@@ -1,15 +1,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getSystemConfig } from '../../services/dataService';
+import { getSystemConfig, DEFAULT_CONFIG } from '../../services/dataService';
 import { SystemConfig } from '../../types';
 
 export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [config, setConfig] = useState<SystemConfig | null>(null);
+  // Khởi tạo ngay với DEFAULT_CONFIG để hiển thị Header/Footer lập tức
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
   useEffect(() => {
+    // Load config thật từ DB, nếu có thì cập nhật lại
     getSystemConfig().then(setConfig);
   }, []);
 
