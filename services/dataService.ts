@@ -23,7 +23,8 @@ const DEFAULT_CONFIG: SystemConfig = {
     cccd: { visible: false, required: false, label: 'Số CCCD (12 số)' },
     truong: { visible: false, required: false, label: 'Trường học' }
   },
-  subjects: ['TOÁN', 'NGỮ VĂN', 'TIẾNG ANH', 'VẬT LÝ', 'HÓA HỌC', 'SINH HỌC', 'LỊCH SỬ', 'ĐỊA LÝ', 'GDCD'],
+  // Mặc định danh sách rỗng, sẽ được điền tự động từ file Excel
+  subjects: [], 
   results: {
     showScore: true,
     showRank: false
@@ -128,14 +129,12 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
 export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
   let successCount = 0;
   const errorLog: string[] = [];
-  const foundSubjects = new Set<string>();
   
   // Helper: Chuẩn hóa tên cột
   const normalizeRow = (row: any) => {
     const normalized: any = {};
     Object.keys(row).forEach(key => {
         const lowerKey = key.toString().toLowerCase().trim();
-        // Xóa dấu tiếng Việt và ký tự đặc biệt để so sánh dễ hơn
         const cleanKey = lowerKey.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
         
         if (['hoten', 'hovaten', 'name', 'thisinh'].includes(cleanKey)) normalized.HO_TEN = row[key];
@@ -145,7 +144,7 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
         else if (['monthi', 'mon', 'subject'].includes(cleanKey)) normalized.MON_THI = row[key];
         else if (['diem', 'diemso', 'ketqua', 'score'].includes(cleanKey)) normalized.DIEM = row[key];
     });
-    // Fallback cho các key chuẩn (nếu file excel đã đúng format)
+    // Fallback
     if (!normalized.HO_TEN && row.HO_TEN) normalized.HO_TEN = row.HO_TEN;
     if (!normalized.SO_BAO_DANH && row.SO_BAO_DANH) normalized.SO_BAO_DANH = row.SO_BAO_DANH;
     if (!normalized.CCCD && row.CCCD) normalized.CCCD = row.CCCD;
@@ -159,11 +158,7 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
   for (const rawRow of data) {
     const row = normalizeRow(rawRow);
 
-    // Skip empty rows or rows without SBD
-    if (!row.SO_BAO_DANH) {
-        // Có thể log lỗi dòng thiếu SBD nếu cần, nhưng thường là dòng trống cuối file
-        continue; 
-    }
+    if (!row.SO_BAO_DANH) continue; 
 
     try {
       const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
@@ -190,7 +185,6 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       }
 
       // 2. Thêm kết quả thi
-      // Xử lý điểm số: đổi dấu phẩy thành chấm nếu có
       let score = row.DIEM;
       if (typeof score === 'string') {
           score = parseFloat(score.replace(',', '.'));
@@ -198,8 +192,6 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       
       if (row.MON_THI) {
           const subject = row.MON_THI.toString().trim().toUpperCase();
-          foundSubjects.add(subject);
-
           const { error: resultError } = await supabase.from('ket_qua').insert({
               hoc_sinh_id: studentId,
               mon_thi: subject,
@@ -214,26 +206,24 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
     }
   }
 
-  // Tự động cập nhật danh sách môn thi trong Cấu hình hệ thống
-  if (foundSubjects.size > 0) {
-      try {
+  // --- ĐỒNG BỘ DANH SÁCH MÔN THI TỪ DATABASE ---
+  // Sau khi import xong, query toàn bộ cột mon_thi từ bảng ket_qua để lấy danh sách duy nhất
+  // Điều này đảm bảo danh sách môn luôn chính xác với dữ liệu thực tế đang có
+  try {
+      const { data: allResults } = await supabase.from('ket_qua').select('mon_thi');
+      
+      if (allResults && allResults.length > 0) {
+          // Lọc trùng và sắp xếp
+          const distinctSubjects = Array.from(new Set(allResults.map(r => r.mon_thi?.trim().toUpperCase()))).filter(Boolean) as string[];
+          distinctSubjects.sort();
+
+          // Cập nhật vào cấu hình
           const currentConfig = await getSystemConfig();
-          const existingSubjects = new Set(currentConfig.subjects.map(s => s.toUpperCase()));
-          let hasNewSubject = false;
-
-          foundSubjects.forEach(s => {
-              if (!existingSubjects.has(s)) {
-                  currentConfig.subjects.push(s);
-                  hasNewSubject = true;
-              }
-          });
-
-          if (hasNewSubject) {
-              await saveSystemConfig(currentConfig);
-          }
-      } catch (configError) {
-          console.error("Lỗi cập nhật danh sách môn thi:", configError);
+          currentConfig.subjects = distinctSubjects;
+          await saveSystemConfig(currentConfig);
       }
+  } catch (syncError) {
+      console.error("Lỗi đồng bộ danh sách môn thi:", syncError);
   }
 
   return { success: successCount, errors: errorLog };
@@ -298,7 +288,6 @@ export const deleteResult = async (id: string): Promise<boolean> => {
 export const updateResult = async (id: string, data: Partial<SearchResult>): Promise<boolean> => {
   try {
     const { error } = await supabase.from('ket_qua').update({ mon_thi: data.mon_thi, diem: data.diem }).eq('id', id);
-    // Cập nhật cả thông tin học sinh nếu cần
     if (!error && data.hoc_sinh_id) {
          await supabase.from('hoc_sinh').update({
              ho_ten: data.ho_ten,
@@ -317,6 +306,13 @@ export const deleteAllData = async (): Promise<boolean> => {
     await supabase.from('ket_qua').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     // Sau đó xóa học sinh
     const { error } = await supabase.from('hoc_sinh').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (!error) {
+        // Reset danh sách môn thi về rỗng
+        const config = await getSystemConfig();
+        config.subjects = [];
+        await saveSystemConfig(config);
+    }
     return !error;
   } catch { return false; }
 };
