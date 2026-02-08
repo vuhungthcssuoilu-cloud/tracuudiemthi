@@ -17,6 +17,11 @@ const DEFAULT_CONFIG: SystemConfig = {
     faviconUrl: null,
     headerTextColor: '#FFFF00'
   },
+  footer: {
+    line1: 'Sở Giáo dục và Đào tạo Ninh Bình',
+    line2: 'Địa chỉ: Số 74, đường Nguyễn Du, phường Vân Giang, thành phố Ninh Bình',
+    line3: 'Điện thoại: 02293.871.053'
+  },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
     so_bao_danh: { visible: true, required: true, label: 'Số báo danh' },
@@ -52,7 +57,17 @@ export const getSystemConfig = async (): Promise<SystemConfig> => {
       .maybeSingle();
 
     if (error) throw error;
-    return data ? { ...DEFAULT_CONFIG, ...data.data } : DEFAULT_CONFIG;
+    // Merge nested objects carefully to ensure footer config exists even if DB data is old
+    const dbConfig = data?.data || {};
+    return { 
+        ...DEFAULT_CONFIG, 
+        ...dbConfig,
+        footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
+        exam: { ...DEFAULT_CONFIG.exam, ...(dbConfig.exam || {}) },
+        fields: { ...DEFAULT_CONFIG.fields, ...(dbConfig.fields || {}) },
+        security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
+        template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
+    };
   } catch (err) {
     return DEFAULT_CONFIG;
   }
