@@ -1,0 +1,87 @@
+
+export interface HocSinh {
+  id?: string;
+  ho_ten: string;
+  so_bao_danh: string;
+  cccd: string;
+  truong: string;
+  cap_hoc: string;
+}
+
+export interface KetQua {
+  id?: string;
+  hoc_sinh_id: string;
+  mon_thi: string;
+  diem: number;
+  // Joined fields for display
+  hoc_sinh?: HocSinh;
+}
+
+export interface SearchParams {
+  ho_ten: string;
+  so_bao_danh: string;
+  cccd: string;
+}
+
+export interface SearchResult extends KetQua {
+  ho_ten: string;
+  truong: string;
+  so_bao_danh: string;
+  cccd: string;
+}
+
+// Mock data type for Excel import
+export interface ExcelRow {
+  HO_TEN: string;
+  SO_BAO_DANH: string;
+  CCCD: string;
+  TRUONG: string;
+  CAP_HOC: string;
+  MON_THI: string;
+  DIEM: number;
+}
+
+export interface FieldConfig {
+  visible: boolean;
+  required: boolean;
+  label: string;
+}
+
+export interface TemplateConfig {
+  fileUrl: string | null;
+  fileName: string | null;
+  lastUpdated: string | null;
+  requiredHeaders: string[];
+}
+
+export interface SystemConfig {
+  exam: {
+    name: string;
+    schoolYear: string;
+    orgUnit: string;
+    subUnit: string;
+    orgLevel: string;
+    isOpen: boolean;
+    logoUrl: string | null;
+    faviconUrl: string | null;
+    headerTextColor: string; // Mới: Màu chữ tiêu đề
+  };
+  fields: {
+    ho_ten: FieldConfig;
+    so_bao_danh: FieldConfig;
+    cccd: FieldConfig;
+    truong: FieldConfig;
+  };
+  subjects: string[];
+  results: {
+    showScore: boolean;
+    showRank: boolean;
+  };
+  security: {
+    enableCaptcha: boolean;
+    requireConfirmation: boolean;
+    confirmationText: string;
+    maxLookupsPerMinute: number;
+  };
+  template: TemplateConfig;
+}

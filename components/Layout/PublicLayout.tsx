@@ -1,0 +1,68 @@
+
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { getSystemConfig } from '../../services/dataService';
+import { SystemConfig } from '../../types';
+
+export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [config, setConfig] = useState<SystemConfig | null>(null);
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  useEffect(() => {
+    getSystemConfig().then(setConfig);
+  }, []);
+
+  const orgName = config?.exam.orgUnit || 'Sở Giáo dục và Đào tạo Ninh Bình';
+  const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI LỚP 12';
+  const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
+  const logoUrl = config?.exam.logoUrl;
+  const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
+
+  return (
+    <div className={`flex flex-col font-sans ${isHomePage ? 'h-screen overflow-hidden' : 'min-h-screen overflow-auto'}`}>
+      {/* Header Banner - Sử dụng font-serif/sans đồng bộ */}
+      <header className="bg-[#337ab7] py-4 shadow-sm border-b border-[#2e6da4] shrink-0">
+        <div className="container mx-auto px-4 flex items-center justify-center gap-6 max-w-6xl">
+          <div className="flex-shrink-0">
+            <img 
+              src={logoUrl || "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png"} 
+              alt="Quốc huy" 
+              className="w-16 h-16 md:w-20 md:h-20 object-contain" 
+            />
+          </div>
+          <div className="flex flex-col text-left select-none" style={{ color: headerTextColor }}>
+            <h2 className="text-[14px] md:text-[20px] font-bold uppercase leading-tight">
+              {orgName}
+            </h2>
+            <h1 className="text-[16px] md:text-[24px] font-bold uppercase mt-1 leading-tight tracking-normal">
+              {examName}
+            </h1>
+            <p className="text-[16px] md:text-[24px] font-bold mt-1 leading-tight">
+              {schoolYear}
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className={`flex-grow flex items-center justify-center bg-white relative ${isHomePage ? 'overflow-hidden' : 'overflow-visible py-10'}`}>
+        <div className={`w-full flex flex-col items-center justify-center ${isHomePage ? 'h-full px-4' : 'container mx-auto px-4'}`}>
+          {children}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-[#337ab7] py-3 text-center border-t border-[#2e6da4] shrink-0 no-print">
+        <div className="container mx-auto px-4">
+          <p className="text-white text-[14px] font-normal">
+            {orgName}
+          </p>
+          <div className="absolute right-4 bottom-3 opacity-10 hover:opacity-50 transition-opacity">
+            <Link to="/admin/login" className="text-white text-[9px] uppercase font-bold tracking-widest">Login</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};

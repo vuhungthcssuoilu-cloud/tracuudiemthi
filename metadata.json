@@ -1,0 +1,5 @@
+{
+  "name": "TRA CỨU KÌ THI HỌC SINH GIỎI",
+  "description": "Ứng dụng tra cứu kết quả thi học sinh giỏi cấp xã, tích hợp quản trị và import Excel, giao diện cổng thông tin điện tử.",
+  "requestFramePermissions": []
+}
