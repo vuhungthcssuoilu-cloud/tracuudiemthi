@@ -173,33 +173,73 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
   for (const rawRow of data) {
     const row = normalizeRow(rawRow);
 
-    if (!row.SO_BAO_DANH) continue; 
+    if (!row.SO_BAO_DANH) {
+        errorLog.push(`Dòng thiếu Số Báo Danh: Bỏ qua.`);
+        continue;
+    }
 
     try {
       const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
+      const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || '';
+      const cccd = row.CCCD?.toString().trim();
+
+      // --- KIỂM TRA TRÙNG LẶP LOGIC (QUAN TRỌNG) ---
       
-      // 1. Tìm hoặc tạo học sinh
+      // 1. Kiểm tra CCCD: Nếu CCCD đã tồn tại nhưng của SBD khác -> Lỗi
+      if (cccd) {
+          const { data: conflictCCCD } = await supabase
+            .from('hoc_sinh')
+            .select('so_bao_danh, ho_ten')
+            .eq('cccd', cccd)
+            .neq('so_bao_danh', sbd) // Khác SBD hiện tại
+            .maybeSingle();
+
+          if (conflictCCCD) {
+              errorLog.push(`Lỗi tại [${hoTen} - SBD: ${sbd}]: Số CCCD ${cccd} đã tồn tại cho thí sinh ${conflictCCCD.ho_ten} (SBD: ${conflictCCCD.so_bao_danh}).`);
+              continue; // Bỏ qua dòng này
+          }
+      }
+
+      // 2. Tìm hoặc tạo học sinh
       const { data: existingStudent } = await supabase
         .from('hoc_sinh')
-        .select('id')
+        .select('id, ho_ten')
         .eq('so_bao_danh', sbd)
         .maybeSingle();
 
       let studentId = existingStudent?.id;
 
-      if (!existingStudent) {
+      if (existingStudent) {
+          // Nếu tồn tại SBD, ta cập nhật thông tin nếu có thay đổi (merge strategy)
+          // Tuy nhiên, nếu tên khác nhau quá xa, có thể cảnh báo? 
+          // Ở đây ta tạm thời tin tưởng file Excel mới nhất là đúng và cập nhật lại thông tin cá nhân.
+           await supabase.from('hoc_sinh').update({
+               ho_ten: hoTen || existingStudent.ho_ten,
+               cccd: cccd, // Update CCCD
+               truong: row.TRUONG?.toString().trim().toUpperCase()
+           }).eq('id', studentId);
+      } else {
+        // Tạo mới
         const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
-            ho_ten: row.HO_TEN?.toString().trim().toUpperCase(),
+            ho_ten: hoTen,
             so_bao_danh: sbd,
-            cccd: row.CCCD?.toString().trim(),
+            cccd: cccd,
             truong: row.TRUONG?.toString().trim().toUpperCase()
           }).select('id').single();
           
-        if (createError) throw createError;
+        if (createError) {
+             // Bắt lỗi duplicate key từ database (phòng hờ)
+             if (createError.code === '23505') { // unique_violation
+                 errorLog.push(`Lỗi tại [${hoTen}]: Trùng thông tin định danh (SBD hoặc CCCD) với dữ liệu hệ thống.`);
+             } else {
+                 throw createError;
+             }
+             continue;
+        }
         studentId = newStudent.id;
       }
 
-      // 2. Thêm kết quả thi
+      // 3. Thêm kết quả thi
       let score = row.DIEM;
       if (typeof score === 'string') {
           score = parseFloat(score.replace(',', '.'));
@@ -207,12 +247,23 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       
       if (row.MON_THI) {
           const subject = row.MON_THI.toString().trim().toUpperCase();
-          const { error: resultError } = await supabase.from('ket_qua').insert({
-              hoc_sinh_id: studentId,
-              mon_thi: subject,
-              diem: Number(score) || 0
-            });
-          if (resultError) throw resultError;
+          // Kiểm tra xem kết quả môn này đã có chưa, nếu có thì update điểm
+          const { data: existingResult } = await supabase.from('ket_qua')
+              .select('id')
+              .eq('hoc_sinh_id', studentId)
+              .eq('mon_thi', subject)
+              .maybeSingle();
+              
+          if (existingResult) {
+              await supabase.from('ket_qua').update({ diem: Number(score) || 0 }).eq('id', existingResult.id);
+          } else {
+              const { error: resultError } = await supabase.from('ket_qua').insert({
+                  hoc_sinh_id: studentId,
+                  mon_thi: subject,
+                  diem: Number(score) || 0
+                });
+              if (resultError) throw resultError;
+          }
       }
 
       successCount++;
@@ -222,27 +273,79 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
   }
 
   // --- ĐỒNG BỘ DANH SÁCH MÔN THI TỪ DATABASE ---
-  // Sau khi import xong, query toàn bộ cột mon_thi từ bảng ket_qua để lấy danh sách duy nhất
-  // Điều này đảm bảo danh sách môn luôn chính xác với dữ liệu thực tế đang có
   try {
       const { data: allResults } = await supabase.from('ket_qua').select('mon_thi');
-      
       if (allResults && allResults.length > 0) {
-          // Lọc trùng và sắp xếp
           const distinctSubjects = Array.from(new Set(allResults.map(r => r.mon_thi?.trim().toUpperCase()))).filter(Boolean) as string[];
           distinctSubjects.sort();
-
-          // Cập nhật vào cấu hình
           const currentConfig = await getSystemConfig();
           currentConfig.subjects = distinctSubjects;
           await saveSystemConfig(currentConfig);
       }
-  } catch (syncError) {
-      console.error("Lỗi đồng bộ danh sách môn thi:", syncError);
-  }
+  } catch (syncError) { console.error(syncError); }
 
   return { success: successCount, errors: errorLog };
 };
+
+// Hàm mới: Thêm thủ công một học sinh/kết quả
+export const createStudentResult = async (data: SearchResult): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const sbd = data.so_bao_danh.trim().toUpperCase();
+        const cccd = data.cccd?.trim();
+
+        // 1. Check CCCD Conflict
+        if (cccd) {
+            const { data: conflict } = await supabase.from('hoc_sinh')
+                .select('so_bao_danh, ho_ten')
+                .eq('cccd', cccd)
+                .neq('so_bao_danh', sbd)
+                .maybeSingle();
+            if (conflict) {
+                return { success: false, message: `CCCD ${cccd} đã thuộc về thí sinh ${conflict.ho_ten} (SBD: ${conflict.so_bao_danh})` };
+            }
+        }
+
+        // 2. Check or Create Student
+        let studentId: string;
+        const { data: existingStudent } = await supabase.from('hoc_sinh').select('id, ho_ten').eq('so_bao_danh', sbd).maybeSingle();
+
+        if (existingStudent) {
+            studentId = existingStudent.id;
+            // Update info optionally? For now, we assume user wants to add result to this SBD.
+            // But if user entered a different name, warn? We'll just update for convenience in manual mode.
+             await supabase.from('hoc_sinh').update({
+                 ho_ten: data.ho_ten.toUpperCase(),
+                 cccd: cccd,
+                 truong: data.truong?.toUpperCase()
+             }).eq('id', studentId);
+        } else {
+            const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
+                ho_ten: data.ho_ten.toUpperCase(),
+                so_bao_danh: sbd,
+                cccd: cccd,
+                truong: data.truong?.toUpperCase()
+            }).select('id').single();
+
+            if (createError) return { success: false, message: `Lỗi tạo học sinh: ${createError.message}` };
+            studentId = newStudent.id;
+        }
+
+        // 3. Insert Result
+        const { error: resError } = await supabase.from('ket_qua').insert({
+            hoc_sinh_id: studentId,
+            mon_thi: data.mon_thi.toUpperCase(),
+            diem: data.diem
+        });
+
+        if (resError) return { success: false, message: `Lỗi tạo kết quả: ${resError.message}` };
+        
+        // Sync subjects list implicitly or explicitly (omitted for speed, relying on dashboard reload)
+        return { success: true };
+
+    } catch (e: any) {
+        return { success: false, message: e.message };
+    }
+}
 
 export const getDashboardStats = async () => {
   try {
