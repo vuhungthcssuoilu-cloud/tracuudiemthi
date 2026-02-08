@@ -28,7 +28,6 @@ const DEFAULT_CONFIG: SystemConfig = {
     cccd: { visible: false, required: false, label: 'Số CCCD (12 số)' },
     truong: { visible: false, required: false, label: 'Trường học' }
   },
-  // Mặc định danh sách rỗng, sẽ được điền tự động từ file Excel
   subjects: [], 
   results: {
     showScore: true,
@@ -57,7 +56,6 @@ export const getSystemConfig = async (): Promise<SystemConfig> => {
       .maybeSingle();
 
     if (error) throw error;
-    // Merge nested objects carefully to ensure footer config exists even if DB data is old
     const dbConfig = data?.data || {};
     return { 
         ...DEFAULT_CONFIG, 
@@ -144,6 +142,7 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
 export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
   let successCount = 0;
   const errorLog: string[] = [];
+  const sbdNameMap = new Map<string, string>(); // Kiểm tra nhất quán tên trong cùng 1 file
   
   // Helper: Chuẩn hóa tên cột
   const normalizeRow = (row: any) => {
@@ -183,43 +182,72 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || '';
       const cccd = row.CCCD?.toString().trim();
 
-      // --- KIỂM TRA TRÙNG LẶP LOGIC (QUAN TRỌNG) ---
-      
-      // 1. Kiểm tra CCCD: Nếu CCCD đã tồn tại nhưng của SBD khác -> Lỗi
-      if (cccd) {
-          const { data: conflictCCCD } = await supabase
-            .from('hoc_sinh')
-            .select('so_bao_danh, ho_ten')
-            .eq('cccd', cccd)
-            .neq('so_bao_danh', sbd) // Khác SBD hiện tại
-            .maybeSingle();
-
-          if (conflictCCCD) {
-              errorLog.push(`Lỗi tại [${hoTen} - SBD: ${sbd}]: Số CCCD ${cccd} đã tồn tại cho thí sinh ${conflictCCCD.ho_ten} (SBD: ${conflictCCCD.so_bao_danh}).`);
-              continue; // Bỏ qua dòng này
+      // 1. KIỂM TRA NHẤT QUÁN TRONG FILE EXCEL
+      if (hoTen) {
+          if (sbdNameMap.has(sbd)) {
+              const prevName = sbdNameMap.get(sbd);
+              if (prevName !== hoTen) {
+                  errorLog.push(`Lỗi tại dòng SBD ${sbd}: Tên '${hoTen}' không khớp với '${prevName}' ở dòng trước.`);
+                  continue;
+              }
+          } else {
+              sbdNameMap.set(sbd, hoTen);
           }
       }
 
-      // 2. Tìm hoặc tạo học sinh
-      const { data: existingStudent } = await supabase
+      // 2. TÌM HỌC SINH ĐÃ CÓ TRONG DB BẰNG SBD
+      const { data: existingStudentBySBD } = await supabase
         .from('hoc_sinh')
-        .select('id, ho_ten')
+        .select('id, ho_ten, cccd, so_bao_danh')
         .eq('so_bao_danh', sbd)
         .maybeSingle();
 
-      let studentId = existingStudent?.id;
+      let studentId: string | undefined;
 
-      if (existingStudent) {
-          // Nếu tồn tại SBD, ta cập nhật thông tin nếu có thay đổi (merge strategy)
-          // Tuy nhiên, nếu tên khác nhau quá xa, có thể cảnh báo? 
-          // Ở đây ta tạm thời tin tưởng file Excel mới nhất là đúng và cập nhật lại thông tin cá nhân.
-           await supabase.from('hoc_sinh').update({
-               ho_ten: hoTen || existingStudent.ho_ten,
-               cccd: cccd, // Update CCCD
+      if (existingStudentBySBD) {
+          // --- LOGIC XỬ LÝ LỖI MÂU THUẪN (CONFLICT HANDLING) ---
+          
+          // A. Kiểm tra tên: Nếu nhập lại SBD cũ nhưng tên khác hoàn toàn -> LỖI
+          if (hoTen && existingStudentBySBD.ho_ten !== hoTen) {
+               errorLog.push(`Lỗi SBD ${sbd}: Đã tồn tại với tên '${existingStudentBySBD.ho_ten}'. Bạn đang nhập tên '${hoTen}'.`);
+               continue;
+          }
+
+          // B. Kiểm tra CCCD:
+          // Nếu DB đã có CCCD, và File Excel cũng có CCCD, nhưng 2 số khác nhau -> LỖI
+          if (cccd && existingStudentBySBD.cccd && existingStudentBySBD.cccd !== cccd) {
+              errorLog.push(`Lỗi SBD ${sbd}: Đã tồn tại với CCCD '${existingStudentBySBD.cccd}'. Bạn đang nhập CCCD '${cccd}'.`);
+              continue;
+          }
+
+          studentId = existingStudentBySBD.id;
+
+          // Cập nhật CCCD/Trường nếu DB đang trống
+          await supabase.from('hoc_sinh').update({
+               cccd: existingStudentBySBD.cccd || cccd, 
                truong: row.TRUONG?.toString().trim().toUpperCase()
            }).eq('id', studentId);
+
       } else {
-        // Tạo mới
+        // 3. NẾU SBD CHƯA CÓ -> TẠO MỚI (NHƯNG PHẢI CHECK CCCD TRƯỚC)
+        if (cccd) {
+            const { data: conflictCCCD } = await supabase
+                .from('hoc_sinh')
+                .select('so_bao_danh, ho_ten')
+                .eq('cccd', cccd)
+                .maybeSingle();
+            
+            if (conflictCCCD) {
+                errorLog.push(`Lỗi tại [${hoTen}]: CCCD ${cccd} đã thuộc về thí sinh ${conflictCCCD.ho_ten} (SBD: ${conflictCCCD.so_bao_danh}).`);
+                continue;
+            }
+        }
+
+        if (!hoTen) {
+             errorLog.push(`Lỗi tại dòng SBD ${sbd}: Thí sinh mới cần có Họ tên.`);
+             continue;
+        }
+
         const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
             ho_ten: hoTen,
             so_bao_danh: sbd,
@@ -227,27 +255,19 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
             truong: row.TRUONG?.toString().trim().toUpperCase()
           }).select('id').single();
           
-        if (createError) {
-             // Bắt lỗi duplicate key từ database (phòng hờ)
-             if (createError.code === '23505') { // unique_violation
-                 errorLog.push(`Lỗi tại [${hoTen}]: Trùng thông tin định danh (SBD hoặc CCCD) với dữ liệu hệ thống.`);
-             } else {
-                 throw createError;
-             }
-             continue;
-        }
+        if (createError) throw createError;
         studentId = newStudent.id;
       }
 
-      // 3. Thêm kết quả thi
+      // 4. THÊM/CẬP NHẬT KẾT QUẢ THI
       let score = row.DIEM;
       if (typeof score === 'string') {
           score = parseFloat(score.replace(',', '.'));
       }
       
-      if (row.MON_THI) {
+      if (row.MON_THI && studentId) {
           const subject = row.MON_THI.toString().trim().toUpperCase();
-          // Kiểm tra xem kết quả môn này đã có chưa, nếu có thì update điểm
+          
           const { data: existingResult } = await supabase.from('ket_qua')
               .select('id')
               .eq('hoc_sinh_id', studentId)
@@ -257,12 +277,11 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
           if (existingResult) {
               await supabase.from('ket_qua').update({ diem: Number(score) || 0 }).eq('id', existingResult.id);
           } else {
-              const { error: resultError } = await supabase.from('ket_qua').insert({
+              await supabase.from('ket_qua').insert({
                   hoc_sinh_id: studentId,
                   mon_thi: subject,
                   diem: Number(score) || 0
                 });
-              if (resultError) throw resultError;
           }
       }
 
@@ -272,7 +291,7 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
     }
   }
 
-  // --- ĐỒNG BỘ DANH SÁCH MÔN THI TỪ DATABASE ---
+  // --- ĐỒNG BỘ DANH SÁCH MÔN THI ---
   try {
       const { data: allResults } = await supabase.from('ket_qua').select('mon_thi');
       if (allResults && allResults.length > 0) {
@@ -287,59 +306,71 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
   return { success: successCount, errors: errorLog };
 };
 
-// Hàm mới: Thêm thủ công một học sinh/kết quả
 export const createStudentResult = async (data: SearchResult): Promise<{ success: boolean; message?: string }> => {
     try {
         const sbd = data.so_bao_danh.trim().toUpperCase();
         const cccd = data.cccd?.trim();
+        const hoTen = data.ho_ten.trim().toUpperCase();
 
-        // 1. Check CCCD Conflict
+        // Check SBD conflict
+        const { data: existingStudent } = await supabase.from('hoc_sinh').select('id, ho_ten, cccd').eq('so_bao_danh', sbd).maybeSingle();
+
+        if (existingStudent) {
+            if (existingStudent.ho_ten !== hoTen) {
+                return { success: false, message: `SBD ${sbd} đã tồn tại với tên '${existingStudent.ho_ten}'. Không thể thêm tên khác.` };
+            }
+            if (cccd && existingStudent.cccd && existingStudent.cccd !== cccd) {
+                return { success: false, message: `SBD ${sbd} đã có CCCD '${existingStudent.cccd}'. Không thể thêm CCCD khác.` };
+            }
+        }
+
+        // Check CCCD conflict (if it belongs to another SBD)
         if (cccd) {
-            const { data: conflict } = await supabase.from('hoc_sinh')
+             const { data: conflict } = await supabase.from('hoc_sinh')
                 .select('so_bao_danh, ho_ten')
                 .eq('cccd', cccd)
                 .neq('so_bao_danh', sbd)
                 .maybeSingle();
-            if (conflict) {
-                return { success: false, message: `CCCD ${cccd} đã thuộc về thí sinh ${conflict.ho_ten} (SBD: ${conflict.so_bao_danh})` };
-            }
+             if (conflict) {
+                 return { success: false, message: `CCCD ${cccd} đã thuộc về ${conflict.ho_ten} (SBD: ${conflict.so_bao_danh}).` };
+             }
         }
 
-        // 2. Check or Create Student
-        let studentId: string;
-        const { data: existingStudent } = await supabase.from('hoc_sinh').select('id, ho_ten').eq('so_bao_danh', sbd).maybeSingle();
+        // Proceed to Create/Update
+        let studentId = existingStudent?.id;
 
-        if (existingStudent) {
-            studentId = existingStudent.id;
-            // Update info optionally? For now, we assume user wants to add result to this SBD.
-            // But if user entered a different name, warn? We'll just update for convenience in manual mode.
-             await supabase.from('hoc_sinh').update({
-                 ho_ten: data.ho_ten.toUpperCase(),
-                 cccd: cccd,
-                 truong: data.truong?.toUpperCase()
-             }).eq('id', studentId);
-        } else {
-            const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
-                ho_ten: data.ho_ten.toUpperCase(),
+        if (!studentId) {
+             const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
+                ho_ten: hoTen,
                 so_bao_danh: sbd,
                 cccd: cccd,
                 truong: data.truong?.toUpperCase()
             }).select('id').single();
-
-            if (createError) return { success: false, message: `Lỗi tạo học sinh: ${createError.message}` };
+            if (createError) return { success: false, message: createError.message };
             studentId = newStudent.id;
+        } else {
+             // Optional update
+             await supabase.from('hoc_sinh').update({ cccd: cccd, truong: data.truong?.toUpperCase() }).eq('id', studentId);
         }
 
-        // 3. Insert Result
+        // Insert Result
+        const { data: existingResult } = await supabase.from('ket_qua')
+            .select('id')
+            .eq('hoc_sinh_id', studentId)
+            .eq('mon_thi', data.mon_thi.toUpperCase())
+            .maybeSingle();
+
+        if (existingResult) {
+            return { success: false, message: `Thí sinh này đã có điểm môn ${data.mon_thi.toUpperCase()}` };
+        }
+
         const { error: resError } = await supabase.from('ket_qua').insert({
             hoc_sinh_id: studentId,
             mon_thi: data.mon_thi.toUpperCase(),
             diem: data.diem
         });
-
-        if (resError) return { success: false, message: `Lỗi tạo kết quả: ${resError.message}` };
+        if (resError) return { success: false, message: resError.message };
         
-        // Sync subjects list implicitly or explicitly (omitted for speed, relying on dashboard reload)
         return { success: true };
 
     } catch (e: any) {
@@ -370,10 +401,7 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
 
     const { data, count, error } = await query.range(from, to);
 
-    if (error) {
-        console.error("Supabase Error in getAdminResults:", error);
-        throw error;
-    }
+    if (error) throw error;
     
     const formattedData = (data || []).map((item: any) => {
         const hs = Array.isArray(item.hoc_sinh) ? item.hoc_sinh[0] : item.hoc_sinh;
@@ -386,12 +414,9 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
         };
     });
 
-    return { 
-      data: formattedData,
-      total: count || 0 
-    };
+    return { data: formattedData, total: count || 0 };
   } catch (err) {
-      console.error("Exception in getAdminResults:", err);
+      console.error(err);
       return { data: [], total: 0 }; 
   }
 };
@@ -420,13 +445,10 @@ export const updateResult = async (id: string, data: Partial<SearchResult>): Pro
 
 export const deleteAllData = async (): Promise<boolean> => {
   try {
-    // Xóa kết quả trước (do FK)
     await supabase.from('ket_qua').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    // Sau đó xóa học sinh
     const { error } = await supabase.from('hoc_sinh').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     
     if (!error) {
-        // Reset danh sách môn thi về rỗng
         const config = await getSystemConfig();
         config.subjects = [];
         await saveSystemConfig(config);
