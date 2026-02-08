@@ -5,7 +5,7 @@ import { SearchParams, SearchResult, SystemConfig } from '../types';
 // ID cố định cho bản ghi cấu hình trong bảng 'cau_hinh'
 const CONFIG_ID = 'global_settings';
 
-const DEFAULT_CONFIG: SystemConfig = {
+export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI LỚP 12',
     schoolYear: 'Năm học 2025 - 2026',
@@ -56,6 +56,7 @@ export const getSystemConfig = async (): Promise<SystemConfig> => {
       .maybeSingle();
 
     if (error) throw error;
+    // Merge nested objects carefully to ensure footer config exists even if DB data is old
     const dbConfig = data?.data || {};
     return { 
         ...DEFAULT_CONFIG, 
