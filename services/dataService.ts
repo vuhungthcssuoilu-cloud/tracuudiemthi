@@ -128,6 +128,7 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
 export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
   let successCount = 0;
   const errorLog: string[] = [];
+  const foundSubjects = new Set<string>();
   
   // Helper: Chuẩn hóa tên cột
   const normalizeRow = (row: any) => {
@@ -196,9 +197,12 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       }
       
       if (row.MON_THI) {
+          const subject = row.MON_THI.toString().trim().toUpperCase();
+          foundSubjects.add(subject);
+
           const { error: resultError } = await supabase.from('ket_qua').insert({
               hoc_sinh_id: studentId,
-              mon_thi: row.MON_THI?.toString().trim().toUpperCase(),
+              mon_thi: subject,
               diem: Number(score) || 0
             });
           if (resultError) throw resultError;
@@ -209,6 +213,29 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       errorLog.push(`SBD ${row.SO_BAO_DANH || '?'}: ${err.message}`);
     }
   }
+
+  // Tự động cập nhật danh sách môn thi trong Cấu hình hệ thống
+  if (foundSubjects.size > 0) {
+      try {
+          const currentConfig = await getSystemConfig();
+          const existingSubjects = new Set(currentConfig.subjects.map(s => s.toUpperCase()));
+          let hasNewSubject = false;
+
+          foundSubjects.forEach(s => {
+              if (!existingSubjects.has(s)) {
+                  currentConfig.subjects.push(s);
+                  hasNewSubject = true;
+              }
+          });
+
+          if (hasNewSubject) {
+              await saveSystemConfig(currentConfig);
+          }
+      } catch (configError) {
+          console.error("Lỗi cập nhật danh sách môn thi:", configError);
+      }
+  }
+
   return { success: successCount, errors: errorLog };
 };
 
