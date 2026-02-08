@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import { Upload, LogOut, FileSpreadsheet, Users, Award, AlertCircle, CheckCircle, Settings, Download, Search, X, Save, Trash2 } from 'lucide-react';
+import { Upload, LogOut, FileSpreadsheet, Users, Award, AlertCircle, CheckCircle, Settings, Download, Search, X, Save, Trash2, Plus } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
-import { uploadExcelData, getDashboardStats, getSystemConfig, getAdminResults, deleteResult, updateResult, deleteAllData, getAllResultsForExport } from '../services/dataService';
+import { uploadExcelData, getDashboardStats, getSystemConfig, getAdminResults, deleteResult, updateResult, deleteAllData, getAllResultsForExport, createStudentResult } from '../services/dataService';
 import { ExcelRow, SystemConfig, SearchResult } from '../types';
 import { AdminResultTable } from '../components/AdminResultTable';
 
@@ -24,9 +24,14 @@ export const AdminDashboard: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ success?: number; error?: string; details?: string[] } | null>(null);
 
-  // Edit Modal State
+  // Edit/Create Modal State
   const [editingItem, setEditingItem] = useState<SearchResult | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  const [isCreating, setIsCreating] = useState(false);
+  const [newItem, setNewItem] = useState<Partial<SearchResult>>({
+      ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0
+  });
 
   useEffect(() => {
     checkAuth();
@@ -132,6 +137,7 @@ export const AdminDashboard: React.FC = () => {
                   loadStats();
                   setPage(1);
                   loadTableData();
+                  loadConfig(); // Reload config to clear subjects
               } else {
                   alert('Có lỗi xảy ra khi thực hiện xóa dữ liệu.');
               }
@@ -178,6 +184,7 @@ export const AdminDashboard: React.FC = () => {
         await loadStats(); 
         setPage(1);
         await loadTableData();
+        await loadConfig(); // Quan trọng: Tải lại config để lấy danh sách môn thi mới vừa import
 
       } catch (error: any) {
         console.error("Upload Error:", error);
@@ -227,6 +234,30 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // --- CREATE LOGIC ---
+  const handleCreate = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newItem.so_bao_danh || !newItem.ho_ten || !newItem.mon_thi) {
+          alert('Vui lòng nhập đủ: Họ tên, Số báo danh, Môn thi');
+          return;
+      }
+
+      setIsUpdating(true);
+      const result = await createStudentResult(newItem as SearchResult);
+      setIsUpdating(false);
+
+      if (result.success) {
+          alert('Thêm mới thành công!');
+          setIsCreating(false);
+          setNewItem({ ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0 }); // Reset
+          loadTableData();
+          loadStats();
+          loadConfig(); // Reload to get new subjects if any
+      } else {
+          alert(`Lỗi: ${result.message}`);
+      }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans pb-20 overflow-y-auto">
       <header className="bg-white shadow border-b border-gray-200 sticky top-0 z-10">
@@ -254,7 +285,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="bg-gradient-to-r from-gov-blue to-blue-800 rounded-lg shadow-lg p-6 text-white flex justify-between items-center">
                 <div>
                     <h2 className="text-xl font-bold uppercase mb-1">Cấu Hình Hệ Thống</h2>
-                    <p className="text-blue-100">Quản lý kỳ thi, môn thi, hiển thị, bảo mật và file mẫu.</p>
+                    <p className="text-blue-100">Quản lý kỳ thi, nhận diện, bảo mật.</p>
                 </div>
                 <button 
                     onClick={() => navigate('/admin/settings')}
@@ -374,16 +405,24 @@ export const AdminDashboard: React.FC = () => {
              <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
                  <div className="flex items-center gap-2 text-sm text-gray-500 font-medium italic">
                      <AlertCircle size={16} />
-                     Thao tác hàng loạt trên toàn bộ dữ liệu hiện có
+                     Công cụ quản lý dữ liệu
                  </div>
                  <div className="flex items-center gap-3">
                      <button 
-                        onClick={handleExportData}
+                        onClick={() => setIsCreating(true)}
                         className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-green-700 transition-colors shadow-sm"
+                     >
+                         <Plus size={16} />
+                         Thêm Mới
+                     </button>
+                     <div className="h-6 w-px bg-gray-300 mx-2"></div>
+                     <button 
+                        onClick={handleExportData}
+                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-blue-700 transition-colors shadow-sm"
                         title="Tải về toàn bộ danh sách hiện có dưới dạng file Excel"
                      >
                          <Download size={16} />
-                         Tải danh sách học sinh
+                         Xuất Excel
                      </button>
                      <button 
                         onClick={handleClearAll}
@@ -391,7 +430,7 @@ export const AdminDashboard: React.FC = () => {
                         title="XÓA TOÀN BỘ dữ liệu khỏi hệ thống"
                      >
                          <Trash2 size={16} />
-                         Xóa toàn bộ danh sách
+                         Xóa toàn bộ
                      </button>
                  </div>
              </div>
@@ -464,13 +503,13 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Môn thi</label>
-                          <select 
+                          <input 
+                            type="text"
                             value={editingItem.mon_thi} 
-                            onChange={(e) => setEditingItem({...editingItem, mon_thi: e.target.value})}
+                            onChange={(e) => setEditingItem({...editingItem, mon_thi: e.target.value.toUpperCase()})}
                             className="w-full border rounded px-3 py-2 uppercase"
-                          >
-                             {config?.subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
+                            required
+                          />
                       </div>
                       <div>
                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Điểm thi</label>
@@ -500,6 +539,115 @@ export const AdminDashboard: React.FC = () => {
                       >
                         <Save size={18} />
                         {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
+                      </button>
+                  </div>
+              </form>
+           </div>
+        </div>
+      )}
+
+      {/* Create Modal */}
+      {isCreating && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up">
+              <div className="bg-green-600 text-white px-6 py-4 flex justify-between items-center">
+                  <h3 className="font-bold uppercase tracking-wide">Thêm Mới Kết Quả</h3>
+                  <button onClick={() => setIsCreating(false)} className="hover:bg-white/10 p-1 rounded">
+                      <X size={24} />
+                  </button>
+              </div>
+
+              <form onSubmit={handleCreate} className="p-6 space-y-4">
+                  <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100 mb-4">
+                      <p><b>Lưu ý:</b> Nếu Số Báo Danh đã tồn tại, hệ thống sẽ thêm môn thi mới cho thí sinh đó.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Họ và tên <span className="text-red-500">*</span></label>
+                          <input 
+                            type="text" 
+                            value={newItem.ho_ten} 
+                            onChange={(e) => setNewItem({...newItem, ho_ten: e.target.value.toUpperCase()})}
+                            className="w-full border rounded px-3 py-2 uppercase"
+                            required
+                            placeholder="NGUYỄN VĂN A"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Số báo danh <span className="text-red-500">*</span></label>
+                          <input 
+                            type="text" 
+                            value={newItem.so_bao_danh} 
+                            onChange={(e) => setNewItem({...newItem, so_bao_danh: e.target.value.toUpperCase()})}
+                            className="w-full border rounded px-3 py-2 uppercase font-mono"
+                            required
+                            placeholder="SBD001"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Số CCCD</label>
+                          <input 
+                            type="text" 
+                            value={newItem.cccd} 
+                            maxLength={12}
+                            onChange={(e) => setNewItem({...newItem, cccd: e.target.value})}
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="12 số (tùy chọn)"
+                          />
+                      </div>
+                      <div className="col-span-2">
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Trường học</label>
+                          <input 
+                            type="text" 
+                            value={newItem.truong} 
+                            onChange={(e) => setNewItem({...newItem, truong: e.target.value.toUpperCase()})}
+                            className="w-full border rounded px-3 py-2 uppercase"
+                            placeholder="THPT..."
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Môn thi <span className="text-red-500">*</span></label>
+                          <input 
+                            type="text" 
+                            value={newItem.mon_thi} 
+                            onChange={(e) => setNewItem({...newItem, mon_thi: e.target.value.toUpperCase()})}
+                            className="w-full border rounded px-3 py-2 uppercase"
+                            required
+                            placeholder="TOÁN"
+                            list="subject-list"
+                          />
+                          <datalist id="subject-list">
+                                {config?.subjects.map(s => <option key={s} value={s} />)}
+                          </datalist>
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Điểm thi <span className="text-red-500">*</span></label>
+                          <input 
+                            type="number" 
+                            step="0.01"
+                            value={newItem.diem} 
+                            onChange={(e) => setNewItem({...newItem, diem: parseFloat(e.target.value)})}
+                            className="w-full border rounded px-3 py-2 font-bold text-gov-blue text-lg"
+                            required
+                          />
+                      </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                      <button 
+                        type="button" 
+                        onClick={() => setIsCreating(false)}
+                        className="flex-1 bg-gray-100 text-gray-600 py-3 rounded font-bold uppercase hover:bg-gray-200 transition-colors"
+                      >
+                        Hủy bỏ
+                      </button>
+                      <button 
+                        type="submit" 
+                        disabled={isUpdating}
+                        className="flex-1 bg-green-600 text-white py-3 rounded font-bold uppercase hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Plus size={18} />
+                        {isUpdating ? 'Đang thêm...' : 'Thêm mới'}
                       </button>
                   </div>
               </form>
