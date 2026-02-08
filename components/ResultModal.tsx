@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, Printer, Award, ShieldCheck, MapPin } from 'lucide-react';
+import { X, Printer, Award, MapPin } from 'lucide-react';
 import { SearchResult, SystemConfig } from '../types';
 
 interface ResultModalProps {
@@ -43,7 +43,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
               <Award size={48} className="text-[#337ab7] opacity-20 absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[4] pointer-events-none" />
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-normal mb-2">
-              GIẤY XÁC NHẬN KẾT QUẢ THI
+              KẾT QUẢ
             </h1>
             <p className="text-[16px] md:text-[18px] font-bold text-[#337ab7] uppercase">
               {config.exam.name} - {config.exam.schoolYear}
@@ -82,9 +82,8 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
 
           {/* Bảng điểm */}
           <div className="mb-10">
-            <h3 className="font-bold text-[16px] uppercase mb-4 flex items-center gap-2 text-slate-800">
-              <ShieldCheck size={20} className="text-green-600" />
-              Kết quả chi tiết:
+            <h3 className="font-bold text-[16px] uppercase mb-3 text-slate-800">
+              KẾT QUẢ
             </h3>
             <div className="border-[1.5px] border-slate-800">
               <table className="w-full text-left border-collapse">
@@ -110,14 +109,6 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
                 </tbody>
               </table>
             </div>
-          </div>
-
-          {/* Ghi chú chân trang */}
-          <div className="mt-20 pt-4 border-t border-slate-200">
-            <p className="text-[12px] text-slate-500 italic text-center">
-              Lưu ý: Giấy xác nhận này được trích xuất từ hệ thống quản lý điểm thi trực tuyến của {config.exam.orgUnit}.
-              Kết quả chính thức được căn cứ trên hồ sơ gốc tại Sở GD&ĐT.
-            </p>
           </div>
         </div>
 
