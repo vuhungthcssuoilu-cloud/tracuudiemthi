@@ -15,7 +15,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
     getSystemConfig().then(setConfig);
   }, []);
 
-  const orgName = config?.exam.orgUnit || 'SỞ GIÁO DỤC VÀ ĐÀO TẠO';
+  const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN';
   const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI';
   const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
   const logoUrl = config?.exam.logoUrl;
