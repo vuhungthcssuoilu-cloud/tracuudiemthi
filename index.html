@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ CÁC MÔN VĂN HÓA</title>
+    <title>TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -44,6 +44,33 @@
         border-color: #337ab7 !important;
         outline: none;
       }
+      /* Pre-loader CSS */
+      .initial-loader {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        background-color: #f8f9fa;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #e5e7eb;
+        border-top: 5px solid #337ab7;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
       @media print {
         .no-print { display: none; }
         html, body { overflow: visible !important; height: auto !important; }
@@ -62,10 +89,14 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body>
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <div id="root">
+      <!-- Nội dung này sẽ hiển thị trước khi React load xong -->
+      <div class="initial-loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; color: #337ab7; font-weight: bold; font-family: sans-serif;">Đang tải dữ liệu...</p>
+      </div>
+    </div>
+  </body>
 </html>
