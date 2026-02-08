@@ -54,6 +54,12 @@ export interface TemplateConfig {
   requiredHeaders: string[];
 }
 
+export interface FooterConfig {
+    line1: string;
+    line2: string;
+    line3: string;
+}
+
 export interface SystemConfig {
   exam: {
     name: string;
@@ -66,6 +72,7 @@ export interface SystemConfig {
     faviconUrl: string | null;
     headerTextColor: string; // Mới: Màu chữ tiêu đề
   };
+  footer: FooterConfig;
   fields: {
     ho_ten: FieldConfig;
     so_bao_danh: FieldConfig;
