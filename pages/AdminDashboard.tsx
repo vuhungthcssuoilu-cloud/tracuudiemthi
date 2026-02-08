@@ -151,18 +151,23 @@ export const AdminDashboard: React.FC = () => {
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
-        const bstr = evt.target?.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
+        const buffer = evt.target?.result;
+        // SỬ DỤNG type: 'array' để đọc ArrayBuffer thay vì 'binary'
+        const wb = XLSX.read(buffer, { type: 'array' });
         const wsName = wb.SheetNames[0];
         const ws = wb.Sheets[wsName];
-        const data = XLSX.utils.sheet_to_json<ExcelRow>(ws);
         
+        // Sử dụng any để cho phép service tự xử lý mapping cột
+        const data = XLSX.utils.sheet_to_json<any>(ws);
+        
+        console.log("Excel Data Parsed:", data.length, "rows"); // Debug log
+
         const result = await uploadExcelData(data);
         
         if (result.errors.length > 0) {
              setUploadStatus({ 
                 success: result.success,
-                error: `Đã nhập ${result.success} dòng. Có ${result.errors.length} lỗi xảy ra.`,
+                error: `Đã nhập ${result.success} dòng. Có ${result.errors.length} cảnh báo/lỗi.`,
                 details: result.errors
              });
         } else {
@@ -175,13 +180,15 @@ export const AdminDashboard: React.FC = () => {
         await loadTableData();
 
       } catch (error: any) {
+        console.error("Upload Error:", error);
         setUploadStatus({ error: error.message || 'Lỗi đọc file Excel' });
       } finally {
         setIsUploading(false);
         e.target.value = '';
       }
     };
-    reader.readAsDataURL(file);
+    // QUAN TRỌNG: Đọc dưới dạng ArrayBuffer để tránh lỗi encoding
+    reader.readAsArrayBuffer(file);
   };
 
   // --- DELETE & EDIT LOGIC ---
