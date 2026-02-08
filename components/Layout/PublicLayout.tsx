@@ -19,6 +19,11 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const logoUrl = config?.exam.logoUrl;
   const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
 
+  // Footer data
+  const footerLine1 = config?.footer?.line1 || orgName;
+  const footerLine2 = config?.footer?.line2 || '';
+  const footerLine3 = config?.footer?.line3 || '';
+
   return (
     <div className={`flex flex-col font-sans ${isHomePage ? 'h-screen overflow-hidden' : 'min-h-screen overflow-auto'}`}>
       {/* Header Banner - Sử dụng font-serif/sans đồng bộ */}
@@ -54,12 +59,23 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
       {/* Footer */}
       <footer className="bg-[#337ab7] py-3 text-center border-t border-[#2e6da4] shrink-0 no-print">
-        <div className="container mx-auto px-4">
-          <p className="text-white text-[14px] font-normal">
-            {orgName}
+        <div className="container mx-auto px-4 relative">
+          <p className="text-white text-[14px] font-bold uppercase mb-1">
+            {footerLine1}
           </p>
-          <div className="absolute right-4 bottom-3 opacity-10 hover:opacity-50 transition-opacity">
-            <Link to="/admin/login" className="text-white text-[9px] uppercase font-bold tracking-widest">Login</Link>
+          {footerLine2 && (
+             <p className="text-white text-[13px] font-normal mb-1">
+                {footerLine2}
+             </p>
+          )}
+          {footerLine3 && (
+             <p className="text-white text-[13px] font-normal">
+                {footerLine3}
+             </p>
+          )}
+          
+          <div className="absolute right-0 bottom-0 opacity-10 hover:opacity-50 transition-opacity">
+            <Link to="/admin/login" className="text-white text-[9px] uppercase font-bold tracking-widest px-2">Login</Link>
           </div>
         </div>
       </footer>
