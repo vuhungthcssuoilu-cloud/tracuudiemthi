@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save, ArrowLeft, Settings, ToggleLeft, ToggleRight, Building2, Image as ImageIcon, Upload, ShieldCheck, Palette, Info } from 'lucide-react';
+import { Save, ArrowLeft, Settings, ToggleLeft, ToggleRight, Building2, Image as ImageIcon, Upload, ShieldCheck, Palette, Info, BookOpen, LayoutTemplate } from 'lucide-react';
 import { isSupabaseConfigured } from '../supabaseClient';
 import { getSystemConfig, saveSystemConfig } from '../services/dataService';
 import { SystemConfig } from '../types';
@@ -91,6 +91,13 @@ export const SystemSettings: React.FC = () => {
   const updateSecurity = (key: keyof SystemConfig['security'], value: any) => {
     if (!config) return;
     setConfig({ ...config, security: { ...config.security, [key]: value } });
+  };
+
+  const updateFooter = (key: keyof SystemConfig['footer'], value: string) => {
+    if (!config) return;
+    // Ensure footer object exists if it's undefined
+    const currentFooter = config.footer || { line1: '', line2: '', line3: '' };
+    setConfig({ ...config, footer: { ...currentFooter, [key]: value } });
   };
 
   if (!config) return <div className="p-10 text-center">Đang tải cấu hình...</div>;
@@ -267,11 +274,36 @@ export const SystemSettings: React.FC = () => {
                 </div>
             </section>
 
-            {/* 3. Bảo Mật & Trạng Thái */}
+             {/* 3. Môn Thi Đã Nhận Diện (Read-only) */}
+             <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+                    <BookOpen className="text-[#337ab7]" size={20} />
+                    <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">3. Môn Thi Hiện Có</h3>
+                </div>
+                <div className="p-6">
+                    <p className="text-sm text-gray-500 italic mb-4">Danh sách này được hệ thống tự động cập nhật từ dữ liệu file Excel đã tải lên.</p>
+                    
+                    {config.subjects && config.subjects.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                            {config.subjects.map((subject, index) => (
+                                <span key={index} className="px-3 py-1 bg-blue-50 text-blue-800 rounded-full text-sm font-bold border border-blue-100">
+                                    {subject}
+                                </span>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-4 text-gray-400 bg-gray-50 rounded border border-dashed border-gray-200">
+                            Chưa có dữ liệu môn thi
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* 4. Bảo Mật & Trạng Thái */}
             <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
                     <ShieldCheck className="text-[#337ab7]" size={20} />
-                    <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">3. Bảo Mật & Trạng Thái</h3>
+                    <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">4. Bảo Mật & Trạng Thái</h3>
                 </div>
                 <div className="p-6 space-y-6">
                     <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100">
@@ -305,6 +337,29 @@ export const SystemSettings: React.FC = () => {
                 </div>
             </section>
         </div>
+
+        {/* 5. Thông Tin Chân Trang (Footer) */}
+        <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+                <LayoutTemplate className="text-[#337ab7]" size={20} />
+                <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">5. Thông Tin Chân Trang (Footer)</h3>
+            </div>
+            <div className="p-6 space-y-5">
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dòng 1 (Tên đơn vị - Mặc định)</label>
+                    <input type="text" value={config.footer?.line1 || ''} onChange={(e) => updateFooter('line1', e.target.value)} className="w-full border p-3 rounded font-bold text-gray-700 focus:ring-2 focus:ring-[#337ab7]/20 outline-none" placeholder={config.exam.orgUnit} />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dòng 2 (Địa chỉ, thông tin khác...)</label>
+                    <input type="text" value={config.footer?.line2 || ''} onChange={(e) => updateFooter('line2', e.target.value)} className="w-full border p-3 rounded text-gray-700 focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dòng 3 (Liên hệ, email...)</label>
+                    <input type="text" value={config.footer?.line3 || ''} onChange={(e) => updateFooter('line3', e.target.value)} className="w-full border p-3 rounded text-gray-700 focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
+                </div>
+            </div>
+        </section>
+
       </main>
     </div>
   );
