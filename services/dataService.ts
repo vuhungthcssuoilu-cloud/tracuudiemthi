@@ -15,7 +15,7 @@ const DEFAULT_CONFIG: SystemConfig = {
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
-    headerTextColor: '#FFFF00' // Màu vàng rực rỡ khớp với hình mẫu
+    headerTextColor: '#FFFF00'
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
@@ -128,29 +128,85 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
 export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
   let successCount = 0;
   const errorLog: string[] = [];
-  for (const row of data) {
+  
+  // Helper: Chuẩn hóa tên cột
+  const normalizeRow = (row: any) => {
+    const normalized: any = {};
+    Object.keys(row).forEach(key => {
+        const lowerKey = key.toString().toLowerCase().trim();
+        // Xóa dấu tiếng Việt và ký tự đặc biệt để so sánh dễ hơn
+        const cleanKey = lowerKey.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+        
+        if (['hoten', 'hovaten', 'name', 'thisinh'].includes(cleanKey)) normalized.HO_TEN = row[key];
+        else if (['sbd', 'sobaodanh', 'sobd'].includes(cleanKey)) normalized.SO_BAO_DANH = row[key];
+        else if (['cccd', 'cmnd', 'socccd'].includes(cleanKey)) normalized.CCCD = row[key];
+        else if (['truong', 'donvi', 'truonghoc'].includes(cleanKey)) normalized.TRUONG = row[key];
+        else if (['monthi', 'mon', 'subject'].includes(cleanKey)) normalized.MON_THI = row[key];
+        else if (['diem', 'diemso', 'ketqua', 'score'].includes(cleanKey)) normalized.DIEM = row[key];
+    });
+    // Fallback cho các key chuẩn (nếu file excel đã đúng format)
+    if (!normalized.HO_TEN && row.HO_TEN) normalized.HO_TEN = row.HO_TEN;
+    if (!normalized.SO_BAO_DANH && row.SO_BAO_DANH) normalized.SO_BAO_DANH = row.SO_BAO_DANH;
+    if (!normalized.CCCD && row.CCCD) normalized.CCCD = row.CCCD;
+    if (!normalized.TRUONG && row.TRUONG) normalized.TRUONG = row.TRUONG;
+    if (!normalized.MON_THI && row.MON_THI) normalized.MON_THI = row.MON_THI;
+    if (!normalized.DIEM && row.DIEM) normalized.DIEM = row.DIEM;
+    
+    return normalized;
+  };
+
+  for (const rawRow of data) {
+    const row = normalizeRow(rawRow);
+
+    // Skip empty rows or rows without SBD
+    if (!row.SO_BAO_DANH) {
+        // Có thể log lỗi dòng thiếu SBD nếu cần, nhưng thường là dòng trống cuối file
+        continue; 
+    }
+
     try {
-      const { data: existingStudent } = await supabase.from('hoc_sinh').select('id').eq('so_bao_danh', row.SO_BAO_DANH).maybeSingle();
+      const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
+      
+      // 1. Tìm hoặc tạo học sinh
+      const { data: existingStudent } = await supabase
+        .from('hoc_sinh')
+        .select('id')
+        .eq('so_bao_danh', sbd)
+        .maybeSingle();
+
       let studentId = existingStudent?.id;
+
       if (!existingStudent) {
         const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
-            ho_ten: row.HO_TEN?.toString().toUpperCase(),
-            so_bao_danh: row.SO_BAO_DANH?.toString().toUpperCase(),
-            cccd: row.CCCD?.toString(),
-            truong: row.TRUONG?.toString().toUpperCase()
+            ho_ten: row.HO_TEN?.toString().trim().toUpperCase(),
+            so_bao_danh: sbd,
+            cccd: row.CCCD?.toString().trim(),
+            truong: row.TRUONG?.toString().trim().toUpperCase()
           }).select('id').single();
+          
         if (createError) throw createError;
         studentId = newStudent.id;
       }
-      const { error: resultError } = await supabase.from('ket_qua').insert({
-          hoc_sinh_id: studentId,
-          mon_thi: row.MON_THI?.toString().toUpperCase(),
-          diem: parseFloat(row.DIEM) || 0
-        });
-      if (resultError) throw resultError;
+
+      // 2. Thêm kết quả thi
+      // Xử lý điểm số: đổi dấu phẩy thành chấm nếu có
+      let score = row.DIEM;
+      if (typeof score === 'string') {
+          score = parseFloat(score.replace(',', '.'));
+      }
+      
+      if (row.MON_THI) {
+          const { error: resultError } = await supabase.from('ket_qua').insert({
+              hoc_sinh_id: studentId,
+              mon_thi: row.MON_THI?.toString().trim().toUpperCase(),
+              diem: Number(score) || 0
+            });
+          if (resultError) throw resultError;
+      }
+
       successCount++;
     } catch (err: any) {
-      errorLog.push(`Dòng ${successCount + errorLog.length + 1}: ${err.message}`);
+      errorLog.push(`SBD ${row.SO_BAO_DANH || '?'}: ${err.message}`);
     }
   }
   return { success: successCount, errors: errorLog };
@@ -170,15 +226,39 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   try {
-    let query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong)', { count: 'exact' });
-    if (search) query = query.ilike('hoc_sinh.ho_ten', `%${search}%`);
-    const { data, count, error } = await query.range(from, to).order('created_at', { ascending: false });
-    if (error) throw error;
+    let query = supabase.from('ket_qua').select('*, hoc_sinh(ho_ten, so_bao_danh, cccd, truong)', { count: 'exact' });
+    
+    if (search) {
+        query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong)', { count: 'exact' })
+          .ilike('hoc_sinh.ho_ten', `%${search}%`);
+    }
+
+    const { data, count, error } = await query.range(from, to);
+
+    if (error) {
+        console.error("Supabase Error in getAdminResults:", error);
+        throw error;
+    }
+    
+    const formattedData = (data || []).map((item: any) => {
+        const hs = Array.isArray(item.hoc_sinh) ? item.hoc_sinh[0] : item.hoc_sinh;
+        return {
+            ...item,
+            ho_ten: hs?.ho_ten || '(Không tên)',
+            so_bao_danh: hs?.so_bao_danh || '---',
+            cccd: hs?.cccd || '',
+            truong: hs?.truong || ''
+        };
+    });
+
     return { 
-      data: (data || []).map((item: any) => ({ ...item, ho_ten: item.hoc_sinh.ho_ten, so_bao_danh: item.hoc_sinh.so_bao_danh, cccd: item.hoc_sinh.cccd, truong: item.hoc_sinh.truong })),
+      data: formattedData,
       total: count || 0 
     };
-  } catch { return { data: [], total: 0 }; }
+  } catch (err) {
+      console.error("Exception in getAdminResults:", err);
+      return { data: [], total: 0 }; 
+  }
 };
 
 export const deleteResult = async (id: string): Promise<boolean> => {
@@ -191,12 +271,24 @@ export const deleteResult = async (id: string): Promise<boolean> => {
 export const updateResult = async (id: string, data: Partial<SearchResult>): Promise<boolean> => {
   try {
     const { error } = await supabase.from('ket_qua').update({ mon_thi: data.mon_thi, diem: data.diem }).eq('id', id);
+    // Cập nhật cả thông tin học sinh nếu cần
+    if (!error && data.hoc_sinh_id) {
+         await supabase.from('hoc_sinh').update({
+             ho_ten: data.ho_ten,
+             so_bao_danh: data.so_bao_danh,
+             cccd: data.cccd,
+             truong: data.truong
+         }).eq('id', data.hoc_sinh_id);
+    }
     return !error;
   } catch { return false; }
 };
 
 export const deleteAllData = async (): Promise<boolean> => {
   try {
+    // Xóa kết quả trước (do FK)
+    await supabase.from('ket_qua').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    // Sau đó xóa học sinh
     const { error } = await supabase.from('hoc_sinh').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     return !error;
   } catch { return false; }
