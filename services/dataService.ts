@@ -7,9 +7,9 @@ const CONFIG_ID = 'global_settings';
 
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
-    name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI LỚP 12',
+    name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI',
     schoolYear: 'Năm học 2025 - 2026',
-    orgUnit: 'Sở Giáo dục và Đào tạo Ninh Bình',
+    orgUnit: 'SỞ GIÁO DỤC VÀ ĐÀO TẠO',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
     orgLevel: 'CẤP TỈNH',
     isOpen: true,
@@ -18,9 +18,9 @@ export const DEFAULT_CONFIG: SystemConfig = {
     headerTextColor: '#FFFF00'
   },
   footer: {
-    line1: 'Sở Giáo dục và Đào tạo Ninh Bình',
-    line2: 'Địa chỉ: Số 74, đường Nguyễn Du, phường Vân Giang, thành phố Ninh Bình',
-    line3: 'Điện thoại: 02293.871.053'
+    line1: 'SỞ GIÁO DỤC VÀ ĐÀO TẠO',
+    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
+    line3: 'Hỗ trợ kỹ thuật: hotro@viettel.vn'
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
