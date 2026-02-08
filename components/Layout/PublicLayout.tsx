@@ -15,15 +15,15 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
     getSystemConfig().then(setConfig);
   }, []);
 
-  const orgName = config?.exam.orgUnit || 'Sở Giáo dục và Đào tạo Ninh Bình';
-  const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI LỚP 12';
+  const orgName = config?.exam.orgUnit || 'SỞ GIÁO DỤC VÀ ĐÀO TẠO';
+  const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI';
   const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
   const logoUrl = config?.exam.logoUrl;
   const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
 
   // Footer data
   const footerLine1 = config?.footer?.line1 || orgName;
-  const footerLine2 = config?.footer?.line2 || '';
+  const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
   const footerLine3 = config?.footer?.line3 || '';
 
   return (
