@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     line2: 'Hệ thống tra cứu điểm thi trực tuyến',
-    line3: 'Hỗ trợ kỹ thuật: hotro@viettel.vn'
+    line3: 'Hỗ trợ kỹ thuật: Mr: Vũ Văn Hùng - SĐT: 0984246993'
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
