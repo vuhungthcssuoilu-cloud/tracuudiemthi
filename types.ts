@@ -5,6 +5,8 @@ export interface HocSinh {
   so_bao_danh: string;
   cccd: string;
   truong: string;
+  ngay_sinh: string; // Mới
+  gioi_tinh: string; // Mới
   cap_hoc: string;
 }
 
@@ -21,6 +23,7 @@ export interface SearchParams {
   ho_ten: string;
   so_bao_danh: string;
   cccd: string;
+  ngay_sinh?: string; // Tùy chọn để search
 }
 
 export interface SearchResult extends KetQua {
@@ -28,12 +31,16 @@ export interface SearchResult extends KetQua {
   truong: string;
   so_bao_danh: string;
   cccd: string;
+  ngay_sinh: string; // Mới
+  gioi_tinh: string; // Mới
 }
 
 // Mock data type for Excel import
 export interface ExcelRow {
   HO_TEN: string;
   SO_BAO_DANH: string;
+  NGAY_SINH: string; // Mới
+  GIOI_TINH: string; // Mới
   CCCD: string;
   TRUONG: string;
   CAP_HOC: string;
@@ -70,7 +77,7 @@ export interface SystemConfig {
     isOpen: boolean;
     logoUrl: string | null;
     faviconUrl: string | null;
-    headerTextColor: string; // Mới: Màu chữ tiêu đề
+    headerTextColor: string;
   };
   footer: FooterConfig;
   fields: {
@@ -78,6 +85,7 @@ export interface SystemConfig {
     so_bao_danh: FieldConfig;
     cccd: FieldConfig;
     truong: FieldConfig;
+    ngay_sinh: FieldConfig; // Mới
   };
   subjects: string[];
   results: {

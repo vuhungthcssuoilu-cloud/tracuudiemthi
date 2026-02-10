@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SearchResult } from '../types';
 import { ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
@@ -42,8 +43,10 @@ export const AdminResultTable: React.FC<AdminResultTableProps> = ({
               <th className="px-4 py-3 text-center w-12">STT</th>
               <th className="px-4 py-3">Họ và Tên</th>
               <th className="px-4 py-3">SBD</th>
-              <th className="px-4 py-3 hidden md:table-cell">CCCD</th>
-              <th className="px-4 py-3 hidden md:table-cell">Trường</th>
+              <th className="px-4 py-3 hidden md:table-cell">Ngày Sinh</th>
+              <th className="px-4 py-3 hidden md:table-cell">Giới Tính</th>
+              <th className="px-4 py-3 hidden lg:table-cell">CCCD</th>
+              <th className="px-4 py-3 hidden lg:table-cell">Trường</th>
               <th className="px-4 py-3">Môn Thi</th>
               <th className="px-4 py-3 text-center">Điểm</th>
               <th className="px-4 py-3 text-center w-24">Thao tác</th>
@@ -57,8 +60,10 @@ export const AdminResultTable: React.FC<AdminResultTableProps> = ({
                 </td>
                 <td className="px-4 py-3 font-semibold text-gray-800 uppercase">{row.ho_ten}</td>
                 <td className="px-4 py-3 font-mono text-blue-600">{row.so_bao_danh}</td>
-                <td className="px-4 py-3 hidden md:table-cell text-gray-600">{row.cccd}</td>
-                <td className="px-4 py-3 hidden md:table-cell text-gray-600">{row.truong}</td>
+                <td className="px-4 py-3 hidden md:table-cell text-gray-600">{row.ngay_sinh}</td>
+                <td className="px-4 py-3 hidden md:table-cell text-gray-600">{row.gioi_tinh}</td>
+                <td className="px-4 py-3 hidden lg:table-cell text-gray-600">{row.cccd}</td>
+                <td className="px-4 py-3 hidden lg:table-cell text-gray-600">{row.truong}</td>
                 <td className="px-4 py-3 text-gray-800">{row.mon_thi}</td>
                 <td className="px-4 py-3 text-center font-bold text-gov-blue">{row.diem}</td>
                 <td className="px-4 py-3 text-center">

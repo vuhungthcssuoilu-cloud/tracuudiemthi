@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS public.hoc_sinh (
     so_bao_danh text,
     cccd text,
     truong text,
+    ngay_sinh text, 
+    gioi_tinh text, 
     CONSTRAINT hoc_sinh_so_bao_danh_key UNIQUE (so_bao_danh)
 );
 
@@ -32,26 +34,14 @@ ALTER TABLE public.hoc_sinh ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ket_qua ENABLE ROW LEVEL SECURITY;
 
 -- 5. Thiết lập Policies (Quyền truy cập)
-
--- Bảng CAU_HINH
--- Cho phép mọi người (kể cả chưa đăng nhập) xem cấu hình để hiển thị giao diện
 CREATE POLICY "Public read config" ON public.cau_hinh FOR SELECT TO anon, authenticated USING (true);
--- Chỉ admin (đã đăng nhập) mới được sửa cấu hình
 CREATE POLICY "Admin update config" ON public.cau_hinh FOR ALL TO authenticated USING (true);
-
--- Bảng HOC_SINH
--- Cho phép tra cứu (Select) công khai
 CREATE POLICY "Public read students" ON public.hoc_sinh FOR SELECT TO anon, authenticated USING (true);
--- Chỉ admin mới được Thêm/Sửa/Xóa
 CREATE POLICY "Admin manage students" ON public.hoc_sinh FOR ALL TO authenticated USING (true);
-
--- Bảng KET_QUA
--- Cho phép tra cứu (Select) công khai
 CREATE POLICY "Public read results" ON public.ket_qua FOR SELECT TO anon, authenticated USING (true);
--- Chỉ admin mới được Thêm/Sửa/Xóa
 CREATE POLICY "Admin manage results" ON public.ket_qua FOR ALL TO authenticated USING (true);
 
--- 6. Dữ liệu mẫu cho cấu hình (nếu chưa có)
+-- 6. Dữ liệu mẫu cho cấu hình
 INSERT INTO public.cau_hinh (id, data)
 VALUES ('global_settings', '{
   "exam": {
@@ -67,23 +57,22 @@ VALUES ('global_settings', '{
     "cccd": { "label": "Số CCCD (12 số)", "visible": false, "required": false },
     "ho_ten": { "label": "Họ và tên thí sinh", "visible": false, "required": false },
     "truong": { "label": "Trường học", "visible": false, "required": false },
+    "ngay_sinh": { "label": "Ngày sinh (dd/mm/yyyy)", "visible": false, "required": false },
     "so_bao_danh": { "label": "Số báo danh", "visible": true, "required": true }
   },
   "results": {
     "showRank": false,
     "showScore": true
   },
-  "subjects": [
-    "TOÁN", "NGỮ VĂN", "TIẾNG ANH", "VẬT LÝ", "HÓA HỌC", "SINH HỌC", "LỊCH SỬ", "ĐỊA LÝ", "GDCD"
-  ],
+  "subjects": [],
   "security": {
     "enableCaptcha": true
   },
   "template": {
     "fileUrl": null,
-    "fileName": null,
+    "fileName": "Mau_Nhap_Diem_Thi.xlsx",
     "lastUpdated": null,
-    "requiredHeaders": ["HO_TEN", "SO_BAO_DANH", "CCCD", "TRUONG", "MON_THI", "DIEM"]
+    "requiredHeaders": ["HO_TEN", "SO_BAO_DANH", "NGAY_SINH", "GIOI_TINH", "CCCD", "TRUONG", "MON_THI", "DIEM"]
   }
 }'::jsonb)
 ON CONFLICT (id) DO NOTHING;

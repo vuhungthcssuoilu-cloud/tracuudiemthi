@@ -58,6 +58,22 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
                 {studentInfo.ho_ten}
               </span>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-baseline gap-2">
+                <span className="min-w-[140px]">Ngày sinh:</span>
+                <span className="font-bold text-slate-800 border-b border-dotted border-slate-400 flex-grow">
+                  {studentInfo.ngay_sinh || '---'}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="min-w-[100px]">Giới tính:</span>
+                <span className="font-bold text-slate-800 border-b border-dotted border-slate-400 flex-grow">
+                  {studentInfo.gioi_tinh || '---'}
+                </span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-baseline gap-2">
                 <span className="min-w-[140px]">Số báo danh:</span>
@@ -72,6 +88,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
                 </span>
               </div>
             </div>
+
             <div className="flex flex-wrap items-baseline gap-2">
               <span className="min-w-[140px]">Đơn vị / Trường:</span>
               <span className="font-bold text-slate-700 border-b border-dotted border-slate-400 flex-grow">

@@ -30,7 +30,7 @@ export const AdminDashboard: React.FC = () => {
   
   const [isCreating, setIsCreating] = useState(false);
   const [newItem, setNewItem] = useState<Partial<SearchResult>>({
-      ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0
+      ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0, ngay_sinh: '', gioi_tinh: ''
   });
 
   useEffect(() => {
@@ -87,22 +87,36 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleDownloadTemplate = () => {
+    // Nếu admin đã tải lên một file mẫu riêng thì ưu tiên dùng file đó
     if (config?.template.fileUrl && !config.template.fileUrl.includes('example.com') && !config.template.fileUrl.includes('mock')) {
         window.open(config.template.fileUrl, '_blank');
         return;
     }
 
-    const headers = config?.template.requiredHeaders && config.template.requiredHeaders.length > 0
-        ? config.template.requiredHeaders
-        : ['HO_TEN', 'SO_BAO_DANH', 'CCCD', 'TRUONG', 'CAP_HOC', 'MON_THI', 'DIEM'];
+    // Header chuẩn cho file mẫu
+    const headers = ['HO_TEN', 'SO_BAO_DANH', 'NGAY_SINH', 'GIOI_TINH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM'];
+    
+    // Dòng dữ liệu mẫu để thí sinh/quản trị biết định dạng (Đặc biệt là Ngày sinh dd/mm/yyyy)
+    const sampleRow = [
+        'NGUYEN VAN A', 
+        'SBD001', 
+        '30/01/2005', 
+        'NAM', 
+        '035095001234', 
+        'THPT CHUYEN NINH BINH', 
+        'TOAN', 
+        '18.5'
+    ];
     
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([headers]);
-    const wscols = headers.map(h => ({ wch: h.length + 5 }));
+    const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
+
+    // Cấu hình độ rộng cột
+    const wscols = headers.map(h => ({ wch: h.length + 12 }));
     ws['!cols'] = wscols;
 
     XLSX.utils.book_append_sheet(wb, ws, "Mau_Nhap_Lieu");
-    XLSX.writeFile(wb, config?.template.fileName || "File_Mau_Nhap_Diem.xlsx");
+    XLSX.writeFile(wb, config?.template.fileName || "Mau_Nhap_Diem_Thi.xlsx");
   };
 
   const handleExportData = async () => {
@@ -115,6 +129,8 @@ export const AdminDashboard: React.FC = () => {
       const exportData = allData.map(item => ({
           'Họ và Tên': item.ho_ten,
           'Số Báo Danh': item.so_bao_danh,
+          'Ngày Sinh': item.ngay_sinh,
+          'Giới Tính': item.gioi_tinh,
           'CCCD': item.cccd,
           'Trường': item.truong,
           'Môn Thi': item.mon_thi,
@@ -158,16 +174,11 @@ export const AdminDashboard: React.FC = () => {
     reader.onload = async (evt) => {
       try {
         const buffer = evt.target?.result;
-        // SỬ DỤNG type: 'array' để đọc ArrayBuffer thay vì 'binary'
         const wb = XLSX.read(buffer, { type: 'array' });
         const wsName = wb.SheetNames[0];
         const ws = wb.Sheets[wsName];
         
-        // Sử dụng any để cho phép service tự xử lý mapping cột
         const data = XLSX.utils.sheet_to_json<any>(ws);
-        
-        console.log("Excel Data Parsed:", data.length, "rows"); // Debug log
-
         const result = await uploadExcelData(data);
         
         if (result.errors.length > 0) {
@@ -180,11 +191,10 @@ export const AdminDashboard: React.FC = () => {
             setUploadStatus({ success: result.success });
         }
         
-        // Refresh Everything
         await loadStats(); 
         setPage(1);
         await loadTableData();
-        await loadConfig(); // Quan trọng: Tải lại config để lấy danh sách môn thi mới vừa import
+        await loadConfig();
 
       } catch (error: any) {
         console.error("Upload Error:", error);
@@ -194,11 +204,14 @@ export const AdminDashboard: React.FC = () => {
         e.target.value = '';
       }
     };
-    // QUAN TRỌNG: Đọc dưới dạng ArrayBuffer để tránh lỗi encoding
     reader.readAsArrayBuffer(file);
   };
 
-  // --- DELETE & EDIT LOGIC ---
+  const isValidDateFormat = (dateString: string) => {
+    if (!dateString) return true;
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/\d{4}$/;
+    return regex.test(dateString.trim());
+  };
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa kết quả này? Thao tác này không thể hoàn tác.')) {
@@ -221,6 +234,11 @@ export const AdminDashboard: React.FC = () => {
     e.preventDefault();
     if (!editingItem) return;
 
+    if (editingItem.ngay_sinh && !isValidDateFormat(editingItem.ngay_sinh)) {
+        alert('Ngày sinh không hợp lệ. Vui lòng nhập đúng định dạng dd/mm/yyyy (Ví dụ: 30/01/2005)');
+        return;
+    }
+
     setIsUpdating(true);
     const success = await updateResult(editingItem.id!, editingItem);
     setIsUpdating(false);
@@ -234,12 +252,16 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // --- CREATE LOGIC ---
   const handleCreate = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!newItem.so_bao_danh || !newItem.ho_ten || !newItem.mon_thi) {
           alert('Vui lòng nhập đủ: Họ tên, Số báo danh, Môn thi');
           return;
+      }
+
+      if (newItem.ngay_sinh && !isValidDateFormat(newItem.ngay_sinh)) {
+        alert('Ngày sinh không hợp lệ. Vui lòng nhập đúng định dạng dd/mm/yyyy (Ví dụ: 30/01/2005)');
+        return;
       }
 
       setIsUpdating(true);
@@ -249,10 +271,10 @@ export const AdminDashboard: React.FC = () => {
       if (result.success) {
           alert('Thêm mới thành công!');
           setIsCreating(false);
-          setNewItem({ ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0 }); // Reset
+          setNewItem({ ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0, ngay_sinh: '', gioi_tinh: '' }); // Reset
           loadTableData();
           loadStats();
-          loadConfig(); // Reload to get new subjects if any
+          loadConfig(); 
       } else {
           alert(`Lỗi: ${result.message}`);
       }
@@ -280,7 +302,6 @@ export const AdminDashboard: React.FC = () => {
 
       <main className="container mx-auto px-6 py-8">
         
-        {/* Navigation to Settings */}
         <div className="mb-8">
             <div className="bg-gradient-to-r from-gov-blue to-blue-800 rounded-lg shadow-lg p-6 text-white flex justify-between items-center">
                 <div>
@@ -297,7 +318,6 @@ export const AdminDashboard: React.FC = () => {
             </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow border border-gray-200 flex items-center gap-4">
             <div className="p-4 bg-blue-100 text-blue-600 rounded-full">
@@ -319,7 +339,6 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Import Section */}
         <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden mb-10">
           <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-lg font-bold text-gray-800 uppercase flex items-center gap-2">
@@ -330,7 +349,7 @@ export const AdminDashboard: React.FC = () => {
             <button 
                 onClick={handleDownloadTemplate}
                 className="flex items-center gap-2 text-sm bg-white border border-gray-300 text-gov-blue px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
-                title="Tải file mẫu định dạng .xlsx"
+                title="Tải file mẫu định dạng .xlsx đầy đủ các cột Ngày sinh, Giới tính"
             >
                 <Download size={16} />
                 Tải File Mẫu
@@ -351,7 +370,7 @@ export const AdminDashboard: React.FC = () => {
                 <p className="text-lg font-medium text-gray-700 mb-2">
                     {isUploading ? 'Đang xử lý...' : 'Kéo thả file Excel hoặc nhấn để chọn'}
                 </p>
-                <p className="text-sm text-gray-500">Hỗ trợ định dạng .xlsx, .xls</p>
+                <p className="text-sm text-gray-500">Hỗ trợ định dạng .xlsx, .xls (Tự động nhận diện cột Ngày sinh, Giới tính)</p>
               </div>
             </div>
 
@@ -382,7 +401,6 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Data Management Section */}
         <div className="mb-6 space-y-4">
              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                  <h2 className="text-xl font-bold text-gray-800 uppercase flex items-center gap-2">
@@ -401,7 +419,6 @@ export const AdminDashboard: React.FC = () => {
                  </form>
              </div>
 
-             {/* Bulk Actions Bar */}
              <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
                  <div className="flex items-center gap-2 text-sm text-gray-500 font-medium italic">
                      <AlertCircle size={16} />
@@ -449,11 +466,10 @@ export const AdminDashboard: React.FC = () => {
 
       </main>
 
-      {/* Edit Modal */}
       {editingItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up">
-              <div className="bg-gov-blue text-white px-6 py-4 flex justify-between items-center">
+           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto">
+              <div className="bg-gov-blue text-white px-6 py-4 flex justify-between items-center sticky top-0">
                   <h3 className="font-bold uppercase tracking-wide">Chỉnh sửa kết quả thi</h3>
                   <button onClick={() => setEditingItem(null)} className="hover:bg-white/10 p-1 rounded">
                       <X size={24} />
@@ -490,6 +506,26 @@ export const AdminDashboard: React.FC = () => {
                             maxLength={12}
                             onChange={(e) => setEditingItem({...editingItem, cccd: e.target.value})}
                             className="w-full border rounded px-3 py-2"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ngày Sinh (dd/mm/yyyy)</label>
+                          <input 
+                            type="text" 
+                            value={editingItem.ngay_sinh} 
+                            onChange={(e) => setEditingItem({...editingItem, ngay_sinh: e.target.value})}
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="01/01/2005"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Giới Tính</label>
+                          <input 
+                            type="text" 
+                            value={editingItem.gioi_tinh} 
+                            onChange={(e) => setEditingItem({...editingItem, gioi_tinh: e.target.value})}
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Nam/Nữ"
                           />
                       </div>
                       <div className="col-span-2">
@@ -546,11 +582,10 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Create Modal */}
       {isCreating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up">
-              <div className="bg-green-600 text-white px-6 py-4 flex justify-between items-center">
+           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto">
+              <div className="bg-green-600 text-white px-6 py-4 flex justify-between items-center sticky top-0">
                   <h3 className="font-bold uppercase tracking-wide">Thêm Mới Kết Quả</h3>
                   <button onClick={() => setIsCreating(false)} className="hover:bg-white/10 p-1 rounded">
                       <X size={24} />
@@ -593,6 +628,26 @@ export const AdminDashboard: React.FC = () => {
                             onChange={(e) => setNewItem({...newItem, cccd: e.target.value})}
                             className="w-full border rounded px-3 py-2"
                             placeholder="12 số (tùy chọn)"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ngày sinh (dd/mm/yyyy)</label>
+                          <input 
+                            type="text" 
+                            value={newItem.ngay_sinh} 
+                            onChange={(e) => setNewItem({...newItem, ngay_sinh: e.target.value})}
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="01/01/2005"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Giới tính</label>
+                          <input 
+                            type="text" 
+                            value={newItem.gioi_tinh} 
+                            onChange={(e) => setNewItem({...newItem, gioi_tinh: e.target.value})}
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Nam"
                           />
                       </div>
                       <div className="col-span-2">
