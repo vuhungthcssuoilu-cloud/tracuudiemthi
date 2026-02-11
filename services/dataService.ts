@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     line2: 'Hệ thống tra cứu điểm thi trực tuyến',
-    line3: 'Hỗ trợ kỹ thuật: Mr: Vũ Văn Hùng - SĐT: 0984246993'
+    line3: 'Hỗ trợ kỹ thuật: hotro@viettel.vn'
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
@@ -57,7 +57,6 @@ export const getSystemConfig = async (): Promise<SystemConfig> => {
       .maybeSingle();
 
     if (error) throw error;
-    // Merge nested objects carefully to ensure footer config exists even if DB data is old
     const dbConfig = data?.data || {};
     return { 
         ...DEFAULT_CONFIG, 
@@ -168,8 +167,11 @@ const formatDateInput = (input: any): string => {
 export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
   let successCount = 0;
   const errorLog: string[] = [];
-  const sbdNameMap = new Map<string, string>(); 
   
+  // Cache để kiểm tra trùng lặp trong nội bộ file đang upload
+  const fileSbdSet = new Set<string>();
+  const fileCccdSet = new Set<string>();
+
   const normalizeRow = (row: any) => {
     const normalized: any = {};
     Object.keys(row).forEach(key => {
@@ -196,22 +198,29 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
     const row = normalizeRow(rawRow);
     if (!row.SO_BAO_DANH) continue;
 
+    const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
+    const cccd = row.CCCD?.toString().trim();
+    const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || 'KHÔNG TÊN';
+
+    // 1. Kiểm tra trùng lặp ngay trong file Excel
+    if (fileSbdSet.has(sbd)) {
+        errorLog.push(`Dòng trùng SBD: ${sbd} (Học sinh: ${hoTen}) bị lặp lại trong file.`);
+        continue;
+    }
+    fileSbdSet.add(sbd);
+    if (cccd) {
+        if (fileCccdSet.has(cccd)) {
+            errorLog.push(`Dòng trùng CCCD: ${cccd} (Học sinh: ${hoTen}) bị lặp lại trong file.`);
+            continue;
+        }
+        fileCccdSet.add(cccd);
+    }
+
     try {
-      const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
-      const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || '';
-      const cccd = row.CCCD?.toString().trim();
       const ngaySinh = formatDateInput(row.NGAY_SINH);
       const gioiTinh = row.GIOI_TINH ? row.GIOI_TINH.toString().trim() : '';
 
-      if (hoTen) {
-          if (sbdNameMap.has(sbd)) {
-              const prevName = sbdNameMap.get(sbd);
-              if (prevName !== hoTen) continue;
-          } else {
-              sbdNameMap.set(sbd, hoTen);
-          }
-      }
-
+      // 2. Kiểm tra trùng lặp với Database
       const { data: existingStudentBySBD } = await supabase
         .from('hoc_sinh')
         .select('id, ho_ten, cccd, so_bao_danh, ngay_sinh, gioi_tinh')
@@ -221,6 +230,12 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       let studentId: string | undefined;
 
       if (existingStudentBySBD) {
+          // Nếu trùng SBD nhưng khác tên -> Báo lỗi xung đột dữ liệu
+          if (existingStudentBySBD.ho_ten !== hoTen) {
+              errorLog.push(`Xung đột SBD ${sbd}: Trong DB là '${existingStudentBySBD.ho_ten}', trong file là '${hoTen}'`);
+              continue;
+          }
+
           studentId = existingStudentBySBD.id;
           const updateData: any = {};
           if (!existingStudentBySBD.cccd && cccd) updateData.cccd = cccd;
@@ -232,7 +247,15 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
               await supabase.from('hoc_sinh').update(updateData).eq('id', studentId);
           }
       } else {
-        if (!hoTen) continue;
+        // Kiểm tra trùng CCCD với người khác trong DB
+        if (cccd) {
+            const { data: existingByCCCD } = await supabase.from('hoc_sinh').select('ho_ten, so_bao_danh').eq('cccd', cccd).maybeSingle();
+            if (existingByCCCD) {
+                errorLog.push(`Trùng CCCD ${cccd}: Đã thuộc về HS ${existingByCCCD.ho_ten} (SBD: ${existingByCCCD.so_bao_danh})`);
+                continue;
+            }
+        }
+
         const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
             ho_ten: hoTen,
             so_bao_danh: sbd,
@@ -269,10 +292,11 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       }
       successCount++;
     } catch (err: any) {
-      errorLog.push(`SBD ${row.SO_BAO_DANH || '?'}: ${err.message}`);
+      errorLog.push(`SBD ${sbd}: ${err.message}`);
     }
   }
 
+  // Đồng bộ lại danh sách môn thi vào cấu hình
   try {
       const { data: allResults } = await supabase.from('ket_qua').select('mon_thi');
       if (allResults && allResults.length > 0) {
@@ -356,15 +380,18 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   try {
-    let query = supabase.from('ket_qua').select('*, hoc_sinh(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' });
+    let query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' });
+    
     if (search) {
-        query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' })
-          .ilike('hoc_sinh.ho_ten', `%${search}%`);
+        // Tìm kiếm linh hoạt: Hoặc trùng Họ tên, hoặc trùng Số báo danh
+        query = query.or(`ho_ten.ilike.%${search}%,so_bao_danh.ilike.%${search}%`, { foreignTable: 'hoc_sinh' });
     }
-    const { data, count, error } = await query.range(from, to);
+    
+    const { data, count, error } = await query.range(from, to).order('created_at', { ascending: false });
+    
     if (error) throw error;
     const formattedData = (data || []).map((item: any) => {
-        const hs = Array.isArray(item.hoc_sinh) ? item.hoc_sinh[0] : item.hoc_sinh;
+        const hs = item.hoc_sinh;
         return {
             ...item,
             ho_ten: hs?.ho_ten || '(Không tên)',
@@ -377,6 +404,7 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
     });
     return { data: formattedData, total: count || 0 };
   } catch (err) {
+      console.error("Admin Fetch Error:", err);
       return { data: [], total: 0 }; 
   }
 };
