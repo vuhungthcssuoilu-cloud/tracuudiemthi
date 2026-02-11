@@ -15,6 +15,7 @@ export interface KetQua {
   hoc_sinh_id: string;
   mon_thi: string;
   diem: number;
+  sort_order?: number; // Thứ tự dòng từ file Excel
   // Joined fields for display
   hoc_sinh?: HocSinh;
 }
