@@ -24,7 +24,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   // Footer data
   const footerLine1 = config?.footer?.line1 || orgName;
   const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
-  const footerLine3 = config?.footer?.line3 || '';
+  const footerLine3 = config?.footer?.line3 || 'Hỗ trợ kĩ thuật: vuhung@db.edu.vn';
 
   return (
     <div className={`flex flex-col font-sans ${isHomePage ? 'h-screen overflow-hidden' : 'min-h-screen overflow-auto'}`}>
