@@ -194,7 +194,9 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
     return normalized;
   };
 
-  for (const rawRow of data) {
+  // Duyệt dữ liệu Excel
+  for (let i = 0; i < data.length; i++) {
+    const rawRow = data[i];
     const row = normalizeRow(rawRow);
     if (!row.SO_BAO_DANH) continue;
 
@@ -281,12 +283,16 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
               .maybeSingle();
               
           if (existingResult) {
-              await supabase.from('ket_qua').update({ diem: Number(score) || 0 }).eq('id', existingResult.id);
+              await supabase.from('ket_qua').update({ 
+                  diem: Number(score) || 0,
+                  sort_order: i // Cập nhật thứ tự theo dòng file mới
+              }).eq('id', existingResult.id);
           } else {
               await supabase.from('ket_qua').insert({
                   hoc_sinh_id: studentId,
                   mon_thi: subject,
-                  diem: Number(score) || 0
+                  diem: Number(score) || 0,
+                  sort_order: i // Lưu thứ tự dòng file
                 });
           }
       }
@@ -354,10 +360,15 @@ export const createStudentResult = async (data: SearchResult): Promise<{ success
         if (existingResult) {
             await supabase.from('ket_qua').update({ diem: data.diem }).eq('id', existingResult.id);
         } else {
+            // Tìm sort_order lớn nhất để thêm vào cuối
+            const { data: maxSort } = await supabase.from('ket_qua').select('sort_order').order('sort_order', { ascending: false }).limit(1).maybeSingle();
+            const nextSort = (maxSort?.sort_order || 0) + 1;
+
             await supabase.from('ket_qua').insert({
                 hoc_sinh_id: studentId,
                 mon_thi: data.mon_thi.toUpperCase(),
-                diem: data.diem
+                diem: data.diem,
+                sort_order: nextSort
             });
         }
         return { success: true };
@@ -387,7 +398,8 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
         query = query.or(`ho_ten.ilike.%${search}%,so_bao_danh.ilike.%${search}%`, { foreignTable: 'hoc_sinh' });
     }
     
-    const { data, count, error } = await query.range(from, to).order('created_at', { ascending: false });
+    // Thay đổi sắp xếp từ created_at sang sort_order để giữ nguyên thứ tự file mẫu
+    const { data, count, error } = await query.range(from, to).order('sort_order', { ascending: true });
     
     if (error) throw error;
     const formattedData = (data || []).map((item: any) => {
