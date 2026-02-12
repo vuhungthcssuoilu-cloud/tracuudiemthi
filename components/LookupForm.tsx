@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Captcha } from './Captcha';
 import { SearchParams, SystemConfig } from '../types';
@@ -21,10 +21,23 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+  
+  // Key để buộc Captcha component mount lại (làm mới mã)
+  const [captchaKey, setCaptchaKey] = useState(0);
+  const prevLoadingRef = useRef(isLoading);
 
   useEffect(() => {
     getSystemConfig().then(setConfig);
   }, []);
+
+  // Tự động làm mới Captcha khi quá trình tra cứu kết thúc (isLoading: true -> false)
+  useEffect(() => {
+    if (prevLoadingRef.current && !isLoading) {
+      setCaptchaKey(prev => prev + 1);
+      setCaptchaInput(''); // Xóa mã cũ đã nhập
+    }
+    prevLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +59,9 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
 
     if (config.security.enableCaptcha && captchaInput.toUpperCase() !== captchaCode) {
       setLocalError('Mã xác nhận không hợp lệ');
+      // Nếu sai mã xác nhận cục bộ, cũng nên đổi mã mới cho bảo mật
+      setCaptchaKey(prev => prev + 1);
+      setCaptchaInput('');
       return;
     }
     
@@ -112,7 +128,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   maxLength={5}
                   autoComplete="off"
                 />
-                <Captcha onRefresh={setCaptchaCode} />
+                <Captcha key={captchaKey} onRefresh={setCaptchaCode} />
               </div>
             </div>
           )}
