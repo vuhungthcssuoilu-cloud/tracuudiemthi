@@ -148,8 +148,17 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
               </button>
             </div>
 
+            {/* Thông báo đang xử lý */}
+            {isLoading && (
+              <div className="w-full md:pl-44 mt-3">
+                <p className="text-[#337ab7] text-[17px] font-normal text-left italic animate-pulse">
+                  Hệ thống đang tra cứu kết quả thi vui lòng chờ...
+                </p>
+              </div>
+            )}
+
             {/* Thông báo lỗi đỏ dưới button */}
-            {displayError && (
+            {!isLoading && displayError && (
               <div className="w-full md:pl-44 mt-3">
                 <p className="text-[#f00] text-[17px] font-normal text-left italic">
                   {displayError}
