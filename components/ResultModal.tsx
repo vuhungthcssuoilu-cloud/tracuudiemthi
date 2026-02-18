@@ -45,9 +45,10 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-normal mb-2">
               KẾT QUẢ
             </h1>
-            <p className="text-[16px] md:text-[18px] font-bold text-[#337ab7] uppercase">
-              {config.exam.name} - {config.exam.schoolYear}
-            </p>
+            <div className="text-[16px] md:text-[18px] font-bold text-[#337ab7] uppercase leading-snug">
+              <p>{config.exam.name}</p>
+              <p className="mt-1">{config.exam.schoolYear}</p>
+            </div>
           </div>
 
           {/* Nội dung thông tin thí sinh */}
@@ -99,9 +100,9 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
 
           {/* Bảng điểm */}
           <div className="mb-10">
-            <h3 className="font-bold text-[16px] uppercase mb-3 text-slate-800">
+            <div className="font-bold text-[16px] uppercase mb-3 text-slate-800">
               KẾT QUẢ
-            </h3>
+            </div>
             <div className="border-[1.5px] border-slate-800">
               <table className="w-full text-left border-collapse">
                 <thead>
