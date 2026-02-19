@@ -96,17 +96,23 @@ export const SystemSettings: React.FC = () => {
   const updateFooter = (key: keyof SystemConfig['footer'], value: string) => {
     if (!config) return;
     // Ensure footer object exists if it's undefined
-    const currentFooter = config.footer || { line1: '', line2: '', line3: '' };
+    const currentFooter = config.footer || { line1: '', line2: '', line3: '', backgroundColor: '#337ab7' };
     setConfig({ ...config, footer: { ...currentFooter, [key]: value } });
   };
 
   if (!config) return <div className="p-10 text-center">Đang tải cấu hình...</div>;
 
-  const colorPresets = [
-    { name: 'Trắng tinh khiết', hex: '#FFFFFF' },
-    { name: 'Vàng Hoàng gia', hex: '#FFD700' },
-    { name: 'Vàng Chanh', hex: '#FFFF00' },
-    { name: 'Xanh nhạt', hex: '#E0F2F1' },
+  const textColorPresets = [
+    { name: 'Trắng', hex: '#FFFFFF' },
+    { name: 'Vàng', hex: '#FFFF00' },
+    { name: 'Đen', hex: '#000000' },
+  ];
+
+  const bgColorPresets = [
+    { name: 'Xanh dương (Gốc)', hex: '#337ab7' },
+    { name: 'Xanh đậm', hex: '#1a4f75' },
+    { name: 'Đỏ đô', hex: '#d32f2f' },
+    { name: 'Xanh lá', hex: '#2e7d32' },
   ];
 
   return (
@@ -165,40 +171,78 @@ export const SystemSettings: React.FC = () => {
                         <input type="text" value={config.exam.schoolYear} onChange={(e) => updateExam('schoolYear', e.target.value)} className="w-full border p-3 rounded text-gray-600 font-bold focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
                     </div>
                     
-                    {/* Cấu hình màu chữ tiêu đề */}
-                    <div className="pt-4 border-t border-gray-100">
-                        <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
-                          <Palette size={18} className="text-[#337ab7]" />
-                          Màu chữ tiêu đề Header
-                        </label>
-                        <div className="flex flex-wrap items-center gap-6">
-                          <div className="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
-                            <input 
-                              type="color" 
-                              value={config.exam.headerTextColor} 
-                              onChange={(e) => updateExam('headerTextColor', e.target.value)}
-                              className="h-10 w-16 rounded border border-gray-300 cursor-pointer p-0.5"
-                            />
-                            <input 
-                              type="text" 
-                              value={config.exam.headerTextColor} 
-                              onChange={(e) => updateExam('headerTextColor', e.target.value.toUpperCase())}
-                              className="w-24 border-none bg-transparent p-1 font-mono font-bold uppercase text-sm focus:ring-0"
-                              placeholder="#FFFFFF"
-                            />
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            {colorPresets.map(preset => (
-                              <button
-                                key={preset.hex}
-                                onClick={() => updateExam('headerTextColor', preset.hex)}
-                                className={`w-8 h-8 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110`}
-                                style={{ backgroundColor: preset.hex }}
-                                title={preset.name}
-                              />
-                            ))}
-                          </div>
+                    {/* Cấu hình màu sắc Header */}
+                    <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Màu chữ */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
+                                <Palette size={18} className="text-[#337ab7]" />
+                                Màu chữ tiêu đề
+                            </label>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded border border-gray-200">
+                                    <input 
+                                        type="color" 
+                                        value={config.exam.headerTextColor} 
+                                        onChange={(e) => updateExam('headerTextColor', e.target.value)}
+                                        className="h-8 w-10 rounded border border-gray-300 cursor-pointer p-0.5"
+                                    />
+                                    <input 
+                                        type="text" 
+                                        value={config.exam.headerTextColor} 
+                                        onChange={(e) => updateExam('headerTextColor', e.target.value.toUpperCase())}
+                                        className="w-20 border-none bg-transparent p-1 font-mono font-bold uppercase text-xs focus:ring-0"
+                                        placeholder="#FFFFFF"
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    {textColorPresets.map(preset => (
+                                        <button
+                                            key={preset.hex}
+                                            onClick={() => updateExam('headerTextColor', preset.hex)}
+                                            className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110"
+                                            style={{ backgroundColor: preset.hex }}
+                                            title={preset.name}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Màu nền */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
+                                <Palette size={18} className="text-[#337ab7]" />
+                                Màu nền Header
+                            </label>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded border border-gray-200">
+                                    <input 
+                                        type="color" 
+                                        value={config.exam.headerBackgroundColor || '#337ab7'} 
+                                        onChange={(e) => updateExam('headerBackgroundColor', e.target.value)}
+                                        className="h-8 w-10 rounded border border-gray-300 cursor-pointer p-0.5"
+                                    />
+                                    <input 
+                                        type="text" 
+                                        value={config.exam.headerBackgroundColor || '#337ab7'} 
+                                        onChange={(e) => updateExam('headerBackgroundColor', e.target.value.toUpperCase())}
+                                        className="w-20 border-none bg-transparent p-1 font-mono font-bold uppercase text-xs focus:ring-0"
+                                        placeholder="#337AB7"
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    {bgColorPresets.map(preset => (
+                                        <button
+                                            key={preset.hex}
+                                            onClick={() => updateExam('headerBackgroundColor', preset.hex)}
+                                            className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110"
+                                            style={{ backgroundColor: preset.hex }}
+                                            title={preset.name}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -356,6 +400,41 @@ export const SystemSettings: React.FC = () => {
                 <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dòng 3 (Liên hệ, email...)</label>
                     <input type="text" value={config.footer?.line3 || ''} onChange={(e) => updateFooter('line3', e.target.value)} className="w-full border p-3 rounded text-gray-700 focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
+                        <Palette size={18} className="text-[#337ab7]" />
+                        Màu nền Footer
+                    </label>
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded border border-gray-200">
+                            <input 
+                                type="color" 
+                                value={config.footer?.backgroundColor || '#337ab7'} 
+                                onChange={(e) => updateFooter('backgroundColor', e.target.value)}
+                                className="h-8 w-10 rounded border border-gray-300 cursor-pointer p-0.5"
+                            />
+                            <input 
+                                type="text" 
+                                value={config.footer?.backgroundColor || '#337ab7'} 
+                                onChange={(e) => updateFooter('backgroundColor', e.target.value.toUpperCase())}
+                                className="w-20 border-none bg-transparent p-1 font-mono font-bold uppercase text-xs focus:ring-0"
+                                placeholder="#337AB7"
+                            />
+                        </div>
+                        <div className="flex gap-2">
+                            {bgColorPresets.map(preset => (
+                                <button
+                                    key={preset.hex}
+                                    onClick={() => updateFooter('backgroundColor', preset.hex)}
+                                    className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110"
+                                    style={{ backgroundColor: preset.hex }}
+                                    title={preset.name}
+                                />
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
