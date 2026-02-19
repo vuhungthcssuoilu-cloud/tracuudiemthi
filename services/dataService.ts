@@ -15,12 +15,14 @@ export const DEFAULT_CONFIG: SystemConfig = {
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
-    headerTextColor: '#FFFF00'
+    headerTextColor: '#FFFF00',
+    headerBackgroundColor: '#337ab7' // Màu mặc định
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     line2: 'Hệ thống tra cứu điểm thi trực tuyến',
-    line3: 'Hỗ trợ kỹ thuật: hotro@viettel.vn'
+    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
+    backgroundColor: '#337ab7' // Màu mặc định
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
