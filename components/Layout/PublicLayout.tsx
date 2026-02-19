@@ -20,16 +20,21 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
   const logoUrl = config?.exam.logoUrl;
   const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
+  const headerBgColor = config?.exam.headerBackgroundColor || '#337ab7';
 
   // Footer data
   const footerLine1 = config?.footer?.line1 || orgName;
   const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
   const footerLine3 = config?.footer?.line3 || '';
+  const footerBgColor = config?.footer?.backgroundColor || '#337ab7';
 
   return (
     <div className={`flex flex-col font-sans ${isHomePage ? 'h-screen overflow-hidden' : 'min-h-screen overflow-auto'}`}>
       {/* Header Banner - Sử dụng font-serif/sans đồng bộ */}
-      <header className="bg-[#337ab7] py-4 shadow-sm border-b border-[#2e6da4] shrink-0">
+      <header 
+        className="py-4 shadow-sm border-b border-[#2e6da4] shrink-0 transition-colors duration-300"
+        style={{ backgroundColor: headerBgColor }}
+      >
         <div className="container mx-auto px-4 flex items-center justify-center gap-6 max-w-6xl">
           <div className="flex-shrink-0">
             <img 
@@ -60,7 +65,10 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#337ab7] py-3 text-center border-t border-[#2e6da4] shrink-0 no-print">
+      <footer 
+        className="py-3 text-center border-t border-[#2e6da4] shrink-0 no-print transition-colors duration-300"
+        style={{ backgroundColor: footerBgColor }}
+      >
         <div className="container mx-auto px-4 relative">
           <p className="text-white text-[14px] font-bold uppercase mb-1">
             {footerLine1}
