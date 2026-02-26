@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
+    line2: 'CTY TNHH 1 thành viên Hoa Anh Hùng',
     line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
     backgroundColor: '#337ab7' // Màu mặc định
   },
