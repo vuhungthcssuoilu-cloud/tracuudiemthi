@@ -24,7 +24,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Footer data
   const footerLine1 = config?.footer?.line1 || orgName;
-  const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
+  const footerLine2 = config?.footer?.line2 || 'Đơn vị thi công: CTY TNHH 1 thành viên Hoa Anh Hùng';
   const footerLine3 = config?.footer?.line3 || '';
   const footerBgColor = config?.footer?.backgroundColor || '#337ab7';
 
