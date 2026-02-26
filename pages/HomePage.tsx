@@ -62,7 +62,7 @@ export const HomePage: React.FC = () => {
          /* Loading Spinner bên trong Layout */
          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
              <div className="w-12 h-12 border-4 border-gray-200 border-t-[#337ab7] rounded-full animate-spin"></div>
-             <p className="mt-4 text-gray-500 font-sans font-medium">Đang kết nối hệ thống...</p>
+             <p className="mt-4 text-gray-500 font-sans font-medium">Đang kết nối hệ thống tra điểm thi vui lòng chờ...</p>
          </div>
       ) : (
         <>
