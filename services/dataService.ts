@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Đơn vị thi công: CTY TNHH 1 thành viên Hoa Anh Hùng',
+    line2: 'Đơn vị thi công: Hoa Anh Hùng',
     line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn - SĐT: 0984 246 993',
     backgroundColor: '#337ab7' // Màu mặc định
   },
