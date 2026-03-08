@@ -20,13 +20,6 @@ export const HomePage: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Ẩn loader của index.html nếu React đã chạy
-    const loader = document.querySelector('.initial-loader');
-    if (loader) {
-        (loader as HTMLElement).style.opacity = '0';
-        setTimeout(() => loader.remove(), 500);
-    }
-    
     // Load config
     getSystemConfig().then((cfg) => {
         setConfig(cfg);
@@ -61,7 +54,7 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <PublicLayout>
+    <PublicLayout config={config}>
       <>
           {config.exam.isOpen ? (
               <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} config={config} />
