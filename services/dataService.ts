@@ -20,8 +20,8 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Đơn vị thi công: Hoa Anh Hùng',
-    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn - SĐT: 0984 246 993',
+    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
+    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
     backgroundColor: '#337ab7' // Màu mặc định
   },
   fields: {
@@ -50,28 +50,39 @@ export const DEFAULT_CONFIG: SystemConfig = {
   }
 };
 
-export const getSystemConfig = async (): Promise<SystemConfig> => {
-  try {
-    const { data, error } = await supabase
-      .from('cau_hinh')
-      .select('data')
-      .eq('id', CONFIG_ID)
-      .maybeSingle();
+let cachedConfig: SystemConfig | null = null;
+let configPromise: Promise<SystemConfig> | null = null;
 
-    if (error) throw error;
-    const dbConfig = data?.data || {};
-    return { 
-        ...DEFAULT_CONFIG, 
-        ...dbConfig,
-        footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
-        exam: { ...DEFAULT_CONFIG.exam, ...(dbConfig.exam || {}) },
-        fields: { ...DEFAULT_CONFIG.fields, ...(dbConfig.fields || {}) },
-        security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
-        template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
-    };
-  } catch (err) {
-    return DEFAULT_CONFIG;
-  }
+export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfig> => {
+  if (cachedConfig && !forceRefresh) return cachedConfig;
+  if (configPromise && !forceRefresh) return configPromise;
+
+  configPromise = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cau_hinh')
+        .select('data')
+        .eq('id', CONFIG_ID)
+        .maybeSingle();
+
+      if (error) throw error;
+      const dbConfig = data?.data || {};
+      cachedConfig = { 
+          ...DEFAULT_CONFIG, 
+          ...dbConfig,
+          footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
+          exam: { ...DEFAULT_CONFIG.exam, ...(dbConfig.exam || {}) },
+          fields: { ...DEFAULT_CONFIG.fields, ...(dbConfig.fields || {}) },
+          security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
+          template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
+      };
+      return cachedConfig;
+    } catch (err) {
+      return DEFAULT_CONFIG;
+    }
+  })();
+
+  return configPromise;
 };
 
 export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> => {
@@ -83,6 +94,9 @@ export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> =
         data: config, 
         updated_at: new Date().toISOString() 
       });
+    if (!error) {
+      cachedConfig = config;
+    }
     return !error;
   } catch {
     return false;
