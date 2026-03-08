@@ -4,7 +4,7 @@ import { PublicLayout } from '../components/Layout/PublicLayout';
 import { LookupForm } from '../components/LookupForm';
 import { ResultModal } from '../components/ResultModal';
 import { SearchParams, SearchResult, SystemConfig } from '../types';
-import { searchScores, getSystemConfig } from '../services/dataService';
+import { searchScores, getSystemConfig, DEFAULT_CONFIG } from '../services/dataService';
 import { AlertTriangle } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -12,8 +12,9 @@ export const HomePage: React.FC = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Khởi tạo null để biết khi nào đang load dữ liệu thật
-  const [config, setConfig] = useState<SystemConfig | null>(null);
+  // Khởi tạo với DEFAULT_CONFIG để hiển thị ngay lập tức
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
+  const [isConfigLoaded, setIsConfigLoaded] = useState(false);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -27,7 +28,10 @@ export const HomePage: React.FC = () => {
     }
     
     // Load config
-    getSystemConfig().then(setConfig);
+    getSystemConfig().then((cfg) => {
+        setConfig(cfg);
+        setIsConfigLoaded(true);
+    });
   }, []);
 
   const handleSearch = async (params: SearchParams) => {
@@ -58,36 +62,28 @@ export const HomePage: React.FC = () => {
 
   return (
     <PublicLayout>
-      {!config ? (
-         /* Loading Spinner bên trong Layout */
-         <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-             <div className="w-12 h-12 border-4 border-gray-200 border-t-[#337ab7] rounded-full animate-spin"></div>
-             <p className="mt-4 text-gray-500 font-sans font-medium">Đang kết nối hệ thống tra điểm thi vui lòng chờ...</p>
-         </div>
-      ) : (
-        <>
-            {config.exam.isOpen ? (
-                <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} />
-            ) : (
-                <div className="bg-white border border-slate-100 rounded-lg p-16 text-center shadow-sm max-w-2xl mx-auto animate-fade-in">
-                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <AlertTriangle size={32} className="text-slate-200" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 uppercase mb-3">Cổng tra cứu hiện đang đóng</h3>
-                <p className="text-slate-400 text-sm italic">
-                    Hệ thống tra cứu điểm thi hiện chưa mở.
-                </p>
-                </div>
-            )}
+      <>
+          {config.exam.isOpen ? (
+              <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} config={config} />
+          ) : (
+              <div className="bg-white border border-slate-100 rounded-lg p-16 text-center shadow-sm max-w-2xl mx-auto animate-fade-in">
+              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <AlertTriangle size={32} className="text-slate-200" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 uppercase mb-3">Cổng tra cứu hiện đang đóng</h3>
+              <p className="text-slate-400 text-sm italic">
+                  Hệ thống tra cứu điểm thi hiện chưa mở.
+              </p>
+              </div>
+          )}
 
-            <ResultModal 
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                results={results}
-                config={config}
-            />
-        </>
-      )}
+          <ResultModal 
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              results={results}
+              config={config}
+          />
+      </>
     </PublicLayout>
   );
 };
