@@ -4,16 +4,20 @@ import { Link, useLocation } from 'react-router-dom';
 import { getSystemConfig, DEFAULT_CONFIG } from '../../services/dataService';
 import { SystemConfig } from '../../types';
 
-export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const PublicLayout: React.FC<{ children: React.ReactNode, config?: SystemConfig }> = ({ children, config: propConfig }) => {
   // Khởi tạo ngay với DEFAULT_CONFIG để hiển thị Header/Footer lập tức
-  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
+  const [localConfig, setLocalConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
+  const config = propConfig || localConfig;
+
   useEffect(() => {
-    // Load config thật từ DB, nếu có thì cập nhật lại
-    getSystemConfig().then(setConfig);
-  }, []);
+    if (!propConfig) {
+      // Load config thật từ DB, nếu có thì cập nhật lại
+      getSystemConfig().then(setLocalConfig);
+    }
+  }, [propConfig]);
 
   const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN';
   const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI';
@@ -24,7 +28,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Footer data
   const footerLine1 = config?.footer?.line1 || orgName;
-  const footerLine2 = config?.footer?.line2 || 'Đơn vị thi công: CTY TNHH 1 thành viên Hoa Anh Hùng';
+  const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
   const footerLine3 = config?.footer?.line3 || '';
   const footerBgColor = config?.footer?.backgroundColor || '#337ab7';
 
