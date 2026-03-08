@@ -9,10 +9,10 @@ interface LookupFormProps {
   onSearch: (params: SearchParams) => void;
   isLoading: boolean;
   error?: string | null;
+  config: SystemConfig;
 }
 
-export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, error: externalError }) => {
-  const [config, setConfig] = useState<SystemConfig | null>(null);
+export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, error: externalError, config }) => {
   const [formData, setFormData] = useState<SearchParams>({
     ho_ten: '',
     so_bao_danh: '',
@@ -25,10 +25,6 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
   // Key để buộc Captcha component mount lại (làm mới mã)
   const [captchaKey, setCaptchaKey] = useState(0);
   const prevLoadingRef = useRef(isLoading);
-
-  useEffect(() => {
-    getSystemConfig().then(setConfig);
-  }, []);
 
   // Tự động làm mới Captcha khi quá trình tra cứu kết thúc (isLoading: true -> false)
   useEffect(() => {
@@ -72,8 +68,6 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
-  if (!config) return null;
 
   const displayError = localError || externalError;
 
