@@ -170,6 +170,10 @@ export const SystemSettings: React.FC = () => {
                         <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Năm Học / Giai Đoạn</label>
                         <input type="text" value={config.exam.schoolYear} onChange={(e) => updateExam('schoolYear', e.target.value)} className="w-full border p-3 rounded text-gray-600 font-bold focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
                     </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Ngày công bố điểm (Hiển thị ngoài trang chủ)</label>
+                        <input type="text" value={config.exam.releaseDate || ''} onChange={(e) => updateExam('releaseDate', e.target.value)} className="w-full border p-3 rounded text-gray-800 font-bold focus:ring-2 focus:ring-[#337ab7]/20 outline-none" placeholder="Ví dụ: 20/05/2026" />
+                    </div>
                     
                     {/* Cấu hình màu sắc Header */}
                     <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
