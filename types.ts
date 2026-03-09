@@ -81,6 +81,7 @@ export interface SystemConfig {
     faviconUrl: string | null;
     headerTextColor: string;
     headerBackgroundColor: string; // Mới: Màu nền header
+    releaseDate?: string; // Mới: Ngày công bố điểm
   };
   footer: FooterConfig;
   fields: {
