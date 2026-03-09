@@ -111,7 +111,11 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
   const dobInput = params.ngay_sinh?.trim();
 
   try {
-    let query = supabase.from('hoc_sinh').select('id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh');
+    // Sử dụng join query để lấy cả thông tin học sinh và kết quả trong 1 lần gọi duy nhất
+    let query = supabase
+      .from('hoc_sinh')
+      .select('id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh, ket_qua(*)');
+    
     let hasCondition = false;
 
     if (config.fields.so_bao_danh.visible && sbdInput) {
@@ -139,16 +143,11 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
     const { data: students, error: studentError } = await query;
     if (studentError || !students || students.length === 0) return [];
 
+    // Lấy học sinh đầu tiên khớp điều kiện
     const student = students[0];
+    const results = (student as any).ket_qua || [];
 
-    const { data: results, error: resultError } = await supabase
-      .from('ket_qua')
-      .select('*')
-      .eq('hoc_sinh_id', student.id);
-
-    if (resultError) throw resultError;
-
-    return (results || []).map(r => ({
+    return results.map((r: any) => ({
       ...r,
       ho_ten: student.ho_ten,
       so_bao_danh: student.so_bao_danh,
