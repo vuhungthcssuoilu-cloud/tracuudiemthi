@@ -16,7 +16,8 @@ export const DEFAULT_CONFIG: SystemConfig = {
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
     headerTextColor: '#FFFF00',
-    headerBackgroundColor: '#337ab7' // Màu mặc định
+    headerBackgroundColor: '#337ab7', // Màu mặc định
+    releaseDate: '01/01/2026' // Mặc định
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
