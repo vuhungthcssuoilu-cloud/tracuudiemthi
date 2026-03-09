@@ -79,9 +79,16 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     <div className="bg-[#f2f2f2] border border-[#d3d3d3] rounded-sm p-8 md:p-16 w-full max-w-4xl shadow-none animate-fade-in font-sans">
       <div className="w-full max-w-2xl mx-auto">
         {/* Hướng dẫn tiêu đề */}
-        <p className="text-center text-[#333] mb-10 text-[18px] font-normal italic">
-          Thí sinh nhập các thông tin và mã xác nhận vào các ô dưới đây
-        </p>
+        <div className="text-center mb-10">
+          <p className="text-[#333] text-[18px] font-normal italic mb-2">
+            Thí sinh nhập các thông tin và mã xác nhận vào các ô dưới đây
+          </p>
+          {config.exam.releaseDate && (
+            <p className="text-[#337ab7] text-[16px] font-bold uppercase">
+              Ngày công bố kết quả: {config.exam.releaseDate}
+            </p>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Render các trường dựa trên config */}
