@@ -43,7 +43,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode, config?: System
           <div className="flex-shrink-0">
             <img 
               src={logoUrl || "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png"} 
-              alt="Quốc huy" 
+              alt="Logo" 
               className="w-16 h-16 md:w-20 md:h-20 object-contain" 
             />
           </div>
