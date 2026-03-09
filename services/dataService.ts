@@ -439,9 +439,29 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
 
 export const deleteResult = async (id: string): Promise<boolean> => {
   try {
-    const { error } = await supabase.from('ket_qua').delete().eq('id', id);
-    return !error;
-  } catch { return false; }
+    // 1. Lấy hoc_sinh_id trước khi xóa để kiểm tra sau này
+    const { data: result } = await supabase.from('ket_qua').select('hoc_sinh_id').eq('id', id).maybeSingle();
+    if (!result) return false;
+
+    const studentId = result.hoc_sinh_id;
+
+    // 2. Xóa kết quả thi
+    const { error: deleteError } = await supabase.from('ket_qua').delete().eq('id', id);
+    if (deleteError) throw deleteError;
+
+    // 3. Kiểm tra xem học sinh này còn kết quả môn thi nào khác không
+    const { count } = await supabase.from('ket_qua').select('*', { count: 'exact', head: true }).eq('hoc_sinh_id', studentId);
+    
+    // 4. Nếu không còn kết quả nào, xóa luôn thông tin học sinh để giải phóng bộ nhớ và cập nhật dashboard
+    if (count === 0) {
+        await supabase.from('hoc_sinh').delete().eq('id', studentId);
+    }
+
+    return true;
+  } catch (err) { 
+    console.error("Lỗi khi xóa kết quả:", err);
+    return false; 
+  }
 };
 
 export const updateResult = async (id: string, data: Partial<SearchResult>): Promise<boolean> => {
