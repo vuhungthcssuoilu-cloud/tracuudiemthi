@@ -17,7 +17,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
     faviconUrl: null,
     headerTextColor: '#FFFF00',
     headerBackgroundColor: '#337ab7', // Màu mặc định
-    releaseDate: '01/01/2026' // Mặc định
+    releaseDate: '' // Mặc định trống
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
