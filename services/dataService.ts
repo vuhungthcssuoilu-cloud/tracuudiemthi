@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
     schoolYear: 'Năm học 2025 - 2026',
-    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
+    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
     orgLevel: 'CẤP XÃ',
     isOpen: true,
@@ -21,8 +21,8 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
-    line2: 'Ứng dụng Tra cứu điểm thi HSG được phát triển bởi: Vũ Văn Hùng - Đơn vị công tác: Trường PTDTBT TH&THCS Suối Lư',
-    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn - SĐT: 0984 246 993',
+    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
+    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
     backgroundColor: '#337ab7' // Màu mặc định
   },
   fields: {
@@ -51,11 +51,29 @@ export const DEFAULT_CONFIG: SystemConfig = {
   }
 };
 
+const CONFIG_CACHE_KEY = 'system_config_cache';
+
 let cachedConfig: SystemConfig | null = null;
+try {
+  const saved = localStorage.getItem(CONFIG_CACHE_KEY);
+  if (saved) cachedConfig = JSON.parse(saved);
+} catch (e) {
+  console.error('Error loading config from cache', e);
+}
+
 let configPromise: Promise<SystemConfig> | null = null;
 
+export const getCachedConfig = (): SystemConfig => {
+  return cachedConfig || DEFAULT_CONFIG;
+};
+
 export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfig> => {
-  if (cachedConfig && !forceRefresh) return cachedConfig;
+  if (cachedConfig && !forceRefresh && !configPromise) {
+    // Trả về cache nhưng vẫn fetch ngầm để cập nhật nếu cần
+    getSystemConfig(true); 
+    return cachedConfig;
+  }
+  
   if (configPromise && !forceRefresh) return configPromise;
 
   configPromise = (async () => {
@@ -68,7 +86,7 @@ export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfi
 
       if (error) throw error;
       const dbConfig = data?.data || {};
-      cachedConfig = { 
+      const newConfig = { 
           ...DEFAULT_CONFIG, 
           ...dbConfig,
           footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
@@ -77,9 +95,14 @@ export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfi
           security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
           template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
       };
+      
+      cachedConfig = newConfig;
+      localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(newConfig));
       return cachedConfig;
     } catch (err) {
-      return DEFAULT_CONFIG;
+      return cachedConfig || DEFAULT_CONFIG;
+    } finally {
+      configPromise = null;
     }
   })();
 
@@ -97,6 +120,7 @@ export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> =
       });
     if (!error) {
       cachedConfig = config;
+      localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(config));
     }
     return !error;
   } catch {
