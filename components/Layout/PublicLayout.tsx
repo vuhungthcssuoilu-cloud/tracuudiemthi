@@ -1,12 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getSystemConfig, DEFAULT_CONFIG } from '../../services/dataService';
+import { getSystemConfig, DEFAULT_CONFIG, getCachedConfig } from '../../services/dataService';
 import { SystemConfig } from '../../types';
 
 export const PublicLayout: React.FC<{ children: React.ReactNode, config?: SystemConfig }> = ({ children, config: propConfig }) => {
-  // Khởi tạo ngay với DEFAULT_CONFIG để hiển thị Header/Footer lập tức
-  const [localConfig, setLocalConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
+  // Khởi tạo ngay với cấu hình đã cache (nếu có) để tránh hiện tượng nháy màu
+  const [localConfig, setLocalConfig] = useState<SystemConfig>(getCachedConfig());
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
@@ -19,18 +19,18 @@ export const PublicLayout: React.FC<{ children: React.ReactNode, config?: System
     }
   }, [propConfig]);
 
-  const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG';
-  const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ';
-  const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
+  const orgName = config?.exam.orgUnit || DEFAULT_CONFIG.exam.orgUnit;
+  const examName = config?.exam.name || DEFAULT_CONFIG.exam.name;
+  const schoolYear = config?.exam.schoolYear || DEFAULT_CONFIG.exam.schoolYear;
   const logoUrl = config?.exam.logoUrl;
-  const headerTextColor = config?.exam.headerTextColor || '#FFFFFF';
-  const headerBgColor = config?.exam.headerBackgroundColor || '#337ab7';
+  const headerTextColor = config?.exam.headerTextColor || DEFAULT_CONFIG.exam.headerTextColor;
+  const headerBgColor = config?.exam.headerBackgroundColor || DEFAULT_CONFIG.exam.headerBackgroundColor;
 
   // Footer data
-  const footerLine1 = config?.footer?.line1 || orgName;
-  const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
-  const footerLine3 = config?.footer?.line3 || '';
-  const footerBgColor = config?.footer?.backgroundColor || '#337ab7';
+  const footerLine1 = config?.footer?.line1 || DEFAULT_CONFIG.footer.line1;
+  const footerLine2 = config?.footer?.line2 || DEFAULT_CONFIG.footer.line2;
+  const footerLine3 = config?.footer?.line3 || DEFAULT_CONFIG.footer.line3;
+  const footerBgColor = config?.footer?.backgroundColor || DEFAULT_CONFIG.footer.backgroundColor;
 
   return (
     <div className={`flex flex-col font-sans ${isHomePage ? 'h-screen overflow-hidden' : 'min-h-screen overflow-auto'}`}>
