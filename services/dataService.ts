@@ -7,20 +7,20 @@ const CONFIG_ID = 'global_settings';
 
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
-    name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI',
+    name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
     schoolYear: 'Năm học 2025 - 2026',
-    orgUnit: '',
-    subUnit: '',
-    orgLevel: '',
+    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
+    subUnit: 'HỘI ĐỒNG KHẢO THÍ',
+    orgLevel: 'CẤP XÃ',
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
-    headerTextColor: '#FFFF00',
+    headerTextColor: '#FFFFFF',
     headerBackgroundColor: '#337ab7', // Màu mặc định
     releaseDate: '' // Mặc định trống
   },
   footer: {
-    line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
+    line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
     line2: 'Hệ thống tra cứu điểm thi trực tuyến',
     line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
     backgroundColor: '#337ab7' // Màu mặc định
