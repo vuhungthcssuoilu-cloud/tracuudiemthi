@@ -19,11 +19,11 @@ export const PublicLayout: React.FC<{ children: React.ReactNode, config?: System
     }
   }, [propConfig]);
 
-  const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN';
-  const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI';
+  const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG';
+  const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ';
   const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
   const logoUrl = config?.exam.logoUrl;
-  const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
+  const headerTextColor = config?.exam.headerTextColor || '#FFFFFF';
   const headerBgColor = config?.exam.headerBackgroundColor || '#337ab7';
 
   // Footer data
