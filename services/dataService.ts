@@ -22,7 +22,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
     line2: 'Ứng dụng Tra cứu điểm thi HSG được phát triển bởi: Vũ Văn Hùng - Đơn vị công tác: Trường PTDTBT TH&THCS Suối Lư',
-    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
+    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn - SĐT: 0984 246 993',
     backgroundColor: '#337ab7' // Màu mặc định
   },
   fields: {
