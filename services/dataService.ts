@@ -9,9 +9,9 @@ export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI',
     schoolYear: 'Năm học 2025 - 2026',
-    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    subUnit: 'HỘI ĐỒNG KHẢO THÍ',
-    orgLevel: 'CẤP XÃ',
+    orgUnit: '',
+    subUnit: '',
+    orgLevel: '',
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
