@@ -153,7 +153,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   color: config.exam.headerTextColor 
                 }}
               >
-                {isLoading ? "..." : "Tra cứu kết quả"}
+                {isLoading ? "..." : "Tra cứu kết quả thi"}
               </button>
             </div>
 
