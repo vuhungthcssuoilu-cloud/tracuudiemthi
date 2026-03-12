@@ -16,14 +16,14 @@ export const DEFAULT_CONFIG: SystemConfig = {
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
     headerTextColor: '#FFFFFF',
-    headerBackgroundColor: '#337ab7', // Màu mặc định
+    headerBackgroundColor: '#1a4f75', // Màu mặc định
     releaseDate: '' // Mặc định trống
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     line2: 'Ứng dụng Tra cứu điểm thi HSG được phát triển bởi: Vũ Văn Hùng - Đơn vị công tác: Trường PTDTBT TH&THCS Suối Lư',
     line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn - SĐT: 0984 246 993',
-    backgroundColor: '#337ab7' // Màu mặc định
+    backgroundColor: '#1a4f75' // Màu mặc định
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
