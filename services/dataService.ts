@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ, TỈNH ĐIỆN BIÊN',
     schoolYear: 'Năm học 2025 - 2026',
-    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
+    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
     orgLevel: 'CẤP XÃ',
     isOpen: true,
