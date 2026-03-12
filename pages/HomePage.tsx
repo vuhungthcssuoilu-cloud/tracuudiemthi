@@ -20,8 +20,8 @@ export const HomePage: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load config
-    getSystemConfig().then((cfg) => {
+    // Load config (force refresh to ensure we have the latest isOpen status)
+    getSystemConfig(true).then((cfg) => {
         setConfig(cfg);
         setIsConfigLoaded(true);
     });
@@ -43,9 +43,15 @@ export const HomePage: React.FC = () => {
         setResults([]);
         setHasSearched(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi tra cứu:", error);
-      setSearchError('Hệ thống đang bận, vui lòng thử lại sau.');
+      if (error.message === "PORTAL_CLOSED") {
+        // Cập nhật lại config để ẩn form
+        getSystemConfig(true).then(cfg => setConfig(cfg));
+        setSearchError('Cổng tra cứu hiện đang đóng.');
+      } else {
+        setSearchError('Hệ thống đang bận, vui lòng thử lại sau.');
+      }
       setResults([]);
       setHasSearched(true);
     } finally {
@@ -56,7 +62,11 @@ export const HomePage: React.FC = () => {
   return (
     <PublicLayout config={config}>
       <>
-          {config.exam.isOpen ? (
+          {!isConfigLoaded ? (
+              <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#337ab7]"></div>
+              </div>
+          ) : config.exam.isOpen ? (
               <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} config={config} />
           ) : (
               <div className="bg-white border border-slate-100 rounded-lg p-16 text-center shadow-sm max-w-2xl mx-auto animate-fade-in">

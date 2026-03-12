@@ -84,7 +84,10 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
             Thí sinh nhập các thông tin và mã xác nhận vào các ô dưới đây
           </p>
           {config.exam.releaseDate && (
-            <p className="text-[#337ab7] text-[16px] font-bold uppercase">
+            <p 
+              className="text-[16px] font-bold uppercase"
+              style={{ color: config.exam.headerBackgroundColor }}
+            >
               Ngày công bố kết quả: {config.exam.releaseDate}
             </p>
           )}
@@ -125,7 +128,8 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   type="text"
                   value={captchaInput}
                   onChange={(e) => setCaptchaInput(e.target.value.toUpperCase())}
-                  className="w-28 border border-[#ccc] rounded-sm px-3 py-1.5 text-center font-bold text-[#337ab7] bg-white transition-all text-xl shadow-sm"
+                  className="w-28 border border-[#ccc] rounded-sm px-3 py-1.5 text-center font-bold bg-white transition-all text-xl shadow-sm"
+                  style={{ color: config.exam.headerBackgroundColor }}
                   maxLength={5}
                   autoComplete="off"
                 />
@@ -143,7 +147,11 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                 className={`min-w-[130px] px-10 py-2.5 rounded-sm text-white font-bold text-[18px] transition-all shadow-sm active:transform active:scale-95
                   ${isLoading 
                     ? 'bg-slate-400 cursor-not-allowed' 
-                    : 'bg-[#337ab7] hover:bg-[#286090]'}`}
+                    : 'hover:brightness-90'}`}
+                style={{ 
+                  backgroundColor: !isLoading ? config.exam.headerBackgroundColor : undefined,
+                  color: config.exam.headerTextColor 
+                }}
               >
                 {isLoading ? "..." : "Tra cứu"}
               </button>
@@ -152,7 +160,10 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
             {/* Thông báo đang xử lý */}
             {isLoading && (
               <div className="w-full md:pl-44 mt-3">
-                <p className="text-[#337ab7] text-[17px] font-normal text-left italic animate-pulse">
+                <p 
+                  className="text-[17px] font-normal text-left italic animate-pulse"
+                  style={{ color: config.exam.headerBackgroundColor }}
+                >
                   Hệ thống đang tra cứu kết quả thi vui lòng chờ...
                 </p>
               </div>

@@ -73,7 +73,7 @@ export const AdminDashboard: React.FC = () => {
   };
   
   const loadConfig = async () => {
-      const data = await getSystemConfig();
+      const data = await getSystemConfig(true);
       setConfig(data);
   }
 
@@ -273,7 +273,7 @@ export const AdminDashboard: React.FC = () => {
       <header className="bg-white shadow border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="bg-gov-blue p-1.5 rounded text-white">
+            <div className="bg-slate-700 p-1.5 rounded text-white">
                 <Award size={24} />
             </div>
             <h1 className="text-xl font-bold text-gray-800 uppercase">Hệ Thống Quản Trị Điểm Thi</h1>
@@ -291,14 +291,14 @@ export const AdminDashboard: React.FC = () => {
       <main className="container mx-auto px-6 py-8">
         
         <div className="mb-8">
-            <div className="bg-gradient-to-r from-gov-blue to-blue-800 rounded-lg shadow-lg p-6 text-white flex justify-between items-center">
+            <div className="bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg shadow-lg p-6 text-white flex justify-between items-center">
                 <div>
                     <h2 className="text-xl font-bold uppercase mb-1">Cấu Hình Hệ Thống</h2>
-                    <p className="text-blue-100">Quản lý kỳ thi, nhận diện, bảo mật.</p>
+                    <p className="text-slate-100">Quản lý kỳ thi, nhận diện, bảo mật.</p>
                 </div>
                 <button 
                     onClick={() => navigate('/admin/settings')}
-                    className="bg-white text-gov-blue px-6 py-3 rounded font-bold uppercase hover:bg-gray-100 transition-colors flex items-center gap-2"
+                    className="bg-white text-slate-800 px-6 py-3 rounded font-bold uppercase hover:bg-gray-100 transition-colors flex items-center gap-2"
                 >
                     <Settings size={20} />
                     Thiết Lập Ngay
@@ -336,7 +336,7 @@ export const AdminDashboard: React.FC = () => {
             
             <button 
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-2 text-sm bg-white border border-gray-300 text-gov-blue px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
+                className="flex items-center gap-2 text-sm bg-white border border-gray-300 text-slate-700 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors font-medium"
                 title="Tải file mẫu định dạng .xlsx"
             >
                 <Download size={16} />
@@ -394,18 +394,27 @@ export const AdminDashboard: React.FC = () => {
         <div className="mb-6 space-y-4">
              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                  <h2 className="text-xl font-bold text-gray-800 uppercase flex items-center gap-2">
-                    <FileSpreadsheet size={24} className="text-gov-blue" />
+                    <FileSpreadsheet size={24} className="text-slate-600" />
                     Danh Sách Kết Quả Thi
                  </h2>
-                 <div className="relative w-full md:w-96">
+                 <div className="relative w-full md:w-96 group">
+                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                     <input 
                         type="text" 
-                        placeholder="Tìm kiếm theo Tên hoặc SBD..." 
+                        placeholder="Nhập họ tên hoặc số báo danh..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+                        className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all"
                     />
-                    <Search size={18} className="absolute left-3 top-3 text-gray-400" />
+                    {searchTerm && (
+                        <button 
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-1"
+                            title="Xóa tìm kiếm"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
                  </div>
              </div>
 
@@ -458,7 +467,7 @@ export const AdminDashboard: React.FC = () => {
       {editingItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
            <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto font-sans">
-              <div className="bg-gov-blue text-white px-6 py-4 flex justify-between items-center sticky top-0">
+              <div className="bg-slate-700 text-white px-6 py-4 flex justify-between items-center sticky top-0">
                   <h3 className="font-bold uppercase tracking-wide">Chỉnh sửa kết quả thi</h3>
                   <button onClick={() => setEditingItem(null)} className="hover:bg-white/10 p-1 rounded">
                       <X size={24} />
@@ -543,7 +552,7 @@ export const AdminDashboard: React.FC = () => {
                             step="0.01"
                             value={editingItem.diem} 
                             onChange={(e) => setEditingItem({...editingItem, diem: parseFloat(e.target.value)})}
-                            className="w-full border rounded px-3 py-2 font-bold text-gov-blue text-lg focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2 font-bold text-slate-800 text-lg focus:ring-1 focus:ring-blue-500"
                             required
                           />
                       </div>
@@ -560,7 +569,7 @@ export const AdminDashboard: React.FC = () => {
                       <button 
                         type="submit" 
                         disabled={isUpdating}
-                        className="flex-1 bg-gov-blue text-white py-3 rounded font-bold uppercase hover:bg-blue-800 transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 bg-slate-700 text-white py-3 rounded font-bold uppercase hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                       >
                         <Save size={18} />
                         {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
@@ -671,7 +680,7 @@ export const AdminDashboard: React.FC = () => {
                             step="0.01"
                             value={newItem.diem} 
                             onChange={(e) => setNewItem({...newItem, diem: parseFloat(e.target.value)})}
-                            className="w-full border rounded px-3 py-2 font-bold text-gov-blue text-lg focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2 font-bold text-slate-800 text-lg focus:ring-1 focus:ring-green-500"
                             required
                           />
                       </div>
@@ -702,3 +711,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+        

@@ -7,7 +7,7 @@ const CONFIG_ID = 'global_settings';
 
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
-    name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ, TỈNH ĐIỆN BIÊN',
+    name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
     schoolYear: 'Năm học 2025 - 2026',
     orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
@@ -21,8 +21,8 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
-    line2: 'Ứng dụng Tra cứu điểm thi HSG được phát triển bởi: Vũ Văn Hùng - Đơn vị công tác: Trường PTDTBT TH&THCS Suối Lư',
-    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn - SĐT: 0984 246 993',
+    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
+    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
     backgroundColor: '#337ab7' // Màu mặc định
   },
   fields: {
@@ -129,7 +129,13 @@ export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> =
 };
 
 export const searchScores = async (params: SearchParams): Promise<SearchResult[]> => {
-  const config = await getSystemConfig();
+  // Lấy cấu hình mới nhất từ server để đảm bảo trạng thái đóng/mở là chính xác
+  const config = await getSystemConfig(true);
+  
+  if (!config.exam.isOpen) {
+    throw new Error("PORTAL_CLOSED");
+  }
+
   const nameInput = params.ho_ten?.trim().toUpperCase();
   const sbdInput = params.so_bao_danh?.trim().toUpperCase();
   const cccdInput = params.cccd?.trim();

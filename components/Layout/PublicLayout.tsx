@@ -36,7 +36,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode, config?: System
     <div className={`flex flex-col font-sans ${isHomePage ? 'h-screen overflow-hidden' : 'min-h-screen overflow-auto'}`}>
       {/* Header Banner - Sử dụng font-serif/sans đồng bộ */}
       <header 
-        className="py-4 shadow-sm border-b border-[#2e6da4] shrink-0 transition-colors duration-300"
+        className="py-4 shadow-sm border-b border-black/10 shrink-0 transition-colors duration-300"
         style={{ backgroundColor: headerBgColor }}
       >
         <div className="container mx-auto px-4 flex items-center justify-center gap-6 max-w-6xl">
@@ -70,7 +70,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode, config?: System
 
       {/* Footer */}
       <footer 
-        className="py-3 text-center border-t border-[#2e6da4] shrink-0 no-print transition-colors duration-300"
+        className="py-3 text-center border-t border-black/10 shrink-0 no-print transition-colors duration-300"
         style={{ backgroundColor: footerBgColor }}
       >
         <div className="container mx-auto px-4 relative">
