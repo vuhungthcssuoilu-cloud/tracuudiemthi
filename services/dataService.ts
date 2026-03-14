@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
     releaseDate: '' // Mặc định trống
   },
   footer: {
-    line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
+    line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     line2: 'Hệ thống tra cứu điểm thi trực tuyến',
     line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
     backgroundColor: '#1a4f75' // Màu mặc định
