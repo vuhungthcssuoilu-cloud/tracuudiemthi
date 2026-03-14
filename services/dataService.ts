@@ -21,8 +21,8 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
-    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
+    line2: 'The application was developed by: Vũ Văn Hùng - Phone number: 0984 246 993',
+    line3: 'Technical support: Vũ Văn Hùng - Mail: vuhung@db.edu.vn',
     backgroundColor: '#1a4f75' // Màu mặc định
   },
   fields: {
