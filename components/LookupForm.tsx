@@ -110,7 +110,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                     onChange={handleInputChange}
                     className="w-full md:w-[400px] border border-[#ccc] rounded-sm px-3 py-1.5 text-slate-800 font-normal bg-white transition-all text-[17px] shadow-sm"
                     autoComplete="off"
-                    placeholder={field.required ? "(Bắt buộc)" : ""}
+                    placeholder={field.required ? "" : ""}
                   />
                 </div>
               </div>
