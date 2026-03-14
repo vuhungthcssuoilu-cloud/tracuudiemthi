@@ -80,7 +80,7 @@ export const HomePage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-slate-800 uppercase mb-3">Trang tra cứu điểm thi hiện đang đóng</h3>
               <p className="text-slate-400 text-sm italic">
-                  The application was developed by: Vũ Văn Hùng - Phone number: 0984 246 993.
+                  Trang tra cứu điểm thi chọn học sinh giỏi cấp xã hiện chưa mở vui lòng chờ.
               </p>
               </div>
           )}
