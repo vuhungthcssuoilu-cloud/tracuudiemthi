@@ -55,8 +55,21 @@ export const AdminDashboard: React.FC = () => {
         if (!localStorage.getItem('sb-mock-token')) navigate('/admin/login');
         return;
     }
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) navigate('/admin/login');
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+            console.error("Auth session error:", error.message);
+            // If the refresh token is invalid, sign out to clear the stale session
+            if (error.message.includes('Refresh Token')) {
+                await supabase.auth.signOut();
+            }
+            navigate('/admin/login');
+            return;
+        }
+        if (!session) navigate('/admin/login');
+    } catch (e) {
+        navigate('/admin/login');
+    }
   };
 
   const loadStats = async () => {

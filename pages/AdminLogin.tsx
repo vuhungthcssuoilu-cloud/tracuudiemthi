@@ -30,6 +30,9 @@ export const AdminLogin: React.FC = () => {
     }
 
     try {
+      // Clear any existing session first to avoid "Invalid Refresh Token" issues
+      await supabase.auth.signOut();
+
       // Login with Supabase Auth
       // Note: We use Email/Password auth as the standard "Admin Table" replacement
       const { error } = await supabase.auth.signInWithPassword({

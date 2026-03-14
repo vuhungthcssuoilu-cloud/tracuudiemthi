@@ -9,21 +9,21 @@ export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
     schoolYear: 'Năm học 2025 - 2026',
-    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
+    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
     orgLevel: 'CẤP XÃ',
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
     headerTextColor: '#FFFFFF',
-    headerBackgroundColor: '#1a4f75', // Màu mặc định
+    headerBackgroundColor: '#337ab7', // Màu mặc định
     releaseDate: '' // Mặc định trống
   },
   footer: {
-    line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Ứng dụng Tra cứu điểm thi HSG được phát triển bởi: Vũ Văn Hùng - Đơn vị công tác: Trường PTDTBT TH&THCS Suối Lư',
-    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn - SĐT: 0984 246 993',
-    backgroundColor: '#1a4f75' // Màu mặc định
+    line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
+    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
+    line3: 'Hỗ trợ kỹ thuật: vuhung@db.edu.vn',
+    backgroundColor: '#337ab7' // Màu mặc định
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
@@ -74,7 +74,8 @@ export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfi
     return cachedConfig;
   }
   
-  if (configPromise && !forceRefresh) return configPromise;
+  // Nếu đang có một request fetch config đang chạy, trả về promise đó để tránh gọi nhiều lần
+  if (configPromise) return configPromise;
 
   configPromise = (async () => {
     try {
@@ -129,8 +130,8 @@ export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> =
 };
 
 export const searchScores = async (params: SearchParams): Promise<SearchResult[]> => {
-  // Lấy cấu hình mới nhất từ server để đảm bảo trạng thái đóng/mở là chính xác
-  const config = await getSystemConfig(true);
+  // Lấy cấu hình từ cache (nhanh hơn), tự động cập nhật ngầm
+  const config = await getSystemConfig(false);
   
   if (!config.exam.isOpen) {
     throw new Error("PORTAL_CLOSED");
@@ -143,9 +144,10 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
 
   try {
     // Sử dụng join query để lấy cả thông tin học sinh và kết quả trong 1 lần gọi duy nhất
+    // Tối ưu hóa: Chỉ select các trường cần thiết từ bảng ket_qua để giảm kích thước payload
     let query = supabase
       .from('hoc_sinh')
-      .select('id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh, ket_qua(*)');
+      .select('id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh, ket_qua(id, mon_thi, diem, sort_order)');
     
     let hasCondition = false;
 
@@ -171,12 +173,17 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
 
     if (!hasCondition) return [];
 
-    const { data: students, error: studentError } = await query;
+    // Tối ưu hóa: Chỉ lấy 1 bản ghi duy nhất nếu các trường tìm kiếm là unique (như SBD)
+    // Dùng limit(1) để database dừng quét sớm
+    const { data: students, error: studentError } = await query.limit(1);
     if (studentError || !students || students.length === 0) return [];
 
     // Lấy học sinh đầu tiên khớp điều kiện
     const student = students[0];
     const results = (student as any).ket_qua || [];
+
+    // Sắp xếp kết quả theo sort_order để hiển thị đúng thứ tự môn thi
+    results.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
 
     return results.map((r: any) => ({
       ...r,

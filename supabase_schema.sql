@@ -44,11 +44,18 @@ CREATE TABLE IF NOT EXISTS public.ket_qua (
 );
 
 -- 2.1 Tạo các Index để tăng tốc độ truy vấn
+-- Bật extension pg_trgm để hỗ trợ tìm kiếm ilike siêu tốc
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE INDEX IF NOT EXISTS idx_hoc_sinh_ho_ten ON public.hoc_sinh (ho_ten);
 CREATE INDEX IF NOT EXISTS idx_hoc_sinh_cccd ON public.hoc_sinh (cccd);
 CREATE INDEX IF NOT EXISTS idx_hoc_sinh_ngay_sinh ON public.hoc_sinh (ngay_sinh);
 CREATE INDEX IF NOT EXISTS idx_ket_qua_hoc_sinh_id ON public.ket_qua (hoc_sinh_id);
 CREATE INDEX IF NOT EXISTS idx_ket_qua_sort_order ON public.ket_qua (sort_order);
+
+-- GIN indexes cho tìm kiếm mờ (ilike)
+CREATE INDEX IF NOT EXISTS idx_hoc_sinh_ho_ten_trgm ON public.hoc_sinh USING gin (ho_ten gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_hoc_sinh_so_bao_danh_trgm ON public.hoc_sinh USING gin (so_bao_danh gin_trgm_ops);
 
 -- 3. Bật RLS
 ALTER TABLE public.cau_hinh ENABLE ROW LEVEL SECURITY;

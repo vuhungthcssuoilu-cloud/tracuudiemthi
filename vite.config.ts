@@ -18,6 +18,18 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+              'supabase-vendor': ['@supabase/supabase-js'],
+              'ui-vendor': ['lucide-react'],
+              'excel-vendor': ['xlsx']
+            }
+          }
+        }
       }
     };
 });

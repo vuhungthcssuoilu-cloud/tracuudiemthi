@@ -20,10 +20,15 @@ export const HomePage: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load config (force refresh to ensure we have the latest isOpen status)
-    getSystemConfig(true).then((cfg) => {
+    // Lấy config từ cache để render ngay lập tức (Stale-While-Revalidate)
+    getSystemConfig(false).then((cfg) => {
         setConfig(cfg);
         setIsConfigLoaded(true);
+    });
+    
+    // Cập nhật lại config ngầm để đảm bảo trạng thái mới nhất (ví dụ: admin vừa đóng cổng)
+    getSystemConfig(true).then((cfg) => {
+        setConfig(cfg);
     });
   }, []);
 

@@ -88,7 +88,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
               className="text-[16px] font-bold uppercase"
               style={{ color: config.exam.headerBackgroundColor }}
             >
-              Ngày công bố kết quả thi: {config.exam.releaseDate}
+              Ngày công bố kết quả: {config.exam.releaseDate}
             </p>
           )}
         </div>
@@ -110,7 +110,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                     onChange={handleInputChange}
                     className="w-full md:w-[400px] border border-[#ccc] rounded-sm px-3 py-1.5 text-slate-800 font-normal bg-white transition-all text-[17px] shadow-sm"
                     autoComplete="off"
-                    placeholder={field.required ? "" : ""}
+                    placeholder={field.required ? "(Bắt buộc)" : ""}
                   />
                 </div>
               </div>
@@ -153,7 +153,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   color: config.exam.headerTextColor 
                 }}
               >
-                {isLoading ? "..." : "Tra cứu kết quả thi"}
+                {isLoading ? "..." : "Tra cứu"}
               </button>
             </div>
 
