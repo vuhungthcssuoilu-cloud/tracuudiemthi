@@ -88,7 +88,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
               className="text-[16px] font-bold uppercase"
               style={{ color: config.exam.headerBackgroundColor }}
             >
-              Ngày công bố kết quả: {config.exam.releaseDate}
+              Ngày công bố kết quả thi: {config.exam.releaseDate}
             </p>
           )}
         </div>
@@ -153,7 +153,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   color: config.exam.headerTextColor 
                 }}
               >
-                {isLoading ? "..." : "Tra cứu"}
+                {isLoading ? "..." : "Tra cứu kết quả thi"}
               </button>
             </div>
 
