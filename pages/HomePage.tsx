@@ -78,9 +78,9 @@ export const HomePage: React.FC = () => {
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <AlertTriangle size={32} className="text-slate-200" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 uppercase mb-3">Cổng tra cứu hiện đang đóng</h3>
+              <h3 className="text-xl font-bold text-slate-800 uppercase mb-3">Trang tra cứu điểm thi hiện đang đóng</h3>
               <p className="text-slate-400 text-sm italic">
-                  Hệ thống tra cứu điểm thi hiện chưa mở.
+                  Trang tra cứu điểm thi hiện chưa mở vui lòng chờ.
               </p>
               </div>
           )}
