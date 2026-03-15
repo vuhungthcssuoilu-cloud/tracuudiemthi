@@ -29,7 +29,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
     so_bao_danh: { visible: true, required: true, label: 'Số báo danh' },
     ngay_sinh: { visible: false, required: false, label: 'Ngày sinh (dd/mm/yyyy)' },
-    cccd: { visible: false, required: false, label: 'Số CCCD thí sinh dự thi (12 số)' },
+    cccd: { visible: false, required: false, label: 'Số CCCD (12 số)' },
     truong: { visible: false, required: false, label: 'Trường học' }
   },
   subjects: [], 
