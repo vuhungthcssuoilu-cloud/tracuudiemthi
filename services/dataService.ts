@@ -21,7 +21,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Ứng dụng tra điểm thi được phát triển bởi: Vũ Văn Hùng - Đơn vị công tác: Trường PTDTBT TH&THCS Suối Lư',
+    line2: 'Đơn vị Phát triển ứng dụng tra cứu: Hoa Anh Hùng',
     line3: 'Thông tin hỗ trợ kĩ thuật: Vũ Văn Hùng - Mail: vuhung@db.edu.vn - Phone number: 0984 246 993',
     backgroundColor: '#1a4f75' // Màu mặc định
   },
