@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
     schoolYear: 'Năm học 2025 - 2026',
-    orgUnit: 'UBND XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
+    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
     orgLevel: 'CẤP XÃ',
     isOpen: true,
@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
     releaseDate: '' // Mặc định trống
   },
   footer: {
-    line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
+    line1: 'UBND XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     line2: 'Đơn vị Phát triển ứng dụng tra cứu: Hoa Anh Hùng',
     line3: 'Thông tin hỗ trợ kĩ thuật: Vũ Văn Hùng - Mail: vuhung@db.edu.vn - Phone number: 0984 246 993',
     backgroundColor: '#1a4f75' // Màu mặc định
