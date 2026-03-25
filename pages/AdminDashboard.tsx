@@ -108,8 +108,8 @@ export const AdminDashboard: React.FC = () => {
         return;
     }
 
-    const headers = ['HO_TEN', 'SO_BAO_DANH', 'NGAY_SINH', 'GIOI_TINH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM'];
-    const sampleRow = ['NGUYEN VAN A', 'SBD001', '30/01/2005', 'NAM', '', 'THPT CHUYEN NINH BINH', 'TOAN', '18.5'];
+    const headers = ['HO_TEN', 'SO_BAO_DANH', 'TRUONG', 'MON_THI', 'DIEM', 'NGAY_SINH', 'GIOI_TINH', 'CCCD'];
+    const sampleRow = ['NGUYEN VAN A', 'SBD001', 'THPT CHUYEN NINH BINH', 'TOAN', '18.5', '30/01/2005', 'NAM', ''];
     
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
