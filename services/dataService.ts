@@ -271,7 +271,7 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
     if (!row.SO_BAO_DANH) continue;
 
     const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
-    const cccd = row.CCCD?.toString().trim();
+    const cccd = row.CCCD?.toString().trim() || null;
     const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || 'KHÔNG TÊN';
 
     // 1. Kiểm tra trùng lặp ngay trong file Excel
@@ -390,7 +390,7 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
 export const createStudentResult = async (data: SearchResult): Promise<{ success: boolean; message?: string }> => {
     try {
         const sbd = data.so_bao_danh.trim().toUpperCase();
-        const cccd = data.cccd?.trim();
+        const cccd = data.cccd?.trim() || null;
         const hoTen = data.ho_ten.trim().toUpperCase();
         const ngaySinh = data.ngay_sinh?.trim();
         const gioiTinh = data.gioi_tinh?.trim();
