@@ -47,7 +47,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
     fileUrl: null,
     fileName: "Mau_Nhap_Diem_Thi.xlsx",
     lastUpdated: null,
-    requiredHeaders: ['HO_TEN', 'SO_BAO_DANH', 'NGAY_SINH', 'GIOI_TINH', 'TRUONG', 'MON_THI', 'DIEM']
+    requiredHeaders: ['HO_TEN', 'SO_BAO_DANH', 'TRUONG', 'MON_THI', 'DIEM']
   }
 };
 
@@ -217,35 +217,52 @@ const formatDateInput = (input: any): string => {
   return str;
 };
 
+const normalizeRow = (row: any) => {
+  const normalized: any = {};
+  Object.keys(row).forEach(key => {
+      const lowerKey = key.toString().toLowerCase().trim();
+      const cleanKey = lowerKey.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+      
+      if (['hoten', 'hovaten', 'name', 'thisinh'].includes(cleanKey)) normalized.HO_TEN = row[key];
+      else if (['sbd', 'sobaodanh', 'sobd'].includes(cleanKey)) normalized.SO_BAO_DANH = row[key];
+      else if (['cccd', 'cmnd', 'socccd'].includes(cleanKey)) normalized.CCCD = row[key];
+      else if (['truong', 'donvi', 'truonghoc'].includes(cleanKey)) normalized.TRUONG = row[key];
+      else if (['monthi', 'mon', 'subject'].includes(cleanKey)) normalized.MON_THI = row[key];
+      else if (['diem', 'diemso', 'ketqua', 'score'].includes(cleanKey)) normalized.DIEM = row[key];
+      else if (['ngaysinh', 'ngayde', 'dob', 'birthdate'].includes(cleanKey)) normalized.NGAY_SINH = row[key];
+      else if (['gioitinh', 'phai', 'gender', 'sex'].includes(cleanKey)) normalized.GIOI_TINH = row[key];
+  });
+  const keys = ['HO_TEN', 'SO_BAO_DANH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM', 'NGAY_SINH', 'GIOI_TINH'];
+  keys.forEach(k => {
+      if (!normalized[k] && row[k]) normalized[k] = row[k];
+  });
+  return normalized;
+};
+
 export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
+  if (!data || data.length === 0) return { success: 0, errors: ['File Excel không có dữ liệu.'] };
+  
+  const config = await getSystemConfig();
+  const requiredHeaders = config.template.requiredHeaders;
+  
+  // Kiểm tra tiêu đề (headers) từ dòng đầu tiên
+  const firstRow = data[0];
+  const normalizedFirstRow = normalizeRow(firstRow);
+  const missingHeaders = requiredHeaders.filter(h => !normalizedFirstRow[h]);
+  
+  if (missingHeaders.length > 0) {
+    return { 
+      success: 0, 
+      errors: [`File Excel thiếu các cột bắt buộc: ${missingHeaders.join(', ')}. Vui lòng kiểm tra lại file mẫu.`] 
+    };
+  }
+
   let successCount = 0;
   const errorLog: string[] = [];
   
   // Cache để kiểm tra trùng lặp trong nội bộ file đang upload
   const fileSbdSet = new Set<string>();
   const fileCccdSet = new Set<string>();
-
-  const normalizeRow = (row: any) => {
-    const normalized: any = {};
-    Object.keys(row).forEach(key => {
-        const lowerKey = key.toString().toLowerCase().trim();
-        const cleanKey = lowerKey.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
-        
-        if (['hoten', 'hovaten', 'name', 'thisinh'].includes(cleanKey)) normalized.HO_TEN = row[key];
-        else if (['sbd', 'sobaodanh', 'sobd'].includes(cleanKey)) normalized.SO_BAO_DANH = row[key];
-        else if (['cccd', 'cmnd', 'socccd'].includes(cleanKey)) normalized.CCCD = row[key];
-        else if (['truong', 'donvi', 'truonghoc'].includes(cleanKey)) normalized.TRUONG = row[key];
-        else if (['monthi', 'mon', 'subject'].includes(cleanKey)) normalized.MON_THI = row[key];
-        else if (['diem', 'diemso', 'ketqua', 'score'].includes(cleanKey)) normalized.DIEM = row[key];
-        else if (['ngaysinh', 'ngayde', 'dob', 'birthdate'].includes(cleanKey)) normalized.NGAY_SINH = row[key];
-        else if (['gioitinh', 'phai', 'gender', 'sex'].includes(cleanKey)) normalized.GIOI_TINH = row[key];
-    });
-    const keys = ['HO_TEN', 'SO_BAO_DANH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM', 'NGAY_SINH', 'GIOI_TINH'];
-    keys.forEach(k => {
-        if (!normalized[k] && row[k]) normalized[k] = row[k];
-    });
-    return normalized;
-  };
 
   // Duyệt dữ liệu Excel
   for (let i = 0; i < data.length; i++) {
