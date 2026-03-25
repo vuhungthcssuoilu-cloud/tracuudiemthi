@@ -109,7 +109,7 @@ export const AdminDashboard: React.FC = () => {
     }
 
     const headers = ['HO_TEN', 'SO_BAO_DANH', 'NGAY_SINH', 'GIOI_TINH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM'];
-    const sampleRow = ['NGUYEN VAN A', 'SBD001', '30/01/2005', 'NAM', '035095001234', 'THPT CHUYEN NINH BINH', 'TOAN', '18.5'];
+    const sampleRow = ['NGUYEN VAN A', 'SBD001', '30/01/2005', 'NAM', '', 'THPT CHUYEN NINH BINH', 'TOAN', '18.5'];
     
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
@@ -371,7 +371,7 @@ export const AdminDashboard: React.FC = () => {
                 <p className="text-lg font-medium text-gray-700 mb-2">
                     {isUploading ? 'Đang xử lý...' : 'Kéo thả file Excel hoặc nhấn để chọn'}
                 </p>
-                <p className="text-sm text-gray-500 italic">Hệ thống sẽ tự động kiểm tra trùng lặp SBD và CCCD</p>
+                <p className="text-sm text-gray-500 italic">Hệ thống sẽ tự động kiểm tra trùng lặp SBD (CCCD không bắt buộc)</p>
               </div>
             </div>
 
