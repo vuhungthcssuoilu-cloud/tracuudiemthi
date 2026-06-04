@@ -15,7 +15,6 @@ export interface KetQua {
   hoc_sinh_id: string;
   mon_thi: string;
   diem: number;
-  sort_order?: number; // Thứ tự dòng từ file Excel
   // Joined fields for display
   hoc_sinh?: HocSinh;
 }
@@ -66,7 +65,6 @@ export interface FooterConfig {
     line1: string;
     line2: string;
     line3: string;
-    backgroundColor: string; // Mới: Màu nền footer
 }
 
 export interface SystemConfig {
@@ -80,8 +78,6 @@ export interface SystemConfig {
     logoUrl: string | null;
     faviconUrl: string | null;
     headerTextColor: string;
-    headerBackgroundColor: string; // Mới: Màu nền header
-    releaseDate?: string; // Mới: Ngày công bố điểm
   };
   footer: FooterConfig;
   fields: {

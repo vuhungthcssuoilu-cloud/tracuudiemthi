@@ -43,10 +43,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Reload table when page or search changes
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-        loadTableData();
-    }, 300);
-    return () => clearTimeout(delayDebounceFn);
+    loadTableData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchTerm]);
 
@@ -55,21 +52,8 @@ export const AdminDashboard: React.FC = () => {
         if (!localStorage.getItem('sb-mock-token')) navigate('/admin/login');
         return;
     }
-    try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-            console.error("Auth session error:", error.message);
-            // If the refresh token is invalid, sign out to clear the stale session
-            if (error.message.includes('Refresh Token')) {
-                await supabase.auth.signOut();
-            }
-            navigate('/admin/login');
-            return;
-        }
-        if (!session) navigate('/admin/login');
-    } catch (e) {
-        navigate('/admin/login');
-    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) navigate('/admin/login');
   };
 
   const loadStats = async () => {
@@ -86,7 +70,7 @@ export const AdminDashboard: React.FC = () => {
   };
   
   const loadConfig = async () => {
-      const data = await getSystemConfig(true);
+      const data = await getSystemConfig();
       setConfig(data);
   }
 
@@ -98,21 +82,36 @@ export const AdminDashboard: React.FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
       e.preventDefault();
-      setPage(1); 
+      setPage(1); // Reset to page 1 on new search
       loadTableData();
   };
 
   const handleDownloadTemplate = () => {
+    // Nếu admin đã tải lên một file mẫu riêng thì ưu tiên dùng file đó
     if (config?.template.fileUrl && !config.template.fileUrl.includes('example.com') && !config.template.fileUrl.includes('mock')) {
         window.open(config.template.fileUrl, '_blank');
         return;
     }
 
-    const headers = ['HO_TEN', 'SO_BAO_DANH', 'TRUONG', 'MON_THI', 'DIEM', 'NGAY_SINH', 'GIOI_TINH', 'CCCD'];
-    const sampleRow = ['NGUYEN VAN A', 'SBD001', 'THPT CHUYEN NINH BINH', 'TOAN', '18.5', '30/01/2005', 'NAM', ''];
+    // Header chuẩn cho file mẫu
+    const headers = ['HO_TEN', 'SO_BAO_DANH', 'NGAY_SINH', 'GIOI_TINH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM'];
+    
+    // Dòng dữ liệu mẫu để thí sinh/quản trị biết định dạng (Đặc biệt là Ngày sinh dd/mm/yyyy)
+    const sampleRow = [
+        'NGUYEN VAN A', 
+        'SBD001', 
+        '30/01/2005', 
+        'NAM', 
+        '035095001234', 
+        'THPT CHUYEN NINH BINH', 
+        'TOAN', 
+        '18.5'
+    ];
     
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
+
+    // Cấu hình độ rộng cột
     const wscols = headers.map(h => ({ wch: h.length + 12 }));
     ws['!cols'] = wscols;
 
@@ -154,7 +153,7 @@ export const AdminDashboard: React.FC = () => {
                   loadStats();
                   setPage(1);
                   loadTableData();
-                  loadConfig();
+                  loadConfig(); // Reload config to clear subjects
               } else {
                   alert('Có lỗi xảy ra khi thực hiện xóa dữ liệu.');
               }
@@ -185,7 +184,7 @@ export const AdminDashboard: React.FC = () => {
         if (result.errors.length > 0) {
              setUploadStatus({ 
                 success: result.success,
-                error: `Đã nhập ${result.success} dòng. Phát hiện ${result.errors.length} lỗi hoặc trùng lặp.`,
+                error: `Đã nhập ${result.success} dòng. Có ${result.errors.length} cảnh báo/lỗi.`,
                 details: result.errors
              });
         } else {
@@ -236,7 +235,7 @@ export const AdminDashboard: React.FC = () => {
     if (!editingItem) return;
 
     if (editingItem.ngay_sinh && !isValidDateFormat(editingItem.ngay_sinh)) {
-        alert('Ngày sinh không hợp lệ. Vui lòng nhập đúng định dạng dd/mm/yyyy');
+        alert('Ngày sinh không hợp lệ. Vui lòng nhập đúng định dạng dd/mm/yyyy (Ví dụ: 30/01/2005)');
         return;
     }
 
@@ -261,7 +260,7 @@ export const AdminDashboard: React.FC = () => {
       }
 
       if (newItem.ngay_sinh && !isValidDateFormat(newItem.ngay_sinh)) {
-        alert('Ngày sinh không hợp lệ. Vui lòng nhập đúng định dạng dd/mm/yyyy');
+        alert('Ngày sinh không hợp lệ. Vui lòng nhập đúng định dạng dd/mm/yyyy (Ví dụ: 30/01/2005)');
         return;
       }
 
@@ -272,7 +271,7 @@ export const AdminDashboard: React.FC = () => {
       if (result.success) {
           alert('Thêm mới thành công!');
           setIsCreating(false);
-          setNewItem({ ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0, ngay_sinh: '', gioi_tinh: '' }); 
+          setNewItem({ ho_ten: '', so_bao_danh: '', cccd: '', truong: '', mon_thi: '', diem: 0, ngay_sinh: '', gioi_tinh: '' }); // Reset
           loadTableData();
           loadStats();
           loadConfig(); 
@@ -286,7 +285,7 @@ export const AdminDashboard: React.FC = () => {
       <header className="bg-white shadow border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="bg-slate-700 p-1.5 rounded text-white">
+            <div className="bg-gov-blue p-1.5 rounded text-white">
                 <Award size={24} />
             </div>
             <h1 className="text-xl font-bold text-gray-800 uppercase">Hệ Thống Quản Trị Điểm Thi</h1>
@@ -304,14 +303,14 @@ export const AdminDashboard: React.FC = () => {
       <main className="container mx-auto px-6 py-8">
         
         <div className="mb-8">
-            <div className="bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg shadow-lg p-6 text-white flex justify-between items-center">
+            <div className="bg-gradient-to-r from-gov-blue to-blue-800 rounded-lg shadow-lg p-6 text-white flex justify-between items-center">
                 <div>
                     <h2 className="text-xl font-bold uppercase mb-1">Cấu Hình Hệ Thống</h2>
-                    <p className="text-slate-100">Quản lý kỳ thi, nhận diện, bảo mật.</p>
+                    <p className="text-blue-100">Quản lý kỳ thi, nhận diện, bảo mật.</p>
                 </div>
                 <button 
                     onClick={() => navigate('/admin/settings')}
-                    className="bg-white text-slate-800 px-6 py-3 rounded font-bold uppercase hover:bg-gray-100 transition-colors flex items-center gap-2"
+                    className="bg-white text-gov-blue px-6 py-3 rounded font-bold uppercase hover:bg-gray-100 transition-colors flex items-center gap-2"
                 >
                     <Settings size={20} />
                     Thiết Lập Ngay
@@ -349,8 +348,8 @@ export const AdminDashboard: React.FC = () => {
             
             <button 
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-2 text-sm bg-white border border-gray-300 text-slate-700 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors font-medium"
-                title="Tải file mẫu định dạng .xlsx"
+                className="flex items-center gap-2 text-sm bg-white border border-gray-300 text-gov-blue px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
+                title="Tải file mẫu định dạng .xlsx đầy đủ các cột Ngày sinh, Giới tính"
             >
                 <Download size={16} />
                 Tải File Mẫu
@@ -371,7 +370,7 @@ export const AdminDashboard: React.FC = () => {
                 <p className="text-lg font-medium text-gray-700 mb-2">
                     {isUploading ? 'Đang xử lý...' : 'Kéo thả file Excel hoặc nhấn để chọn'}
                 </p>
-                <p className="text-sm text-gray-500 italic">Hệ thống sẽ tự động kiểm tra trùng lặp SBD (CCCD không bắt buộc)</p>
+                <p className="text-sm text-gray-500">Hỗ trợ định dạng .xlsx, .xls (Tự động nhận diện cột Ngày sinh, Giới tính)</p>
               </div>
             </div>
 
@@ -384,19 +383,17 @@ export const AdminDashboard: React.FC = () => {
                                 {uploadStatus.error}
                              </h4>
                              {uploadStatus.details && (
-                                <div className="mt-3 p-3 bg-white/50 rounded border border-red-100 max-h-60 overflow-y-auto">
-                                    <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
-                                        {uploadStatus.details.map((msg, idx) => (
-                                            <li key={idx} className="leading-relaxed">{msg}</li>
-                                        ))}
-                                    </ul>
-                                </div>
+                                <ul className="mt-2 list-disc list-inside text-sm text-red-600 max-h-40 overflow-y-auto">
+                                    {uploadStatus.details.map((msg, idx) => (
+                                        <li key={idx}>{msg}</li>
+                                    ))}
+                                </ul>
                              )}
                         </div>
                     ) : (
                         <h4 className="font-bold text-green-700 flex items-center gap-2">
                             <CheckCircle size={20} />
-                            Nhập dữ liệu hoàn tất! Đã thêm {uploadStatus.success} bản ghi.
+                            Nhập dữ liệu thành công! Đã thêm {uploadStatus.success} bản ghi.
                         </h4>
                     )}
                 </div>
@@ -407,34 +404,25 @@ export const AdminDashboard: React.FC = () => {
         <div className="mb-6 space-y-4">
              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                  <h2 className="text-xl font-bold text-gray-800 uppercase flex items-center gap-2">
-                    <FileSpreadsheet size={24} className="text-slate-600" />
+                    <FileSpreadsheet size={24} className="text-gov-blue" />
                     Danh Sách Kết Quả Thi
                  </h2>
-                 <div className="relative w-full md:w-96 group">
-                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                 <form onSubmit={handleSearch} className="relative w-full md:w-96">
                     <input 
                         type="text" 
-                        placeholder="Nhập họ tên hoặc số báo danh..." 
+                        placeholder="Tìm theo Tên hoặc Số Báo Danh..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
                     />
-                    {searchTerm && (
-                        <button 
-                            onClick={() => setSearchTerm('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-1"
-                            title="Xóa tìm kiếm"
-                        >
-                            <X size={16} />
-                        </button>
-                    )}
-                 </div>
+                    <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
+                 </form>
              </div>
 
              <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
                  <div className="flex items-center gap-2 text-sm text-gray-500 font-medium italic">
                      <AlertCircle size={16} />
-                     Quản lý và cập nhật dữ liệu trực tuyến
+                     Công cụ quản lý dữ liệu
                  </div>
                  <div className="flex items-center gap-3">
                      <button 
@@ -448,6 +436,7 @@ export const AdminDashboard: React.FC = () => {
                      <button 
                         onClick={handleExportData}
                         className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-blue-700 transition-colors shadow-sm"
+                        title="Tải về toàn bộ danh sách hiện có dưới dạng file Excel"
                      >
                          <Download size={16} />
                          Xuất Excel
@@ -455,6 +444,7 @@ export const AdminDashboard: React.FC = () => {
                      <button 
                         onClick={handleClearAll}
                         className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-red-700 transition-colors shadow-sm"
+                        title="XÓA TOÀN BỘ dữ liệu khỏi hệ thống"
                      >
                          <Trash2 size={16} />
                          Xóa toàn bộ
@@ -476,11 +466,10 @@ export const AdminDashboard: React.FC = () => {
 
       </main>
 
-      {/* Edit/Create Modal (Keep original structure but ensure date validation is consistent) */}
       {editingItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto font-sans">
-              <div className="bg-slate-700 text-white px-6 py-4 flex justify-between items-center sticky top-0">
+           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto">
+              <div className="bg-gov-blue text-white px-6 py-4 flex justify-between items-center sticky top-0">
                   <h3 className="font-bold uppercase tracking-wide">Chỉnh sửa kết quả thi</h3>
                   <button onClick={() => setEditingItem(null)} className="hover:bg-white/10 p-1 rounded">
                       <X size={24} />
@@ -495,7 +484,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={editingItem.ho_ten} 
                             onChange={(e) => setEditingItem({...editingItem, ho_ten: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2 uppercase"
                             required
                           />
                       </div>
@@ -505,7 +494,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={editingItem.so_bao_danh} 
                             onChange={(e) => setEditingItem({...editingItem, so_bao_danh: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase font-mono focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2 uppercase font-mono"
                             required
                           />
                       </div>
@@ -516,7 +505,7 @@ export const AdminDashboard: React.FC = () => {
                             value={editingItem.cccd} 
                             maxLength={12}
                             onChange={(e) => setEditingItem({...editingItem, cccd: e.target.value})}
-                            className="w-full border rounded px-3 py-2 focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2"
                           />
                       </div>
                       <div>
@@ -525,7 +514,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={editingItem.ngay_sinh} 
                             onChange={(e) => setEditingItem({...editingItem, ngay_sinh: e.target.value})}
-                            className="w-full border rounded px-3 py-2 focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2"
                             placeholder="01/01/2005"
                           />
                       </div>
@@ -535,7 +524,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={editingItem.gioi_tinh} 
                             onChange={(e) => setEditingItem({...editingItem, gioi_tinh: e.target.value})}
-                            className="w-full border rounded px-3 py-2 focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2"
                             placeholder="Nam/Nữ"
                           />
                       </div>
@@ -545,7 +534,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={editingItem.truong} 
                             onChange={(e) => setEditingItem({...editingItem, truong: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2 uppercase"
                           />
                       </div>
                       <div>
@@ -554,7 +543,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text"
                             value={editingItem.mon_thi} 
                             onChange={(e) => setEditingItem({...editingItem, mon_thi: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2 uppercase"
                             required
                           />
                       </div>
@@ -565,7 +554,7 @@ export const AdminDashboard: React.FC = () => {
                             step="0.01"
                             value={editingItem.diem} 
                             onChange={(e) => setEditingItem({...editingItem, diem: parseFloat(e.target.value)})}
-                            className="w-full border rounded px-3 py-2 font-bold text-slate-800 text-lg focus:ring-1 focus:ring-blue-500"
+                            className="w-full border rounded px-3 py-2 font-bold text-gov-blue text-lg"
                             required
                           />
                       </div>
@@ -582,7 +571,7 @@ export const AdminDashboard: React.FC = () => {
                       <button 
                         type="submit" 
                         disabled={isUpdating}
-                        className="flex-1 bg-slate-700 text-white py-3 rounded font-bold uppercase hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 bg-gov-blue text-white py-3 rounded font-bold uppercase hover:bg-blue-800 transition-colors flex items-center justify-center gap-2"
                       >
                         <Save size={18} />
                         {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
@@ -595,7 +584,7 @@ export const AdminDashboard: React.FC = () => {
 
       {isCreating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto font-sans">
+           <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto">
               <div className="bg-green-600 text-white px-6 py-4 flex justify-between items-center sticky top-0">
                   <h3 className="font-bold uppercase tracking-wide">Thêm Mới Kết Quả</h3>
                   <button onClick={() => setIsCreating(false)} className="hover:bg-white/10 p-1 rounded">
@@ -604,8 +593,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <form onSubmit={handleCreate} className="p-6 space-y-4">
-                  <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100 mb-4 italic">
-                      <p><b>Lưu ý:</b> Hệ thống sẽ tự động đồng bộ thông tin nếu Số Báo Danh đã tồn tại.</p>
+                  <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100 mb-4">
+                      <p><b>Lưu ý:</b> Nếu Số Báo Danh đã tồn tại, hệ thống sẽ thêm môn thi mới cho thí sinh đó.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
@@ -614,7 +603,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={newItem.ho_ten} 
                             onChange={(e) => setNewItem({...newItem, ho_ten: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2 uppercase"
                             required
                             placeholder="NGUYỄN VĂN A"
                           />
@@ -625,7 +614,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={newItem.so_bao_danh} 
                             onChange={(e) => setNewItem({...newItem, so_bao_danh: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase font-mono focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2 uppercase font-mono"
                             required
                             placeholder="SBD001"
                           />
@@ -637,8 +626,8 @@ export const AdminDashboard: React.FC = () => {
                             value={newItem.cccd} 
                             maxLength={12}
                             onChange={(e) => setNewItem({...newItem, cccd: e.target.value})}
-                            className="w-full border rounded px-3 py-2 focus:ring-1 focus:ring-green-500"
-                            placeholder="12 số"
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="12 số (tùy chọn)"
                           />
                       </div>
                       <div>
@@ -647,7 +636,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={newItem.ngay_sinh} 
                             onChange={(e) => setNewItem({...newItem, ngay_sinh: e.target.value})}
-                            className="w-full border rounded px-3 py-2 focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2"
                             placeholder="01/01/2005"
                           />
                       </div>
@@ -657,7 +646,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={newItem.gioi_tinh} 
                             onChange={(e) => setNewItem({...newItem, gioi_tinh: e.target.value})}
-                            className="w-full border rounded px-3 py-2 focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2"
                             placeholder="Nam"
                           />
                       </div>
@@ -667,7 +656,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={newItem.truong} 
                             onChange={(e) => setNewItem({...newItem, truong: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2 uppercase"
                             placeholder="THPT..."
                           />
                       </div>
@@ -677,7 +666,7 @@ export const AdminDashboard: React.FC = () => {
                             type="text" 
                             value={newItem.mon_thi} 
                             onChange={(e) => setNewItem({...newItem, mon_thi: e.target.value.toUpperCase()})}
-                            className="w-full border rounded px-3 py-2 uppercase focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2 uppercase"
                             required
                             placeholder="TOÁN"
                             list="subject-list"
@@ -693,7 +682,7 @@ export const AdminDashboard: React.FC = () => {
                             step="0.01"
                             value={newItem.diem} 
                             onChange={(e) => setNewItem({...newItem, diem: parseFloat(e.target.value)})}
-                            className="w-full border rounded px-3 py-2 font-bold text-slate-800 text-lg focus:ring-1 focus:ring-green-500"
+                            className="w-full border rounded px-3 py-2 font-bold text-gov-blue text-lg"
                             required
                           />
                       </div>
@@ -724,4 +713,3 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
-        

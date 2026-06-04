@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Captcha } from './Captcha';
 import { SearchParams, SystemConfig } from '../types';
@@ -9,10 +9,10 @@ interface LookupFormProps {
   onSearch: (params: SearchParams) => void;
   isLoading: boolean;
   error?: string | null;
-  config: SystemConfig;
 }
 
-export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, error: externalError, config }) => {
+export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, error: externalError }) => {
+  const [config, setConfig] = useState<SystemConfig | null>(null);
   const [formData, setFormData] = useState<SearchParams>({
     ho_ten: '',
     so_bao_danh: '',
@@ -21,19 +21,10 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
-  
-  // Key để buộc Captcha component mount lại (làm mới mã)
-  const [captchaKey, setCaptchaKey] = useState(0);
-  const prevLoadingRef = useRef(isLoading);
 
-  // Tự động làm mới Captcha khi quá trình tra cứu kết thúc (isLoading: true -> false)
   useEffect(() => {
-    if (prevLoadingRef.current && !isLoading) {
-      setCaptchaKey(prev => prev + 1);
-      setCaptchaInput(''); // Xóa mã cũ đã nhập
-    }
-    prevLoadingRef.current = isLoading;
-  }, [isLoading]);
+    getSystemConfig().then(setConfig);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,9 +46,6 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
 
     if (config.security.enableCaptcha && captchaInput.toUpperCase() !== captchaCode) {
       setLocalError('Mã xác nhận không hợp lệ');
-      // Nếu sai mã xác nhận cục bộ, cũng nên đổi mã mới cho bảo mật
-      setCaptchaKey(prev => prev + 1);
-      setCaptchaInput('');
       return;
     }
     
@@ -69,6 +57,8 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  if (!config) return null;
+
   const displayError = localError || externalError;
 
   // Lấy danh sách các trường cần hiển thị
@@ -79,19 +69,9 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     <div className="bg-[#f2f2f2] border border-[#d3d3d3] rounded-sm p-8 md:p-16 w-full max-w-4xl shadow-none animate-fade-in font-sans">
       <div className="w-full max-w-2xl mx-auto">
         {/* Hướng dẫn tiêu đề */}
-        <div className="text-center mb-10">
-          <p className="text-[#333] text-[18px] font-normal italic mb-2">
-            Thí sinh nhập các thông tin và mã xác nhận vào các ô dưới đây
-          </p>
-          {config.exam.releaseDate && (
-            <p 
-              className="text-[16px] font-bold uppercase"
-              style={{ color: config.exam.headerBackgroundColor }}
-            >
-              Ngày công bố kết quả thi: {config.exam.releaseDate}
-            </p>
-          )}
-        </div>
+        <p className="text-center text-[#333] mb-10 text-[18px] font-normal italic">
+          Thí sinh nhập các thông tin và mã xác nhận vào các ô dưới đây
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Render các trường dựa trên config */}
@@ -110,7 +90,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                     onChange={handleInputChange}
                     className="w-full md:w-[400px] border border-[#ccc] rounded-sm px-3 py-1.5 text-slate-800 font-normal bg-white transition-all text-[17px] shadow-sm"
                     autoComplete="off"
-                    placeholder={field.required ? "" : ""}
+                    placeholder={field.required ? "(Bắt buộc)" : ""}
                   />
                 </div>
               </div>
@@ -128,12 +108,11 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   type="text"
                   value={captchaInput}
                   onChange={(e) => setCaptchaInput(e.target.value.toUpperCase())}
-                  className="w-28 border border-[#ccc] rounded-sm px-3 py-1.5 text-center font-bold bg-white transition-all text-xl shadow-sm"
-                  style={{ color: config.exam.headerBackgroundColor }}
+                  className="w-28 border border-[#ccc] rounded-sm px-3 py-1.5 text-center font-bold text-[#337ab7] bg-white transition-all text-xl shadow-sm"
                   maxLength={5}
                   autoComplete="off"
                 />
-                <Captcha key={captchaKey} onRefresh={setCaptchaCode} />
+                <Captcha onRefresh={setCaptchaCode} />
               </div>
             </div>
           )}
@@ -147,30 +126,14 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                 className={`min-w-[130px] px-10 py-2.5 rounded-sm text-white font-bold text-[18px] transition-all shadow-sm active:transform active:scale-95
                   ${isLoading 
                     ? 'bg-slate-400 cursor-not-allowed' 
-                    : 'hover:brightness-90'}`}
-                style={{ 
-                  backgroundColor: !isLoading ? config.exam.headerBackgroundColor : undefined,
-                  color: config.exam.headerTextColor 
-                }}
+                    : 'bg-[#337ab7] hover:bg-[#286090]'}`}
               >
-                {isLoading ? "..." : "Tra cứu kết quả thi"}
+                {isLoading ? "..." : "Tra cứu"}
               </button>
             </div>
 
-            {/* Thông báo đang xử lý */}
-            {isLoading && (
-              <div className="w-full md:pl-44 mt-3">
-                <p 
-                  className="text-[17px] font-normal text-left italic animate-pulse"
-                  style={{ color: config.exam.headerBackgroundColor }}
-                >
-                  Hệ thống đang tra cứu kết quả thi vui lòng chờ...
-                </p>
-              </div>
-            )}
-
             {/* Thông báo lỗi đỏ dưới button */}
-            {!isLoading && displayError && (
+            {displayError && (
               <div className="w-full md:pl-44 mt-3">
                 <p className="text-[#f00] text-[17px] font-normal text-left italic">
                   {displayError}

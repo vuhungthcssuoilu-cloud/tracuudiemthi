@@ -22,8 +22,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-4 bg-slate-900/80 backdrop-blur-sm animate-fade-in font-sans">
       <div 
-        className="bg-[#fdfdfd] w-full max-w-3xl rounded-sm shadow-2xl flex flex-col max-h-[95vh] border-[12px] relative"
-        style={{ borderColor: `${config.exam.headerBackgroundColor}1A` }} // 10% opacity hex
+        className="bg-[#fdfdfd] w-full max-w-3xl rounded-sm shadow-2xl flex flex-col max-h-[95vh] border-[12px] border-[#337ab7]/10 relative"
         role="dialog"
         aria-modal="true"
       >
@@ -36,30 +35,19 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
         </button>
 
         {/* Khung viền nghệ thuật bên trong */}
-        <div 
-          className="flex-grow overflow-y-auto p-4 md:p-10 border-[1px] m-2 relative bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]"
-          style={{ borderColor: `${config.exam.headerBackgroundColor}4D` }} // 30% opacity hex
-        >
+        <div className="flex-grow overflow-y-auto p-4 md:p-10 border-[1px] border-[#337ab7]/30 m-2 relative bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]">
           
           {/* Tiêu đề chính */}
           <div className="text-center mb-10 pt-4">
             <div className="flex justify-center mb-4">
-              <Award 
-                size={48} 
-                className="opacity-20 absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[4] pointer-events-none" 
-                style={{ color: config.exam.headerBackgroundColor }}
-              />
+              <Award size={48} className="text-[#337ab7] opacity-20 absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[4] pointer-events-none" />
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-normal mb-2">
               KẾT QUẢ
             </h1>
-            <div 
-              className="text-[16px] md:text-[18px] font-bold uppercase leading-snug"
-              style={{ color: config.exam.headerBackgroundColor }}
-            >
-              <p>{config.exam.name}</p>
-              <p className="mt-1">{config.exam.schoolYear}</p>
-            </div>
+            <p className="text-[16px] md:text-[18px] font-bold text-[#337ab7] uppercase">
+              {config.exam.name} - {config.exam.schoolYear}
+            </p>
           </div>
 
           {/* Nội dung thông tin thí sinh */}
@@ -89,10 +77,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-baseline gap-2">
                 <span className="min-w-[140px]">Số báo danh:</span>
-                <span 
-                  className="font-bold border-b border-dotted border-slate-400 flex-grow"
-                  style={{ color: config.exam.headerBackgroundColor }}
-                >
+                <span className="font-bold text-[#337ab7] border-b border-dotted border-slate-400 flex-grow">
                   {studentInfo.so_bao_danh}
                 </span>
               </div>
@@ -114,9 +99,9 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
 
           {/* Bảng điểm */}
           <div className="mb-10">
-            <div className="font-bold text-[16px] uppercase mb-3 text-slate-800">
+            <h3 className="font-bold text-[16px] uppercase mb-3 text-slate-800">
               KẾT QUẢ
-            </div>
+            </h3>
             <div className="border-[1.5px] border-slate-800">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -154,22 +139,14 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 
               onClick={handlePrint}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 border px-6 py-2 rounded-sm font-bold uppercase text-[13px] hover:brightness-90 transition-colors"
-              style={{ 
-                color: config.exam.headerBackgroundColor,
-                borderColor: config.exam.headerBackgroundColor
-              }}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 text-[#337ab7] border border-[#337ab7] px-6 py-2 rounded-sm font-bold uppercase text-[13px] hover:bg-blue-50 transition-colors"
             >
               <Printer size={16} />
               In kết quả
             </button>
             <button 
               onClick={onClose}
-              className="flex-1 sm:flex-none px-8 py-2 text-white rounded-sm font-bold uppercase text-[13px] hover:brightness-90 transition-all shadow-md"
-              style={{ 
-                backgroundColor: config.exam.headerBackgroundColor,
-                color: config.exam.headerTextColor
-              }}
+              className="flex-1 sm:flex-none px-8 py-2 bg-[#337ab7] text-white rounded-sm font-bold uppercase text-[13px] hover:bg-[#286090] transition-all shadow-md"
             >
               Xác nhận & Đóng
             </button>

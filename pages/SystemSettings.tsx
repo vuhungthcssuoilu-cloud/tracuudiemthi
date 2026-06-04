@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, ArrowLeft, Settings, ToggleLeft, ToggleRight, Building2, Image as ImageIcon, Upload, ShieldCheck, Palette, Info, BookOpen, LayoutTemplate } from 'lucide-react';
-import { supabase, isSupabaseConfigured } from '../supabaseClient';
-import { getSystemConfig, saveSystemConfig, DEFAULT_CONFIG } from '../services/dataService';
+import { isSupabaseConfigured } from '../supabaseClient';
+import { getSystemConfig, saveSystemConfig } from '../services/dataService';
 import { SystemConfig } from '../types';
 
 export const SystemSettings: React.FC = () => {
@@ -22,24 +22,10 @@ export const SystemSettings: React.FC = () => {
         if (!localStorage.getItem('sb-mock-token')) navigate('/admin/login');
         return;
     }
-    try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-            console.error("Auth session error:", error.message);
-            if (error.message.includes('Refresh Token')) {
-                await supabase.auth.signOut();
-            }
-            navigate('/admin/login');
-            return;
-        }
-        if (!session) navigate('/admin/login');
-    } catch (e) {
-        navigate('/admin/login');
-    }
   };
 
   const loadConfig = async () => {
-    const data = await getSystemConfig(true);
+    const data = await getSystemConfig();
     setConfig(data);
   };
 
@@ -110,23 +96,17 @@ export const SystemSettings: React.FC = () => {
   const updateFooter = (key: keyof SystemConfig['footer'], value: string) => {
     if (!config) return;
     // Ensure footer object exists if it's undefined
-    const currentFooter = config.footer || { line1: '', line2: '', line3: '', backgroundColor: '#337ab7' };
+    const currentFooter = config.footer || { line1: '', line2: '', line3: '' };
     setConfig({ ...config, footer: { ...currentFooter, [key]: value } });
   };
 
   if (!config) return <div className="p-10 text-center">Đang tải cấu hình...</div>;
 
-  const textColorPresets = [
-    { name: 'Trắng', hex: '#FFFFFF' },
-    { name: 'Vàng', hex: '#FFFF00' },
-    { name: 'Đen', hex: '#000000' },
-  ];
-
-  const bgColorPresets = [
-    { name: 'Xanh dương (Gốc)', hex: '#337ab7' },
-    { name: 'Xanh đậm', hex: '#1a4f75' },
-    { name: 'Đỏ đô', hex: '#d32f2f' },
-    { name: 'Xanh lá', hex: '#2e7d32' },
+  const colorPresets = [
+    { name: 'Trắng tinh khiết', hex: '#FFFFFF' },
+    { name: 'Vàng Hoàng gia', hex: '#FFD700' },
+    { name: 'Vàng Chanh', hex: '#FFFF00' },
+    { name: 'Xanh nhạt', hex: '#E0F2F1' },
   ];
 
   return (
@@ -166,107 +146,66 @@ export const SystemSettings: React.FC = () => {
         {/* 1. Thông tin cơ bản & Nhận diện */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-                <Building2 className="text-slate-600" size={20} />
-                <h3 className="text-lg font-bold text-slate-700 uppercase text-[15px]">1. Thông Tin Cơ Quan & Nhận Diện</h3>
+                <Building2 className="text-[#337ab7]" size={20} />
+                <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">1. Thông Tin Cơ Quan & Nhận Diện</h3>
             </div>
             
             <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="space-y-5">
                     <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Tên Cơ Quan Chủ Quản</label>
-                        <input type="text" value={config.exam.orgUnit} onChange={(e) => updateExam('orgUnit', e.target.value.toUpperCase())} className="w-full border p-3 rounded font-bold text-slate-700 uppercase focus:ring-2 focus:ring-slate-400/20 outline-none" />
+                        <input type="text" value={config.exam.orgUnit} onChange={(e) => updateExam('orgUnit', e.target.value.toUpperCase())} className="w-full border p-3 rounded font-bold text-[#337ab7] uppercase focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Tên Kỳ Thi</label>
-                        <input type="text" value={config.exam.name} onChange={(e) => updateExam('name', e.target.value.toUpperCase())} className="w-full border p-3 rounded text-gray-800 font-bold uppercase focus:ring-2 focus:ring-slate-400/20 outline-none" />
+                        <input type="text" value={config.exam.name} onChange={(e) => updateExam('name', e.target.value.toUpperCase())} className="w-full border p-3 rounded text-gray-800 font-bold uppercase focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Năm Học / Giai Đoạn</label>
-                        <input type="text" value={config.exam.schoolYear} onChange={(e) => updateExam('schoolYear', e.target.value)} className="w-full border p-3 rounded text-gray-600 font-bold focus:ring-2 focus:ring-slate-400/20 outline-none" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Ngày, tháng, năm công bố điểm (Hiển thị ngoài trang chủ)</label>
-                        <input type="text" value={config.exam.releaseDate || ''} onChange={(e) => updateExam('releaseDate', e.target.value)} className="w-full border p-3 rounded text-gray-800 font-bold focus:ring-2 focus:ring-slate-400/20 outline-none" placeholder="Ví dụ: Ngày 20 tháng 05 năm 2026" />
+                        <input type="text" value={config.exam.schoolYear} onChange={(e) => updateExam('schoolYear', e.target.value)} className="w-full border p-3 rounded text-gray-600 font-bold focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
                     </div>
                     
-                    {/* Cấu hình màu sắc Header */}
-                    <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Màu chữ */}
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
-                                <Palette size={18} className="text-slate-600" />
-                                Màu chữ tiêu đề
-                            </label>
-                            <div className="flex flex-wrap items-center gap-4">
-                                <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded border border-gray-200">
-                                    <input 
-                                        type="color" 
-                                        value={config.exam.headerTextColor} 
-                                        onChange={(e) => updateExam('headerTextColor', e.target.value)}
-                                        className="h-8 w-10 rounded border border-gray-300 cursor-pointer p-0.5"
-                                    />
-                                    <input 
-                                        type="text" 
-                                        value={config.exam.headerTextColor} 
-                                        onChange={(e) => updateExam('headerTextColor', e.target.value.toUpperCase())}
-                                        className="w-20 border-none bg-transparent p-1 font-mono font-bold uppercase text-xs focus:ring-0"
-                                        placeholder="#FFFFFF"
-                                    />
-                                </div>
-                                <div className="flex gap-2">
-                                    {textColorPresets.map(preset => (
-                                        <button
-                                            key={preset.hex}
-                                            onClick={() => updateExam('headerTextColor', preset.hex)}
-                                            className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110"
-                                            style={{ backgroundColor: preset.hex }}
-                                            title={preset.name}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Màu nền */}
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
-                                <Palette size={18} className="text-slate-600" />
-                                Màu nền Header
-                            </label>
-                            <div className="flex flex-wrap items-center gap-4">
-                                <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded border border-gray-200">
-                                    <input 
-                                        type="color" 
-                                        value={config.exam.headerBackgroundColor || '#337ab7'} 
-                                        onChange={(e) => updateExam('headerBackgroundColor', e.target.value)}
-                                        className="h-8 w-10 rounded border border-gray-300 cursor-pointer p-0.5"
-                                    />
-                                    <input 
-                                        type="text" 
-                                        value={config.exam.headerBackgroundColor || '#337ab7'} 
-                                        onChange={(e) => updateExam('headerBackgroundColor', e.target.value.toUpperCase())}
-                                        className="w-20 border-none bg-transparent p-1 font-mono font-bold uppercase text-xs focus:ring-0"
-                                        placeholder="#337AB7"
-                                    />
-                                </div>
-                                <div className="flex gap-2">
-                                    {bgColorPresets.map(preset => (
-                                        <button
-                                            key={preset.hex}
-                                            onClick={() => updateExam('headerBackgroundColor', preset.hex)}
-                                            className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110"
-                                            style={{ backgroundColor: preset.hex }}
-                                            title={preset.name}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
+                    {/* Cấu hình màu chữ tiêu đề */}
+                    <div className="pt-4 border-t border-gray-100">
+                        <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
+                          <Palette size={18} className="text-[#337ab7]" />
+                          Màu chữ tiêu đề Header
+                        </label>
+                        <div className="flex flex-wrap items-center gap-6">
+                          <div className="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
+                            <input 
+                              type="color" 
+                              value={config.exam.headerTextColor} 
+                              onChange={(e) => updateExam('headerTextColor', e.target.value)}
+                              className="h-10 w-16 rounded border border-gray-300 cursor-pointer p-0.5"
+                            />
+                            <input 
+                              type="text" 
+                              value={config.exam.headerTextColor} 
+                              onChange={(e) => updateExam('headerTextColor', e.target.value.toUpperCase())}
+                              className="w-24 border-none bg-transparent p-1 font-mono font-bold uppercase text-sm focus:ring-0"
+                              placeholder="#FFFFFF"
+                            />
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            {colorPresets.map(preset => (
+                              <button
+                                key={preset.hex}
+                                onClick={() => updateExam('headerTextColor', preset.hex)}
+                                className={`w-8 h-8 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110`}
+                                style={{ backgroundColor: preset.hex }}
+                                title={preset.name}
+                              />
+                            ))}
+                          </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-100">
                     <div className="flex flex-col items-center gap-3">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Logo Hiển Thị</span>
                         <div className="w-32 h-32 bg-white border border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden relative group shadow-inner">
                             {config.exam.logoUrl ? (
                                 <img src={config.exam.logoUrl} alt="Logo preview" className="w-full h-full object-contain" />
@@ -281,6 +220,7 @@ export const SystemSettings: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex flex-col items-center gap-3">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Icon Trình Duyệt</span>
                         <div className="w-32 h-32 bg-white border border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden relative group shadow-inner">
                             {config.exam.faviconUrl ? (
                                 <img src={config.exam.faviconUrl} alt="Favicon" className="w-12 h-12" />
@@ -302,7 +242,7 @@ export const SystemSettings: React.FC = () => {
             {/* 2. Form Tra Cứu */}
             <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-bold text-slate-700 uppercase text-[15px]">2. Trường dữ liệu Tra Cứu</h3>
+                    <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">2. Trường dữ liệu Tra Cứu</h3>
                 </div>
                 <div className="p-6">
                     <table className="w-full text-sm">
@@ -337,8 +277,8 @@ export const SystemSettings: React.FC = () => {
              {/* 3. Môn Thi Đã Nhận Diện (Read-only) */}
              <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-                    <BookOpen className="text-slate-600" size={20} />
-                    <h3 className="text-lg font-bold text-slate-700 uppercase text-[15px]">3. Môn Thi Hiện Có</h3>
+                    <BookOpen className="text-[#337ab7]" size={20} />
+                    <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">3. Môn Thi Hiện Có</h3>
                 </div>
                 <div className="p-6">
                     <p className="text-sm text-gray-500 italic mb-4">Danh sách này được hệ thống tự động cập nhật từ dữ liệu file Excel đã tải lên.</p>
@@ -362,8 +302,8 @@ export const SystemSettings: React.FC = () => {
             {/* 4. Bảo Mật & Trạng Thái */}
             <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-                    <ShieldCheck className="text-slate-600" size={20} />
-                    <h3 className="text-lg font-bold text-slate-700 uppercase text-[15px]">4. Bảo Mật & Trạng Thái</h3>
+                    <ShieldCheck className="text-[#337ab7]" size={20} />
+                    <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">4. Bảo Mật & Trạng Thái</h3>
                 </div>
                 <div className="p-6 space-y-6">
                     <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100">
@@ -401,56 +341,21 @@ export const SystemSettings: React.FC = () => {
         {/* 5. Thông Tin Chân Trang (Footer) */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-                <LayoutTemplate className="text-slate-600" size={20} />
-                <h3 className="text-lg font-bold text-slate-700 uppercase text-[15px]">5. Thông Tin Chân Trang (Footer)</h3>
+                <LayoutTemplate className="text-[#337ab7]" size={20} />
+                <h3 className="text-lg font-bold text-[#337ab7] uppercase text-[15px]">5. Thông Tin Chân Trang (Footer)</h3>
             </div>
             <div className="p-6 space-y-5">
                 <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dòng 1 (Tên đơn vị - Mặc định)</label>
-                    <input type="text" value={config.footer?.line1 || ''} onChange={(e) => updateFooter('line1', e.target.value)} className="w-full border p-3 rounded font-bold text-gray-700 focus:ring-2 focus:ring-slate-400/20 outline-none" placeholder={config.exam.orgUnit} />
+                    <input type="text" value={config.footer?.line1 || ''} onChange={(e) => updateFooter('line1', e.target.value)} className="w-full border p-3 rounded font-bold text-gray-700 focus:ring-2 focus:ring-[#337ab7]/20 outline-none" placeholder={config.exam.orgUnit} />
                 </div>
                 <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dòng 2 (Địa chỉ, thông tin khác...)</label>
-                    <input type="text" value={config.footer?.line2 || ''} onChange={(e) => updateFooter('line2', e.target.value)} className="w-full border p-3 rounded text-gray-700 focus:ring-2 focus:ring-slate-400/20 outline-none" />
+                    <input type="text" value={config.footer?.line2 || ''} onChange={(e) => updateFooter('line2', e.target.value)} className="w-full border p-3 rounded text-gray-700 focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
                 </div>
                 <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Dòng 3 (Liên hệ, email...)</label>
-                    <input type="text" value={config.footer?.line3 || ''} onChange={(e) => updateFooter('line3', e.target.value)} className="w-full border p-3 rounded text-gray-700 focus:ring-2 focus:ring-slate-400/20 outline-none" />
-                </div>
-
-                <div className="pt-4 border-t border-gray-100">
-                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase flex items-center gap-2 text-[13px]">
-                        <Palette size={18} className="text-slate-600" />
-                        Màu nền Footer
-                    </label>
-                    <div className="flex flex-wrap items-center gap-4">
-                        <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded border border-gray-200">
-                            <input 
-                                type="color" 
-                                value={config.footer?.backgroundColor || DEFAULT_CONFIG.footer.backgroundColor} 
-                                onChange={(e) => updateFooter('backgroundColor', e.target.value)}
-                                className="h-8 w-10 rounded border border-gray-300 cursor-pointer p-0.5"
-                            />
-                            <input 
-                                type="text" 
-                                value={config.footer?.backgroundColor || DEFAULT_CONFIG.footer.backgroundColor} 
-                                onChange={(e) => updateFooter('backgroundColor', e.target.value.toUpperCase())}
-                                className="w-20 border-none bg-transparent p-1 font-mono font-bold uppercase text-xs focus:ring-0"
-                                placeholder={DEFAULT_CONFIG.footer.backgroundColor}
-                            />
-                        </div>
-                        <div className="flex gap-2">
-                            {bgColorPresets.map(preset => (
-                                <button
-                                    key={preset.hex}
-                                    onClick={() => updateFooter('backgroundColor', preset.hex)}
-                                    className="w-6 h-6 rounded-full border border-gray-300 shadow-sm transition-transform hover:scale-110"
-                                    style={{ backgroundColor: preset.hex }}
-                                    title={preset.name}
-                                />
-                            ))}
-                        </div>
-                    </div>
+                    <input type="text" value={config.footer?.line3 || ''} onChange={(e) => updateFooter('line3', e.target.value)} className="w-full border p-3 rounded text-gray-700 focus:ring-2 focus:ring-[#337ab7]/20 outline-none" />
                 </div>
             </div>
         </section>

@@ -1,49 +1,40 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getSystemConfig, DEFAULT_CONFIG, getCachedConfig } from '../../services/dataService';
+import { getSystemConfig, DEFAULT_CONFIG } from '../../services/dataService';
 import { SystemConfig } from '../../types';
 
-export const PublicLayout: React.FC<{ children: React.ReactNode, config?: SystemConfig }> = ({ children, config: propConfig }) => {
-  // Khởi tạo ngay với cấu hình đã cache (nếu có) để tránh hiện tượng nháy màu
-  const [localConfig, setLocalConfig] = useState<SystemConfig>(getCachedConfig());
+export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Khởi tạo ngay với DEFAULT_CONFIG để hiển thị Header/Footer lập tức
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
-  const config = propConfig || localConfig;
-
   useEffect(() => {
-    if (!propConfig) {
-      // Load config thật từ DB, nếu có thì cập nhật lại
-      getSystemConfig().then(setLocalConfig);
-    }
-  }, [propConfig]);
+    // Load config thật từ DB, nếu có thì cập nhật lại
+    getSystemConfig().then(setConfig);
+  }, []);
 
-  const orgName = config?.exam.orgUnit || DEFAULT_CONFIG.exam.orgUnit;
-  const examName = config?.exam.name || DEFAULT_CONFIG.exam.name;
-  const schoolYear = config?.exam.schoolYear || DEFAULT_CONFIG.exam.schoolYear;
+  const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN';
+  const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI';
+  const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
   const logoUrl = config?.exam.logoUrl;
-  const headerTextColor = config?.exam.headerTextColor || DEFAULT_CONFIG.exam.headerTextColor;
-  const headerBgColor = config?.exam.headerBackgroundColor || DEFAULT_CONFIG.exam.headerBackgroundColor;
+  const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
 
   // Footer data
-  const footerLine1 = config?.footer?.line1 || DEFAULT_CONFIG.footer.line1;
-  const footerLine2 = config?.footer?.line2 || DEFAULT_CONFIG.footer.line2;
-  const footerLine3 = config?.footer?.line3 || DEFAULT_CONFIG.footer.line3;
-  const footerBgColor = config?.footer?.backgroundColor || DEFAULT_CONFIG.footer.backgroundColor;
+  const footerLine1 = config?.footer?.line1 || orgName;
+  const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
+  const footerLine3 = config?.footer?.line3 || '';
 
   return (
     <div className={`flex flex-col font-sans ${isHomePage ? 'h-screen overflow-hidden' : 'min-h-screen overflow-auto'}`}>
       {/* Header Banner - Sử dụng font-serif/sans đồng bộ */}
-      <header 
-        className="py-4 shadow-sm border-b border-black/10 shrink-0 transition-colors duration-300"
-        style={{ backgroundColor: headerBgColor }}
-      >
+      <header className="bg-[#337ab7] py-4 shadow-sm border-b border-[#2e6da4] shrink-0">
         <div className="container mx-auto px-4 flex items-center justify-center gap-6 max-w-6xl">
           <div className="flex-shrink-0">
             <img 
               src={logoUrl || "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png"} 
-              alt="Logo" 
+              alt="Quốc huy" 
               className="w-16 h-16 md:w-20 md:h-20 object-contain" 
             />
           </div>
@@ -69,10 +60,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode, config?: System
       </main>
 
       {/* Footer */}
-      <footer 
-        className="py-3 text-center border-t border-black/10 shrink-0 no-print transition-colors duration-300"
-        style={{ backgroundColor: footerBgColor }}
-      >
+      <footer className="bg-[#337ab7] py-3 text-center border-t border-[#2e6da4] shrink-0 no-print">
         <div className="container mx-auto px-4 relative">
           <p className="text-white text-[14px] font-bold uppercase mb-1">
             {footerLine1}
