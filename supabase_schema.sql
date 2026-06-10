@@ -9,6 +9,10 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='hoc_sinh' AND column_name='gioi_tinh') THEN
         ALTER TABLE public.hoc_sinh ADD COLUMN gioi_tinh text;
     END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ket_qua' AND column_name='sort_order') THEN
+        ALTER TABLE public.ket_qua ADD COLUMN sort_order integer DEFAULT 0;
+    END IF;
 END $$;
 
 -- 2. Tạo các bảng nếu chưa có (cho lần cài đặt đầu tiên)
@@ -35,7 +39,8 @@ CREATE TABLE IF NOT EXISTS public.ket_qua (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     hoc_sinh_id uuid REFERENCES public.hoc_sinh(id) ON DELETE CASCADE,
     mon_thi text,
-    diem double precision
+    diem double precision,
+    sort_order integer DEFAULT 0
 );
 
 -- 3. Bật RLS
