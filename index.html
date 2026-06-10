@@ -4,21 +4,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tra Cứu Điểm Thi HSG</title>
+    <title>Tra cứu điểm thi học sinh giỏi cấp xã</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              // Ghi đè font sans để toàn bộ các class font-sans sử dụng Times New Roman
-              sans: ['"Times New Roman"', 'Times', 'serif'],
+              sans: ['"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
               serif: ['"Times New Roman"', 'Times', 'serif'],
+              times: ['"Times New Roman"', 'Times', 'serif'],
             },
             colors: {
               gov: {
-                blue: '#337ab7',
-                blueDark: '#286090',
+                blue: '#004e9a',
+                blueDark: '#003d7a',
+                bg: '#f0f4f8',
               }
             }
           }
@@ -32,13 +33,13 @@
         padding: 0;
       }
       body {
-        background-color: #ffffff;
-        font-family: "Times New Roman", Times, serif;
+        background-color: #f0f4f8;
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
       input, button, select, textarea {
-        font-family: "Times New Roman", Times, serif !important;
+        font-family: inherit;
       }
       input:focus {
         border-color: #337ab7 !important;
