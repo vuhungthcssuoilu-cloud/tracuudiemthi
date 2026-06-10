@@ -499,7 +499,7 @@ export const AdminDashboard: React.FC = () => {
                           />
                       </div>
                       <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Số CCCD</label>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Căn cước công dân (CCCD)</label>
                           <input 
                             type="text" 
                             value={editingItem.cccd} 
@@ -620,14 +620,14 @@ export const AdminDashboard: React.FC = () => {
                           />
                       </div>
                       <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Số CCCD</label>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Căn cước công dân (CCCD)</label>
                           <input 
                             type="text" 
                             value={newItem.cccd} 
                             maxLength={12}
                             onChange={(e) => setNewItem({...newItem, cccd: e.target.value})}
                             className="w-full border rounded px-3 py-2"
-                            placeholder="12 số (tùy chọn)"
+                            placeholder="Căn cước công dân (CCCD)"
                           />
                       </div>
                       <div>

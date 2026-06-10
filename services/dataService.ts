@@ -53,7 +53,23 @@ const CONFIG_CACHE_KEY = 'system_config_cache';
 let cachedConfig: SystemConfig | null = null;
 try {
   const saved = localStorage.getItem(CONFIG_CACHE_KEY);
-  if (saved) cachedConfig = JSON.parse(saved);
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (parsed && parsed.fields && parsed.fields.cccd) {
+      const label = parsed.fields.cccd.label;
+      if (
+        !label ||
+        label === 'Số CCCD (12 số)' ||
+        label === 'Số CCCD (12 chữ số)' ||
+        label === 'Số CCCD' ||
+        label.includes('12 số') ||
+        label.toLowerCase().includes('cccd (12')
+      ) {
+        parsed.fields.cccd.label = 'Căn cước công dân (CCCD)';
+      }
+    }
+    cachedConfig = parsed;
+  }
 } catch (e) {
   console.error('Error loading config from cache', e);
 }
@@ -92,7 +108,14 @@ export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfi
       // Chuẩn hóa tên trường CCCD nếu đang sử dụng nhãn cũ trong cơ sở dữ liệu
       if (newConfig.fields.cccd) {
         const cccdLabel = newConfig.fields.cccd.label;
-        if (cccdLabel === 'Số CCCD (12 số)' || cccdLabel === 'Số CCCD (12 chữ số)' || cccdLabel === 'Số CCCD') {
+        if (
+          !cccdLabel ||
+          cccdLabel === 'Số CCCD (12 số)' || 
+          cccdLabel === 'Số CCCD (12 chữ số)' || 
+          cccdLabel === 'Số CCCD' ||
+          cccdLabel.includes('12 số') ||
+          cccdLabel.toLowerCase().includes('cccd (12')
+        ) {
           newConfig.fields.cccd.label = 'Căn cước công dân (CCCD)';
         }
       }

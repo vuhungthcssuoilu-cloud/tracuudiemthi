@@ -92,7 +92,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004e9a] focus:ring-1 focus:ring-[#004e9a] text-[14px] sm:text-[15px] shadow-sm placeholder-gray-400"
                   autoComplete="off"
                   placeholder={
-                    key === 'cccd' ? "Nhập số CCCD (12 chữ số)" : 
+                    key === 'cccd' ? "Nhập Căn cước công dân (CCCD)" : 
                     key === 'so_bao_danh' ? "Nhập số báo danh" : 
                     field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
                   }
