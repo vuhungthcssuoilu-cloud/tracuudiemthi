@@ -8,7 +8,7 @@ const CONFIG_ID = 'global_settings';
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI',
-    schoolYear: 'Năm học 2025 - 2026',
+    schoolYear: 'Năm học 2026 - 2027',
     orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
     orgLevel: 'CẤP XÃ',
@@ -19,8 +19,8 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
-    line3: 'Hỗ trợ kỹ thuật: hotro@viettel.vn'
+    line2: 'Trang tra cứu điểm thi học sinh giỏi',
+    line3: 'Hỗ trợ kỹ thuật: Email: vuhung@db.edu.vn- SĐT: 0984246993'
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
