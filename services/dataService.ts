@@ -8,7 +8,7 @@ const CONFIG_ID = 'global_settings';
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI',
-    schoolYear: 'Năm học 2026 - 2027',
+    schoolYear: 'Năm học 2025 - 2026',
     orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
     orgLevel: 'CẤP XÃ',
@@ -19,8 +19,8 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
-    line2: 'Trang tra cứu điểm thi học sinh giỏi',
-    line3: 'Hỗ trợ kỹ thuật: Email: vuhung@db.edu.vn- SĐT: 0984246993'
+    line2: 'Hệ thống tra cứu điểm thi trực tuyến',
+    line3: 'Hỗ trợ kỹ thuật: hotro@viettel.vn'
   },
   fields: {
     ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
@@ -48,28 +48,58 @@ export const DEFAULT_CONFIG: SystemConfig = {
   }
 };
 
-export const getSystemConfig = async (): Promise<SystemConfig> => {
-  try {
-    const { data, error } = await supabase
-      .from('cau_hinh')
-      .select('data')
-      .eq('id', CONFIG_ID)
-      .maybeSingle();
+const CONFIG_CACHE_KEY = 'system_config_cache';
 
-    if (error) throw error;
-    const dbConfig = data?.data || {};
-    return { 
-        ...DEFAULT_CONFIG, 
-        ...dbConfig,
-        footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
-        exam: { ...DEFAULT_CONFIG.exam, ...(dbConfig.exam || {}) },
-        fields: { ...DEFAULT_CONFIG.fields, ...(dbConfig.fields || {}) },
-        security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
-        template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
-    };
-  } catch (err) {
-    return DEFAULT_CONFIG;
+let cachedConfig: SystemConfig | null = null;
+try {
+  const saved = localStorage.getItem(CONFIG_CACHE_KEY);
+  if (saved) cachedConfig = JSON.parse(saved);
+} catch (e) {
+  console.error('Error loading config from cache', e);
+}
+
+let configPromise: Promise<SystemConfig> | null = null;
+
+export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfig> => {
+  if (cachedConfig && !forceRefresh) {
+    // Kích hoạt cập nhật ngầm cấu hình để đồng bộ tức thì mà không block UI
+    getSystemConfig(true).catch(() => {});
+    return cachedConfig;
   }
+  
+  if (configPromise) return configPromise;
+
+  configPromise = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cau_hinh')
+        .select('data')
+        .eq('id', CONFIG_ID)
+        .maybeSingle();
+
+      if (error) throw error;
+      const dbConfig = data?.data || {};
+      const newConfig = { 
+          ...DEFAULT_CONFIG, 
+          ...dbConfig,
+          footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
+          exam: { ...DEFAULT_CONFIG.exam, ...(dbConfig.exam || {}) },
+          fields: { ...DEFAULT_CONFIG.fields, ...(dbConfig.fields || {}) },
+          security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
+          template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
+      };
+      
+      cachedConfig = newConfig;
+      localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(newConfig));
+      return cachedConfig;
+    } catch (err) {
+      return cachedConfig || DEFAULT_CONFIG;
+    } finally {
+      configPromise = null;
+    }
+  })();
+
+  return configPromise;
 };
 
 export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> => {
@@ -81,6 +111,10 @@ export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> =
         data: config, 
         updated_at: new Date().toISOString() 
       });
+    if (!error) {
+      cachedConfig = config;
+      localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(config));
+    }
     return !error;
   } catch {
     return false;
@@ -95,7 +129,8 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
   const dobInput = params.ngay_sinh?.trim();
 
   try {
-    let query = supabase.from('hoc_sinh').select('id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh');
+    // Sử dụng Join logic (ket_qua(*)) để chỉ cần đúng 1 cuộc gọi API duy nhất đến Supabase (Giảm 50% độ trễ)
+    let query = supabase.from('hoc_sinh').select('id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh, ket_qua(*)');
     let hasCondition = false;
 
     if (config.fields.so_bao_danh.visible && sbdInput) {
@@ -124,15 +159,9 @@ export const searchScores = async (params: SearchParams): Promise<SearchResult[]
     if (studentError || !students || students.length === 0) return [];
 
     const student = students[0];
+    const results = (student as any).ket_qua || [];
 
-    const { data: results, error: resultError } = await supabase
-      .from('ket_qua')
-      .select('*')
-      .eq('hoc_sinh_id', student.id);
-
-    if (resultError) throw resultError;
-
-    return (results || []).map(r => ({
+    return (results || []).map((r: any) => ({
       ...r,
       ho_ten: student.ho_ten,
       so_bao_danh: student.so_bao_danh,
@@ -167,11 +196,8 @@ const formatDateInput = (input: any): string => {
 export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
   let successCount = 0;
   const errorLog: string[] = [];
+  const sbdNameMap = new Map<string, string>(); 
   
-  // Cache để kiểm tra trùng lặp trong nội bộ file đang upload
-  const fileSbdSet = new Set<string>();
-  const fileCccdSet = new Set<string>();
-
   const normalizeRow = (row: any) => {
     const normalized: any = {};
     Object.keys(row).forEach(key => {
@@ -194,35 +220,26 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
     return normalized;
   };
 
-  // Duyệt dữ liệu Excel
-  for (let i = 0; i < data.length; i++) {
-    const rawRow = data[i];
+  for (const rawRow of data) {
     const row = normalizeRow(rawRow);
     if (!row.SO_BAO_DANH) continue;
 
-    const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
-    const cccd = row.CCCD?.toString().trim();
-    const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || 'KHÔNG TÊN';
-
-    // 1. Kiểm tra trùng lặp ngay trong file Excel
-    if (fileSbdSet.has(sbd)) {
-        errorLog.push(`Dòng trùng SBD: ${sbd} (Học sinh: ${hoTen}) bị lặp lại trong file.`);
-        continue;
-    }
-    fileSbdSet.add(sbd);
-    if (cccd) {
-        if (fileCccdSet.has(cccd)) {
-            errorLog.push(`Dòng trùng CCCD: ${cccd} (Học sinh: ${hoTen}) bị lặp lại trong file.`);
-            continue;
-        }
-        fileCccdSet.add(cccd);
-    }
-
     try {
+      const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
+      const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || '';
+      const cccd = row.CCCD?.toString().trim();
       const ngaySinh = formatDateInput(row.NGAY_SINH);
       const gioiTinh = row.GIOI_TINH ? row.GIOI_TINH.toString().trim() : '';
 
-      // 2. Kiểm tra trùng lặp với Database
+      if (hoTen) {
+          if (sbdNameMap.has(sbd)) {
+              const prevName = sbdNameMap.get(sbd);
+              if (prevName !== hoTen) continue;
+          } else {
+              sbdNameMap.set(sbd, hoTen);
+          }
+      }
+
       const { data: existingStudentBySBD } = await supabase
         .from('hoc_sinh')
         .select('id, ho_ten, cccd, so_bao_danh, ngay_sinh, gioi_tinh')
@@ -232,12 +249,6 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
       let studentId: string | undefined;
 
       if (existingStudentBySBD) {
-          // Nếu trùng SBD nhưng khác tên -> Báo lỗi xung đột dữ liệu
-          if (existingStudentBySBD.ho_ten !== hoTen) {
-              errorLog.push(`Xung đột SBD ${sbd}: Trong DB là '${existingStudentBySBD.ho_ten}', trong file là '${hoTen}'`);
-              continue;
-          }
-
           studentId = existingStudentBySBD.id;
           const updateData: any = {};
           if (!existingStudentBySBD.cccd && cccd) updateData.cccd = cccd;
@@ -249,15 +260,7 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
               await supabase.from('hoc_sinh').update(updateData).eq('id', studentId);
           }
       } else {
-        // Kiểm tra trùng CCCD với người khác trong DB
-        if (cccd) {
-            const { data: existingByCCCD } = await supabase.from('hoc_sinh').select('ho_ten, so_bao_danh').eq('cccd', cccd).maybeSingle();
-            if (existingByCCCD) {
-                errorLog.push(`Trùng CCCD ${cccd}: Đã thuộc về HS ${existingByCCCD.ho_ten} (SBD: ${existingByCCCD.so_bao_danh})`);
-                continue;
-            }
-        }
-
+        if (!hoTen) continue;
         const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
             ho_ten: hoTen,
             so_bao_danh: sbd,
@@ -283,26 +286,21 @@ export const uploadExcelData = async (data: any[]): Promise<{ success: number; e
               .maybeSingle();
               
           if (existingResult) {
-              await supabase.from('ket_qua').update({ 
-                  diem: Number(score) || 0,
-                  sort_order: i // Cập nhật thứ tự theo dòng file mới
-              }).eq('id', existingResult.id);
+              await supabase.from('ket_qua').update({ diem: Number(score) || 0 }).eq('id', existingResult.id);
           } else {
               await supabase.from('ket_qua').insert({
                   hoc_sinh_id: studentId,
                   mon_thi: subject,
-                  diem: Number(score) || 0,
-                  sort_order: i // Lưu thứ tự dòng file
+                  diem: Number(score) || 0
                 });
           }
       }
       successCount++;
     } catch (err: any) {
-      errorLog.push(`SBD ${sbd}: ${err.message}`);
+      errorLog.push(`SBD ${row.SO_BAO_DANH || '?'}: ${err.message}`);
     }
   }
 
-  // Đồng bộ lại danh sách môn thi vào cấu hình
   try {
       const { data: allResults } = await supabase.from('ket_qua').select('mon_thi');
       if (allResults && allResults.length > 0) {
@@ -360,15 +358,10 @@ export const createStudentResult = async (data: SearchResult): Promise<{ success
         if (existingResult) {
             await supabase.from('ket_qua').update({ diem: data.diem }).eq('id', existingResult.id);
         } else {
-            // Tìm sort_order lớn nhất để thêm vào cuối
-            const { data: maxSort } = await supabase.from('ket_qua').select('sort_order').order('sort_order', { ascending: false }).limit(1).maybeSingle();
-            const nextSort = (maxSort?.sort_order || 0) + 1;
-
             await supabase.from('ket_qua').insert({
                 hoc_sinh_id: studentId,
                 mon_thi: data.mon_thi.toUpperCase(),
-                diem: data.diem,
-                sort_order: nextSort
+                diem: data.diem
             });
         }
         return { success: true };
@@ -391,19 +384,15 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   try {
-    let query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' });
-    
+    let query = supabase.from('ket_qua').select('*, hoc_sinh(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' });
     if (search) {
-        // Tìm kiếm linh hoạt: Hoặc trùng Họ tên, hoặc trùng Số báo danh
-        query = query.or(`ho_ten.ilike.%${search}%,so_bao_danh.ilike.%${search}%`, { foreignTable: 'hoc_sinh' });
+        query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' })
+          .ilike('hoc_sinh.ho_ten', `%${search}%`);
     }
-    
-    // Thay đổi sắp xếp từ created_at sang sort_order để giữ nguyên thứ tự file mẫu
-    const { data, count, error } = await query.range(from, to).order('sort_order', { ascending: true });
-    
+    const { data, count, error } = await query.range(from, to);
     if (error) throw error;
     const formattedData = (data || []).map((item: any) => {
-        const hs = item.hoc_sinh;
+        const hs = Array.isArray(item.hoc_sinh) ? item.hoc_sinh[0] : item.hoc_sinh;
         return {
             ...item,
             ho_ten: hs?.ho_ten || '(Không tên)',
@@ -416,7 +405,6 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
     });
     return { data: formattedData, total: count || 0 };
   } catch (err) {
-      console.error("Admin Fetch Error:", err);
       return { data: [], total: 0 }; 
   }
 };
