@@ -7,18 +7,18 @@ const CONFIG_ID = 'global_settings';
 
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
-    name: 'TRA CỨU ĐIỂM THI HỌC SINH GIỎI CẤP XÃ',
+    name: 'TRA CỨU ĐIỂM THI TUYỂN SINH VÀO LỚP 10 THPT',
     schoolYear: 'NĂM HỌC 2026 – 2027',
-    orgUnit: 'UBND XÃ XA DUNG,TỈNH ĐIỆN BIÊN',
+    orgUnit: 'SỞ GIÁO DỤC VÀ ĐÀO TẠO TỈNH ĐIỆN BIÊN',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
-    orgLevel: 'CẤP XÃ',
+    orgLevel: 'CẤP TỈNH',
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
     headerTextColor: '#FFFF00'
   },
   footer: {
-    line1: 'Dữ liệu chính thức UBND xã Xa Dung, tỉnh Điện Biên.',
+    line1: 'Dữ liệu chính thức từ Sở GD&ĐT tỉnh Điện Biên.',
     line2: 'Mọi thắc mắc về điểm thi xin liên hệ đơn vị tổ chức kỳ thi.',
     line3: ''
   },
@@ -88,6 +88,14 @@ export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfi
           security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
           template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
       };
+      
+      // Chuẩn hóa tên trường CCCD nếu đang sử dụng nhãn cũ trong cơ sở dữ liệu
+      if (newConfig.fields.cccd) {
+        const cccdLabel = newConfig.fields.cccd.label;
+        if (cccdLabel === 'Số CCCD (12 số)' || cccdLabel === 'Số CCCD (12 chữ số)' || cccdLabel === 'Số CCCD') {
+          newConfig.fields.cccd.label = 'Căn cước công dân (CCCD)';
+        }
+      }
       
       cachedConfig = newConfig;
       localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(newConfig));
