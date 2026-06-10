@@ -7,18 +7,18 @@ const CONFIG_ID = 'global_settings';
 
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
-    name: 'TRA CỨU ĐIỂM THI TUYỂN SINH VÀO LỚP 10 THPT',
+    name: 'TRA CỨU ĐIỂM THI HỌC SINH GIỎI CẤP XÃ',
     schoolYear: 'NĂM HỌC 2026 – 2027',
-    orgUnit: 'SỞ GIÁO DỤC VÀ ĐÀO TẠO TỈNH ĐIỆN BIÊN',
+    orgUnit: 'UBND XÃ XA DUNG,TỈNH ĐIỆN BIÊN',
     subUnit: 'HỘI ĐỒNG KHẢO THÍ',
-    orgLevel: 'CẤP TỈNH',
+    orgLevel: 'CẤP XÃ',
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
     headerTextColor: '#FFFF00'
   },
   footer: {
-    line1: 'Dữ liệu chính thức từ Sở GD&ĐT tỉnh Điện Biên.',
+    line1: 'Dữ liệu chính thức UBND xã Xa Dung, tỉnh Điện Biên.',
     line2: 'Mọi thắc mắc về điểm thi xin liên hệ đơn vị tổ chức kỳ thi.',
     line3: ''
   },
