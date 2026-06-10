@@ -73,18 +73,18 @@ CREATE POLICY "Admin manage results" ON public.ket_qua FOR ALL TO authenticated 
 INSERT INTO public.cau_hinh (id, data)
 VALUES ('global_settings', '{
   "exam": {
-    "name": "TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI",
+    "name": "TRA CỨU ĐIỂM THI TUYỂN SINH VÀO LỚP 10 THPT",
     "isOpen": true,
     "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png",
-    "orgUnit": "ỦY BAN NHÂN DÂN XÃ XA DUNG",
-    "schoolYear": "Năm học 2025 - 2026",
+    "orgUnit": "SỞ GIÁO DỤC VÀ ĐÀO TẠO TỈNH ĐIỆN BIÊN",
+    "schoolYear": "NĂM HỌC 2026 – 2027",
     "headerTextColor": "#FFFF00"
   },
   "fields": {
-    "cccd": { "label": "Số CCCD (12 số)", "visible": false, "required": false },
-    "ho_ten": { "label": "Họ và tên thí sinh", "visible": true, "required": true },
-    "truong": { "label": "Trường học", "visible": true, "required": false },
-    "ngay_sinh": { "label": "Ngày sinh (dd/mm/yyyy)", "visible": true, "required": true },
+    "cccd": { "label": "Căn cước công dân (CCCD)", "visible": true, "required": true },
+    "ho_ten": { "label": "Họ và tên thí sinh", "visible": false, "required": false },
+    "truong": { "label": "Trường học", "visible": false, "required": false },
+    "ngay_sinh": { "label": "Ngày sinh (dd/mm/yyyy)", "visible": false, "required": false },
     "so_bao_danh": { "label": "Số báo danh", "visible": true, "required": true }
   },
   "template": {

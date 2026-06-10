@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Captcha } from './Captcha';
 import { SearchParams, SystemConfig } from '../types';
@@ -21,23 +21,10 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
-  
-  // Key để buộc Captcha component mount lại (làm mới mã)
-  const [captchaKey, setCaptchaKey] = useState(0);
-  const prevLoadingRef = useRef(isLoading);
 
   useEffect(() => {
     getSystemConfig().then(setConfig);
   }, []);
-
-  // Tự động làm mới Captcha khi quá trình tra cứu kết thúc (isLoading: true -> false)
-  useEffect(() => {
-    if (prevLoadingRef.current && !isLoading) {
-      setCaptchaKey(prev => prev + 1);
-      setCaptchaInput(''); // Xóa mã cũ đã nhập
-    }
-    prevLoadingRef.current = isLoading;
-  }, [isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,9 +46,6 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
 
     if (config.security.enableCaptcha && captchaInput.toUpperCase() !== captchaCode) {
       setLocalError('Mã xác nhận không hợp lệ');
-      // Nếu sai mã xác nhận cục bộ, cũng nên đổi mã mới cho bảo mật
-      setCaptchaKey(prev => prev + 1);
-      setCaptchaInput('');
       return;
     }
     
@@ -82,85 +66,81 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     .filter(key => config.fields[key].visible);
 
   return (
-    <div className="bg-[#f2f2f2] border border-[#d3d3d3] rounded-sm p-8 md:p-16 w-full max-w-4xl shadow-none animate-fade-in font-sans">
-      <div className="w-full max-w-2xl mx-auto">
-        {/* Hướng dẫn tiêu đề */}
-        <p className="text-center text-[#333] mb-10 text-[18px] font-normal italic">
-          Thí sinh nhập các thông tin và mã xác nhận vào các ô dưới đây
-        </p>
+    <div className="bg-white border border-[#e5e7eb] rounded-lg p-6 md:p-10 w-full max-w-xl shadow-lg animate-fade-in font-sans">
+      <div className="w-full">
+        {/* Tiêu đề khung nhập thông tin */}
+        <div className="mb-6">
+          <h3 className="text-lg font-bold text-[#004e9a] mb-3">Nhập thông tin tra cứu</h3>
+          <div className="h-[1px] bg-gray-200 w-full"></div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Render các trường dựa trên config */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Render các trường dựa trên config theo dạng khối dọc dọc */}
           {visibleFields.map((key) => {
             const field = config.fields[key];
             return (
-              <div key={key} className="flex flex-col md:flex-row md:items-center">
-                <label className="md:w-44 text-[17px] font-bold text-[#333] mb-1 md:mb-0">
+              <div key={key} className="flex flex-col">
+                <label className="text-[14px] font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
                   {field.label}
+                  {field.required && <span className="text-red-500">*</span>}
                 </label>
-                <div className="flex-grow">
-                  <input
-                    type="text"
-                    name={key}
-                    value={formData[key as keyof SearchParams] || ''}
-                    onChange={handleInputChange}
-                    className="w-full md:w-[400px] border border-[#ccc] rounded-sm px-3 py-1.5 text-slate-800 font-normal bg-white transition-all text-[17px] shadow-sm"
-                    autoComplete="off"
-                    placeholder={field.required ? "(Bắt buộc)" : ""}
-                  />
-                </div>
+                <input
+                  type="text"
+                  name={key}
+                  value={formData[key as keyof SearchParams] || ''}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md px-3.5 py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004e9a] focus:ring-1 focus:ring-[#004e9a] text-[15px] shadow-sm placeholder-gray-400"
+                  autoComplete="off"
+                  placeholder={
+                    key === 'cccd' ? "Nhập số CCCD (12 chữ số)" : 
+                    key === 'so_bao_danh' ? "Nhập số báo danh" : 
+                    field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
+                  }
+                />
               </div>
             );
           })}
 
           {/* Hàng: Mã xác nhận */}
           {config.security.enableCaptcha && (
-            <div className="flex flex-col md:flex-row md:items-center">
-              <label className="md:w-44 text-[17px] font-bold text-[#333] mb-1 md:mb-0">
-                Mã xác nhận
+            <div className="flex flex-col">
+              <label className="text-[14px] font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+                Mã xác nhận <span className="text-red-500">*</span>
               </label>
-              <div className="flex-grow flex items-center gap-2">
+              <div className="flex gap-3">
                 <input
                   type="text"
                   value={captchaInput}
                   onChange={(e) => setCaptchaInput(e.target.value.toUpperCase())}
-                  className="w-28 border border-[#ccc] rounded-sm px-3 py-1.5 text-center font-bold text-[#337ab7] bg-white transition-all text-xl shadow-sm"
+                  className="flex-grow border border-gray-300 rounded-md px-3.5 py-2.5 text-center font-bold text-[#004e9a] bg-white transition-all outline-none focus:border-[#004e9a] focus:ring-1 focus:ring-[#004e9a] text-lg shadow-sm"
                   maxLength={5}
+                  placeholder="Nhập mã xác nhận"
                   autoComplete="off"
                 />
-                <Captcha key={captchaKey} onRefresh={setCaptchaCode} />
+                <div className="shrink-0 flex items-center">
+                  <Captcha onRefresh={setCaptchaCode} />
+                </div>
               </div>
             </div>
           )}
 
           {/* Nút bấm Tra cứu */}
-          <div className="flex flex-col items-center pt-4">
-            <div className="w-full flex md:pl-44">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`min-w-[130px] px-10 py-2.5 rounded-sm text-white font-bold text-[18px] transition-all shadow-sm active:transform active:scale-95
-                  ${isLoading 
-                    ? 'bg-slate-400 cursor-not-allowed' 
-                    : 'bg-[#337ab7] hover:bg-[#286090]'}`}
-              >
-                {isLoading ? "..." : "Tra cứu"}
-              </button>
-            </div>
-
-            {/* Thông báo đang xử lý */}
-            {isLoading && (
-              <div className="w-full md:pl-44 mt-3">
-                <p className="text-[#337ab7] text-[17px] font-normal text-left italic animate-pulse">
-                  Hệ thống đang tra cứu kết quả thi vui lòng chờ...
-                </p>
-              </div>
-            )}
+          <div className="pt-2 flex flex-col">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-3 px-6 rounded-md text-white font-bold text-[16px] transition-all shadow-md active:transform active:scale-[0.99]
+                ${isLoading 
+                  ? 'bg-slate-400 cursor-not-allowed' 
+                  : 'bg-[#004e9a] hover:bg-[#003d7a]'}`}
+            >
+              {isLoading ? "Đang xử lý..." : "Tra cứu điểm"}
+            </button>
 
             {/* Thông báo lỗi đỏ dưới button */}
-            {!isLoading && displayError && (
-              <div className="w-full md:pl-44 mt-3">
-                <p className="text-[#f00] text-[17px] font-normal text-left italic">
+            {displayError && (
+              <div className="w-full mt-3 text-center">
+                <p className="text-[#f00] text-[15px] font-medium italic">
                   {displayError}
                 </p>
               </div>
