@@ -20,9 +20,9 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-4 bg-slate-900/80 backdrop-blur-sm animate-fade-in font-sans">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-sm animate-fade-in font-sans">
       <div 
-        className="bg-[#fdfdfd] w-full max-w-3xl rounded-sm shadow-2xl flex flex-col max-h-[95vh] border-[12px] border-[#337ab7]/10 relative"
+        className="bg-[#fdfdfd] w-full max-w-3xl rounded-md shadow-2xl flex flex-col max-h-[96vh] border-4 md:border-[12px] border-[#004e9a]/10 relative"
         role="dialog"
         aria-modal="true"
       >
@@ -35,17 +35,17 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
         </button>
 
         {/* Khung viền nghệ thuật bên trong */}
-        <div className="flex-grow overflow-y-auto p-4 md:p-10 border-[1px] border-[#337ab7]/30 m-2 relative bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]">
+        <div className="flex-grow overflow-y-auto p-3 md:p-10 border-[1px] border-[#004e9a]/30 m-1 md:m-2 relative bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] font-serif">
           
           {/* Tiêu đề chính */}
-          <div className="text-center mb-10 pt-4">
+          <div className="text-center mb-6 md:mb-10 pt-2 md:pt-4">
             <div className="flex justify-center mb-4">
-              <Award size={48} className="text-[#337ab7] opacity-20 absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[4] pointer-events-none" />
+              <Award size={48} className="text-[#004e9a] opacity-20 absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[4] pointer-events-none" />
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-normal mb-2">
               KẾT QUẢ
             </h1>
-            <p className="text-[16px] md:text-[18px] font-bold text-[#337ab7] uppercase">
+            <p className="text-[16px] md:text-[18px] font-bold text-[#004e9a] uppercase">
               {config.exam.name} - {config.exam.schoolYear}
             </p>
           </div>
@@ -77,7 +77,7 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-baseline gap-2">
                 <span className="min-w-[140px]">Số báo danh:</span>
-                <span className="font-bold text-[#337ab7] border-b border-dotted border-slate-400 flex-grow">
+                <span className="font-bold text-[#004e9a] border-b border-dotted border-slate-400 flex-grow">
                   {studentInfo.so_bao_danh}
                 </span>
               </div>
@@ -102,8 +102,8 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
             <h3 className="font-bold text-[16px] uppercase mb-3 text-slate-800">
               KẾT QUẢ
             </h3>
-            <div className="border-[1.5px] border-slate-800">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto border-[1.5px] border-slate-800">
+              <table className="w-full text-left border-collapse min-w-[480px] sm:min-w-0">
                 <thead>
                   <tr className="bg-slate-100 border-b border-slate-800">
                     <th className="border-r border-slate-800 px-4 py-2 text-center w-16 font-bold uppercase text-[14px]">STT</th>
@@ -139,14 +139,14 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 
               onClick={handlePrint}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 text-[#337ab7] border border-[#337ab7] px-6 py-2 rounded-sm font-bold uppercase text-[13px] hover:bg-blue-50 transition-colors"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 text-[#004e9a] border border-[#004e9a] px-6 py-2 rounded-sm font-bold uppercase text-[13px] hover:bg-blue-50 transition-colors"
             >
               <Printer size={16} />
               In kết quả
             </button>
             <button 
               onClick={onClose}
-              className="flex-1 sm:flex-none px-8 py-2 bg-[#337ab7] text-white rounded-sm font-bold uppercase text-[13px] hover:bg-[#286090] transition-all shadow-md"
+              className="flex-1 sm:flex-none px-8 py-2 bg-[#004e9a] text-white rounded-sm font-bold uppercase text-[13px] hover:bg-[#003d7a] transition-all shadow-md"
             >
               Xác nhận & Đóng
             </button>
