@@ -9,10 +9,6 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='hoc_sinh' AND column_name='gioi_tinh') THEN
         ALTER TABLE public.hoc_sinh ADD COLUMN gioi_tinh text;
     END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ket_qua' AND column_name='sort_order') THEN
-        ALTER TABLE public.ket_qua ADD COLUMN sort_order integer DEFAULT 0;
-    END IF;
 END $$;
 
 -- 2. Tạo các bảng nếu chưa có (cho lần cài đặt đầu tiên)
@@ -39,9 +35,15 @@ CREATE TABLE IF NOT EXISTS public.ket_qua (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     hoc_sinh_id uuid REFERENCES public.hoc_sinh(id) ON DELETE CASCADE,
     mon_thi text,
-    diem double precision,
-    sort_order integer DEFAULT 0
+    diem double precision
 );
+
+-- 2.1 Tạo các Index tối ưu hóa truy vấn tìm kiếm đạt tốc độ tối đa (0ms scan)
+CREATE INDEX IF NOT EXISTS idx_hoc_sinh_so_bao_danh ON public.hoc_sinh (so_bao_danh);
+CREATE INDEX IF NOT EXISTS idx_hoc_sinh_cccd ON public.hoc_sinh (cccd);
+CREATE INDEX IF NOT EXISTS idx_hoc_sinh_ho_ten ON public.hoc_sinh (ho_ten);
+CREATE INDEX IF NOT EXISTS idx_hoc_sinh_ngay_sinh ON public.hoc_sinh (ngay_sinh);
+CREATE INDEX IF NOT EXISTS idx_ket_qua_hoc_sinh_id ON public.ket_qua (hoc_sinh_id);
 
 -- 3. Bật RLS
 ALTER TABLE public.cau_hinh ENABLE ROW LEVEL SECURITY;
