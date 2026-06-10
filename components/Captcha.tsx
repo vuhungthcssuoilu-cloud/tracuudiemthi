@@ -50,15 +50,15 @@ export const Captcha: React.FC<CaptchaProps> = ({ onRefresh }) => {
     ctx.lineWidth = 1;
     ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
-    // Text style
-    ctx.font = 'italic bold 22px "Times New Roman", Times, serif';
-    ctx.fillStyle = '#337ab7';
+    // Text style - Cỡ chữ vừa vặn cho canvas hẹp hơn
+    ctx.font = 'italic bold 18px "Times New Roman", Times, serif';
+    ctx.fillStyle = '#004e9a';
     ctx.textBaseline = 'middle';
     
-    const startX = 12;
+    const startX = 8;
     for (let i = 0; i < code.length; i++) {
       ctx.save();
-      const x = startX + i * 22;
+      const x = startX + i * 18;
       const y = canvas.height / 2;
       const offsetY = (Math.random() - 0.5) * 4;
       ctx.translate(x, y + offsetY);
@@ -82,20 +82,21 @@ export const Captcha: React.FC<CaptchaProps> = ({ onRefresh }) => {
   }, []);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       <canvas 
         ref={canvasRef} 
-        width={130} 
-        height={38} 
-        className="bg-white cursor-pointer"
+        width={104} 
+        height={34} 
+        className="bg-white cursor-pointer rounded-[3px]"
         onClick={drawCaptcha}
       />
       <button 
         type="button" 
         onClick={drawCaptcha}
-        className="text-[#337ab7] hover:text-[#286090] transition-colors"
+        className="text-[#004e9a] hover:text-[#003d7a] transition-colors p-1"
+        title="Đổi mã xác nhận"
       >
-        <RefreshCw size={20} />
+        <RefreshCw size={16} />
       </button>
     </div>
   );
