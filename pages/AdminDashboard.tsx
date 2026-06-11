@@ -18,6 +18,7 @@ export const AdminDashboard: React.FC = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [localSearchInput, setLocalSearchInput] = useState('');
   const [isTableLoading, setIsTableLoading] = useState(false);
 
   const [config, setConfig] = useState<SystemConfig | null>(null);
@@ -40,6 +41,16 @@ export const AdminDashboard: React.FC = () => {
     loadTableData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Debounce search input to prevent rapid API calls while typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setPage(1);
+      setSearchTerm(localSearchInput);
+    }, 450); // 450ms is ideal for typing speed
+
+    return () => clearTimeout(handler);
+  }, [localSearchInput]);
 
   // Reload table when page or search changes
   useEffect(() => {
@@ -83,7 +94,7 @@ export const AdminDashboard: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
       e.preventDefault();
       setPage(1); // Reset to page 1 on new search
-      loadTableData();
+      setSearchTerm(localSearchInput);
   };
 
   const handleDownloadTemplate = () => {
@@ -410,12 +421,21 @@ export const AdminDashboard: React.FC = () => {
                  <form onSubmit={handleSearch} className="relative w-full md:w-96">
                     <input 
                         type="text" 
-                        placeholder="Tìm theo Tên hoặc Số Báo Danh..." 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="Tìm theo Họ tên, SBD hoặc số CCCD..." 
+                        value={localSearchInput}
+                        onChange={(e) => setLocalSearchInput(e.target.value)}
+                        className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-500 outline-none text-sm text-gray-800"
                     />
                     <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
+                    {localSearchInput && (
+                       <button 
+                          type="button" 
+                          onClick={() => setLocalSearchInput('')}
+                          className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                       >
+                          <X size={16} />
+                       </button>
+                    )}
                  </form>
              </div>
 
