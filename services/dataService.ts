@@ -417,8 +417,9 @@ export const getAdminResults = async (page: number = 1, pageSize: number = 20, s
   try {
     let query = supabase.from('ket_qua').select('*, hoc_sinh(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' });
     if (search) {
+        const cleanSearch = search.trim().replace(/,/g, ' ');
         query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' })
-          .ilike('hoc_sinh.ho_ten', `%${search}%`);
+          .or(`ho_ten.ilike.%${cleanSearch}%,so_bao_danh.ilike.%${cleanSearch}%,cccd.ilike.%${cleanSearch}%`, { foreignTable: 'hoc_sinh' });
     }
     const { data, count, error } = await query.range(from, to);
     if (error) throw error;
