@@ -49,22 +49,28 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
       <main className="flex-grow flex flex-col items-center justify-start md:justify-center px-3 py-3 sm:py-6 md:py-12">
         <div className="w-full max-w-md md:max-w-xl flex flex-col items-center justify-center">
           {children}
+          
+          {isHomePage && (
+            <div className="mt-4 sm:mt-6 text-center select-none no-print animate-fade-in w-full">
+              <div className="flex flex-col items-center justify-center gap-1 px-4">
+                <p className="text-gray-500 text-[12px] sm:text-[13px] md:text-[14px] font-semibold leading-tight">
+                  {footerLine1}
+                </p>
+                {footerLine2 && (
+                   <p className="text-gray-400 text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-tight">
+                      {footerLine2}
+                   </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
       {/* Footer */}
       {isHomePage ? (
-        <footer className="pt-2 pb-4 text-center shrink-0 no-print bg-transparent select-none">
-          <div className="container mx-auto px-4 relative flex flex-col items-center justify-center gap-0.5">
-            <p className="text-gray-500 text-[12px] md:text-[14px] font-medium leading-tight">
-              {footerLine1}
-            </p>
-            {footerLine2 && (
-               <p className="text-gray-400 text-[11px] md:text-[13px] font-normal leading-tight">
-                  {footerLine2}
-               </p>
-            )}
-            
+        <footer className="pt-1 pb-4 text-center shrink-0 no-print bg-transparent select-none">
+          <div className="container mx-auto px-4 relative flex flex-col items-center justify-center">
             <div className="absolute right-4 bottom-0 opacity-10 hover:opacity-50 transition-opacity">
               <Link to="/admin/login" className="text-gray-500 text-[9px] uppercase font-bold tracking-widest px-2">Login</Link>
             </div>
