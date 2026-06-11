@@ -15,6 +15,14 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
     getSystemConfig().then(setConfig);
   }, []);
 
+  useEffect(() => {
+    if (isHomePage) {
+      document.body.classList.add('no-scrollbar');
+    } else {
+      document.body.classList.remove('no-scrollbar');
+    }
+  }, [isHomePage]);
+
   const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN';
   const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI';
   const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
@@ -27,7 +35,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const footerLine3 = config?.footer?.line3 || '';
 
   return (
-    <div className={`flex flex-col ${isHomePage ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-[#f0f4f8] font-sans`}>
+    <div className={`flex flex-col min-h-screen bg-[#f0f4f8] font-sans`}>
       {/* Header Banner - Thiết kế chính xác theo hình gốc, tối ưu mobile */}
       <header className="bg-[#004e9a] py-4 sm:py-7 shrink-0">
         <div className="container mx-auto px-2 xs:px-4 max-w-6xl flex flex-col items-center justify-center select-none">
@@ -46,7 +54,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
       </header>
 
       {/* Main Content Area */}
-      <main className={`flex-grow flex flex-col items-center justify-start px-3 py-4 sm:py-6 md:py-10 ${isHomePage ? 'overflow-y-auto' : ''}`}>
+      <main className="flex-grow flex flex-col items-center justify-start px-3 py-4 sm:py-6 md:py-10">
         <div className="w-full max-w-md md:max-w-xl flex flex-col items-center justify-start">
           {children}
           
