@@ -27,9 +27,9 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const footerLine3 = config?.footer?.line3 || '';
 
   return (
-    <div className={`flex flex-col min-h-screen bg-[#f0f4f8] font-sans`}>
+    <div className={`flex flex-col ${isHomePage ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-[#f0f4f8] font-sans`}>
       {/* Header Banner - Thiết kế chính xác theo hình gốc, tối ưu mobile */}
-      <header className="bg-[#004e9a] py-3 sm:py-5 shadow-md border-b border-[#003c77] shrink-0">
+      <header className="bg-[#004e9a] py-4 sm:py-7 shrink-0">
         <div className="container mx-auto px-2 xs:px-4 max-w-6xl flex flex-col items-center justify-center select-none">
           <h2 className="text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-wider text-[#edf2f7] text-center opacity-90 leading-tight">
             {orgName}
@@ -38,7 +38,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
             {examName}
           </h1>
           <div className="mt-1 text-center">
-            <span className="inline-block bg-[#d32f2f] text-white font-black text-[10px] sm:text-xs md:text-sm px-3 py-0.5 rounded-[3px] uppercase tracking-wider shadow-sm">
+            <span className="inline-block bg-[#d32f2f] text-white font-bold text-[10px] sm:text-xs md:text-[13px] px-3 md:px-5 py-1 md:py-1.5 rounded-sm uppercase tracking-wider">
               {schoolYear}
             </span>
           </div>
@@ -46,7 +46,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-grow flex flex-col items-center justify-start px-3 py-4 sm:py-6 md:py-10">
+      <main className={`flex-grow flex flex-col items-center justify-start px-3 py-4 sm:py-6 md:py-10 ${isHomePage ? 'overflow-y-auto' : ''}`}>
         <div className="w-full max-w-md md:max-w-xl flex flex-col items-center justify-start">
           {children}
           

@@ -66,7 +66,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
   const visibleFields = fieldOrder.filter(key => config.fields[key] && config.fields[key].visible);
 
   return (
-    <div className="bg-white border border-[#e5e7eb] rounded-md sm:rounded-lg p-4 sm:p-6 md:p-10 w-full max-w-md md:max-w-xl shadow-md animate-fade-in font-sans">
+    <div className="bg-white rounded-md p-5 sm:p-6 md:p-8 w-full max-w-md md:max-w-xl animate-fade-in font-sans">
       <div className="w-full">
         {/* Tiêu đề khung nhập thông tin */}
         <div className="mb-4 sm:mb-6">
@@ -89,10 +89,10 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   name={key}
                   value={formData[key as keyof SearchParams] || ''}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004e9a] focus:ring-1 focus:ring-[#004e9a] text-[14px] sm:text-[15px] shadow-sm placeholder-gray-400"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004b93] focus:ring-1 focus:ring-[#004b93] text-[14px] sm:text-[15px] placeholder-gray-400"
                   autoComplete="off"
                   placeholder={
-                    key === 'cccd' ? "Nhập căn cước công dân (CCCD)" : 
+                    key === 'cccd' ? "Nhập Căn cước công dân (CCCD)" : 
                     key === 'so_bao_danh' ? "Nhập số báo danh" : 
                     field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
                   }
@@ -112,12 +112,12 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   type="text"
                   value={captchaInput}
                   onChange={(e) => setCaptchaInput(e.target.value.toUpperCase())}
-                  className="flex-grow min-w-[100px] border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-center font-bold text-[#004e9a] bg-white transition-all outline-none focus:border-[#004e9a] focus:ring-1 focus:ring-[#004e9a] text-[14px] sm:text-lg shadow-sm placeholder-gray-400"
+                  className="flex-grow min-w-[100px] border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-center font-bold text-[#004b93] bg-white transition-all outline-none focus:border-[#004b93] focus:ring-1 focus:ring-[#004b93] text-[14px] sm:text-lg placeholder-gray-400"
                   maxLength={5}
                   placeholder="Nhập mã xác nhận"
                   autoComplete="off"
                 />
-                <div className="shrink-0 flex items-center bg-white rounded-md border border-gray-200 p-1 shadow-sm">
+                <div className="shrink-0 flex items-center bg-white rounded-md border border-gray-200 p-1">
                   <Captcha onRefresh={setCaptchaCode} />
                 </div>
               </div>
@@ -129,10 +129,10 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-2.5 sm:py-3 px-6 rounded-md text-white font-bold text-[15px] sm:text-[16px] transition-all shadow-md active:transform active:scale-[0.99]
+              className={`w-full py-2.5 sm:py-3 px-6 rounded-md text-white font-bold text-[15px] sm:text-[16px] transition-all active:transform active:scale-[0.99]
                 ${isLoading 
                   ? 'bg-slate-400 cursor-not-allowed' 
-                  : 'bg-[#004e9a] hover:bg-[#003d7a]'}`}
+                  : 'bg-[#004b93] hover:bg-[#003d7a]'}`}
             >
               {isLoading ? "Đang xử lý..." : "Tra cứu điểm"}
             </button>
