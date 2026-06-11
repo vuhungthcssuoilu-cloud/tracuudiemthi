@@ -29,16 +29,16 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <div className={`flex flex-col min-h-screen bg-[#f0f4f8] font-sans`}>
       {/* Header Banner - Thiết kế chính xác theo hình gốc, tối ưu mobile */}
-      <header className="bg-[#004e9a] py-4 xs:py-6 shadow-md border-b border-[#003c77] shrink-0">
+      <header className="bg-[#004e9a] py-3 sm:py-5 shadow-md border-b border-[#003c77] shrink-0">
         <div className="container mx-auto px-2 xs:px-4 max-w-6xl flex flex-col items-center justify-center select-none">
           <h2 className="text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-wider text-[#edf2f7] text-center opacity-90 leading-tight">
             {orgName}
           </h2>
-          <h1 className="text-[15px] sm:text-[18px] md:text-2xl font-black uppercase mt-1 leading-snug tracking-normal text-white text-center px-1">
+          <h1 className="text-[14px] sm:text-[18px] md:text-2xl font-black uppercase mt-1 leading-snug tracking-normal text-white text-center px-1">
             {examName}
           </h1>
-          <div className="mt-1.5 text-center">
-            <span className="inline-block bg-[#d32f2f] text-white font-black text-[11px] sm:text-xs md:text-sm px-3.5 py-0.5 rounded-[3px] uppercase tracking-wider shadow-sm">
+          <div className="mt-1 text-center">
+            <span className="inline-block bg-[#d32f2f] text-white font-black text-[10px] sm:text-xs md:text-sm px-3 py-0.5 rounded-[3px] uppercase tracking-wider shadow-sm">
               {schoolYear}
             </span>
           </div>
@@ -46,7 +46,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-grow flex items-center justify-center px-3 py-4 xs:py-6 sm:px-4 md:py-12">
+      <main className="flex-grow flex flex-col items-center justify-center px-3 py-2 sm:py-6 md:py-12">
         <div className="w-full max-w-md md:max-w-xl flex flex-col items-center justify-center">
           {children}
         </div>
@@ -54,13 +54,13 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
       {/* Footer */}
       {isHomePage ? (
-        <footer className="py-6 text-center shrink-0 no-print bg-transparent select-none">
-          <div className="container mx-auto px-4 relative flex flex-col items-center justify-center gap-1">
-            <p className="text-gray-500 text-[13px] md:text-[14px] font-medium">
+        <footer className="pt-2 pb-4 text-center shrink-0 no-print bg-transparent select-none">
+          <div className="container mx-auto px-4 relative flex flex-col items-center justify-center gap-0.5">
+            <p className="text-gray-500 text-[12px] md:text-[14px] font-medium leading-tight">
               {footerLine1}
             </p>
             {footerLine2 && (
-               <p className="text-gray-400 text-[12px] md:text-[13px] font-normal">
+               <p className="text-gray-400 text-[11px] md:text-[13px] font-normal leading-tight">
                   {footerLine2}
                </p>
             )}
