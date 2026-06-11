@@ -103,20 +103,20 @@ export const ResultModal: React.FC<ResultModalProps> = ({ isOpen, onClose, resul
               KẾT QUẢ
             </h3>
             <div className="border-[1.5px] border-slate-800 rounded-sm overflow-hidden bg-white">
-              <table className="w-full text-left border-collapse table-fixed min-w-0">
+              <table className="w-full text-left border-collapse min-w-0">
                 <thead>
                   <tr className="bg-slate-100 border-b border-slate-800">
-                    <th className="border-r border-slate-800 px-2 py-2 text-center font-bold uppercase text-[12px] sm:text-[14px] w-[15%] sm:w-16">STT</th>
-                    <th className="border-r border-slate-800 px-2 py-2 sm:px-4 font-bold uppercase text-[12px] sm:text-[14px] w-[50%] sm:w-auto">Môn thi / Nội dung</th>
-                    <th className="px-2 py-2 text-center font-bold uppercase text-[12px] sm:text-[14px] w-[35%] sm:w-32">Điểm số</th>
+                    <th className="border-r border-slate-800 px-3 py-3 text-center font-bold uppercase text-[13px] sm:text-[15px] w-16 sm:w-20">STT</th>
+                    <th className="border-r border-slate-800 px-3 py-3 sm:px-6 font-bold uppercase text-[13px] sm:text-[15px]">Môn thi / Nội dung</th>
+                    <th className="px-3 py-3 text-center font-bold uppercase text-[13px] sm:text-[15px] w-32 sm:w-48">Điểm số</th>
                   </tr>
                 </thead>
                 <tbody>
                   {results.map((item, index) => (
                     <tr key={item.id || index} className="border-b border-slate-800 last:border-b-0 hover:bg-slate-50 transition-colors">
-                      <td className="border-r border-slate-800 px-2 py-2 text-center font-bold text-[13px] sm:text-[16px]">{index + 1}</td>
-                      <td className="border-r border-slate-800 px-2 py-2 sm:px-4 sm:py-3 font-bold uppercase text-[13px] sm:text-[16px] break-words">{item.mon_thi}</td>
-                      <td className="px-2 py-2 text-center">
+                      <td className="border-r border-slate-800 px-3 py-3 text-center font-bold text-[14px] sm:text-[16px]">{index + 1}</td>
+                      <td className="border-r border-slate-800 px-3 py-3 sm:px-6 font-bold uppercase text-[14px] sm:text-[16px]">{item.mon_thi}</td>
+                      <td className="px-3 py-3 text-center">
                         <span className="text-xl sm:text-2xl font-black text-[#d32f2f] block">
                           {item.diem}
                         </span>
