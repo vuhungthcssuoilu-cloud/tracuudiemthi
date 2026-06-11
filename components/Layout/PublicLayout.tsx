@@ -46,7 +46,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-grow flex flex-col items-center justify-center px-3 py-2 sm:py-6 md:py-12">
+      <main className="flex-grow flex flex-col items-center justify-start md:justify-center px-3 py-3 sm:py-6 md:py-12">
         <div className="w-full max-w-md md:max-w-xl flex flex-col items-center justify-center">
           {children}
         </div>
