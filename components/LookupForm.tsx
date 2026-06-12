@@ -66,7 +66,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
   const visibleFields = fieldOrder.filter(key => config.fields[key] && config.fields[key].visible);
 
   return (
-    <div className="bg-white rounded-md p-5 sm:p-6 md:p-8 w-full max-w-md md:max-w-xl animate-fade-in font-sans">
+    <div className="bg-white rounded-lg p-5 sm:p-6 md:p-8 w-full max-w-md md:max-w-xl animate-fade-in font-sans shadow-[0_15px_45px_rgba(0,78,154,0.12)] border border-slate-100/80 border-t-[5px] border-t-[#004e9a]">
       <div className="w-full">
         {/* Tiêu đề khung nhập thông tin */}
         <div className="mb-4 sm:mb-6">
@@ -92,7 +92,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004b93] focus:ring-1 focus:ring-[#004b93] text-[14px] sm:text-[15px] placeholder-gray-400"
                   autoComplete="off"
                   placeholder={
-                    key === 'cccd' ? "Nhập số CCCD (12 số)" : 
+                    key === 'cccd' ? "Nhập số CCCD (12 chữ số)" : 
                     key === 'so_bao_danh' ? "Nhập số báo danh" : 
                     field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
                   }
