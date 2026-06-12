@@ -61,8 +61,8 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
 
   const displayError = localError || externalError;
 
-  // Lấy danh sách các trường cần hiển thị và sắp xếp theo thứ tự quy chuẩn: SBD lên trước, CCCD tiếp theo
-  const fieldOrder: Array<keyof typeof config.fields> = ['so_bao_danh', 'cccd', 'ho_ten', 'ngay_sinh', 'truong'];
+  // Lấy danh sách các trường cần hiển thị và sắp xếp theo thứ tự quy chuẩn: CCCD lên trước, SBD tiếp theo
+  const fieldOrder: Array<keyof typeof config.fields> = ['cccd', 'so_bao_danh', 'ho_ten', 'ngay_sinh', 'truong'];
   const visibleFields = fieldOrder.filter(key => config.fields[key] && config.fields[key].visible);
 
   return (
