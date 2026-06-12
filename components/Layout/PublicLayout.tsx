@@ -37,16 +37,16 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <div className={`flex flex-col min-h-screen bg-[#f0f4f8] font-sans`}>
       {/* Header Banner - Thiết kế chính xác theo hình gốc, tối ưu mobile */}
-      <header className="bg-[#004e9a] py-4 sm:py-7 shrink-0">
+      <header className="bg-[#004e9a] py-2.5 sm:py-4.5 shrink-0">
         <div className="container mx-auto px-2 xs:px-4 max-w-6xl flex flex-col items-center justify-center select-none">
-          <h2 className="text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-wider text-[#edf2f7] text-center opacity-90 leading-tight">
+          <h2 className="text-[10px] sm:text-xs md:text-sm font-medium uppercase tracking-wider text-[#edf2f7] text-center opacity-90 leading-tight">
             {orgName}
           </h2>
-          <h1 className="text-[14px] sm:text-[18px] md:text-2xl font-black uppercase mt-1 leading-snug tracking-normal text-white text-center px-1">
+          <h1 className="text-[13px] sm:text-[17px] md:text-xl font-bold uppercase mt-1 leading-snug tracking-normal text-white text-center px-1">
             {examName}
           </h1>
           <div className="mt-1 text-center">
-            <span className="inline-block bg-[#d32f2f] text-white font-bold text-[10px] sm:text-xs md:text-[13px] px-3 md:px-5 py-1 md:py-1.5 rounded-sm uppercase tracking-wider">
+            <span className="inline-block bg-[#d32f2f] text-white font-medium text-[10px] sm:text-xs md:text-[11px] px-3 md:px-4 py-0.5 md:py-1 rounded-sm uppercase tracking-wider">
               {schoolYear}
             </span>
           </div>
@@ -61,7 +61,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
           {isHomePage && (
             <div className="mt-4 sm:mt-6 text-center select-none no-print animate-fade-in w-full">
               <div className="flex flex-col items-center justify-center gap-1 px-4">
-                <p className="text-gray-500 text-[12px] sm:text-[13px] md:text-[14px] font-semibold leading-tight">
+                <p className="text-gray-500 text-[12px] sm:text-[13px] md:text-[14px] font-medium leading-tight">
                   {footerLine1}
                 </p>
                 {footerLine2 && (
