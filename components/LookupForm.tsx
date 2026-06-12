@@ -31,11 +31,11 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     setLocalError(null);
     if (!config) return;
 
-    // Kiểm tra các trường bắt buộc dựa trên cấu hình
-    const fieldKeys = Object.keys(config.fields) as Array<keyof typeof config.fields>;
+    // Kiểm tra các trường bắt buộc theo thứ tự hiển thị quy chuẩn: CCCD lên trước, SBD tiếp theo
+    const fieldKeys: Array<keyof typeof config.fields> = ['cccd', 'so_bao_danh', 'ho_ten', 'ngay_sinh', 'truong'];
     for (const key of fieldKeys) {
       const field = config.fields[key];
-      if (field.visible && field.required) {
+      if (field && field.visible && field.required) {
         const val = (formData[key as keyof SearchParams] || '').trim();
         if (!val) {
           setLocalError(`Vui lòng nhập ${field.label}`);
@@ -92,7 +92,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004b93] focus:ring-1 focus:ring-[#004b93] text-[14px] sm:text-[15px] placeholder-gray-400"
                   autoComplete="off"
                   placeholder={
-                    key === 'cccd' ? "Nhập số CCCD (12 chữ số)" : 
+                    key === 'cccd' ? "Nhập căn cước công dân (CCCD)" : 
                     key === 'so_bao_danh' ? "Nhập số báo danh" : 
                     field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
                   }
