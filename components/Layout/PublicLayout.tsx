@@ -69,6 +69,11 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                       {footerLine2}
                    </p>
                 )}
+                {footerLine3 && (
+                   <p className="text-gray-400 text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-tight">
+                      {footerLine3}
+                   </p>
+                )}
               </div>
             </div>
           )}
