@@ -70,7 +70,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
       <div className="w-full">
         {/* Tiêu đề khung nhập thông tin */}
         <div className="mb-4 sm:mb-6">
-          <h3 className="text-base sm:text-lg font-bold text-[#004e9a] mb-2 sm:mb-3">Nhập thông tin tra cứu</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-[#004e9a] mb-2 sm:mb-3">Nhập thông tin tra cứu</h3>
           <div className="h-[1px] bg-gray-200 w-full"></div>
         </div>
 
@@ -80,7 +80,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
             const field = config.fields[key];
             return (
               <div key={key} className="flex flex-col">
-                <label className="text-[13px] sm:text-[14px] font-bold text-gray-700 mb-1 sm:mb-1.5 flex items-center gap-1">
+                <label className="text-[13px] sm:text-[14px] font-semibold text-gray-700 mb-1 sm:mb-1.5 flex items-center gap-1">
                   {field.label}
                   {field.required && <span className="text-red-500">*</span>}
                 </label>
@@ -92,7 +92,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004b93] focus:ring-1 focus:ring-[#004b93] text-[14px] sm:text-[15px] placeholder-gray-400"
                   autoComplete="off"
                   placeholder={
-                    key === 'cccd' ? "Nhập số CCCD (12 chữ số)" : 
+                    key === 'cccd' ? "Nhập Căn cước công dân (CCCD)" : 
                     key === 'so_bao_danh' ? "Nhập số báo danh" : 
                     field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
                   }
@@ -104,7 +104,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
           {/* Hàng: Mã xác nhận */}
           {config.security.enableCaptcha && (
             <div className="flex flex-col">
-              <label className="text-[13px] sm:text-[14px] font-bold text-gray-700 mb-1 sm:mb-1.5 flex items-center gap-1">
+              <label className="text-[13px] sm:text-[14px] font-semibold text-gray-700 mb-1 sm:mb-1.5 flex items-center gap-1">
                 Mã xác nhận <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-row items-center gap-2 sm:gap-3">
