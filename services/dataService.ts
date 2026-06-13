@@ -8,9 +8,9 @@ const CONFIG_ID = 'global_settings';
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
-    schoolYear: 'NĂM HỌC 2026 – 2027',
-    orgUnit: 'UBND XÃ XA DUNG',
-    subUnit: 'HỘI ĐỒNG KHẢO THÍ',
+    schoolYear: 'Năm học 2025 - 2026',
+    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
+    subUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
     orgLevel: 'CẤP XÃ',
     isOpen: true,
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
@@ -19,7 +19,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
   },
   footer: {
     line1: 'Dữ liệu chính thức từ phòng Văn Hóa UBND xã Xa Dung',
-    line2: 'Mọi thắc mắc về điểm thi xin liên hệ đơn vị tổ chức kỳ thi.',
+    line2: 'Mọi thắc mắc về điểm thi xin liên hệ đơn vị tổ chức kỳ thi',
     line3: 'Application developed by: Vu Hung - Email: vuhung@db.edu.vn'
   },
   fields: {
