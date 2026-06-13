@@ -25,7 +25,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
   const orgName = config?.exam.orgUnit || 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN';
   const examName = config?.exam.name || 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI';
-  const schoolYear = config?.exam.schoolYear || 'Năm học 2025 - 2026';
+  const schoolYear = config?.exam.schoolYear || 'Năm học 2026 - 2027';
   const logoUrl = config?.exam.logoUrl;
   const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
 
