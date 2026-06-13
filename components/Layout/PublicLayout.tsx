@@ -30,9 +30,9 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const headerTextColor = config?.exam.headerTextColor || '#FFFF00';
 
   // Footer data
-  const footerLine1 = config?.footer?.line1 || orgName;
-  const footerLine2 = config?.footer?.line2 || 'Hệ thống tra cứu điểm thi trực tuyến';
-  const footerLine3 = config?.footer?.line3 || '';
+  const footerLine1 = config?.footer?.line1 || 'Dữ liệu chính thức từ phòng Văn Hóa UBND xã Xa Dung';
+  const footerLine2 = config?.footer?.line2 || 'Mọi thắc mắc về điểm thi xin liên hệ đơn vị tổ chức kỳ thi';
+  const footerLine3 = config?.footer?.line3 || 'Application developed by: Vu Hung - Email: vuhung@db.edu.vn';
 
   return (
     <div className={`flex flex-col min-h-screen bg-[#f0f4f8] font-sans`}>
