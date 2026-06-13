@@ -8,7 +8,7 @@ const CONFIG_ID = 'global_settings';
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
-    schoolYear: 'Năm học 2025 - 2026',
+    schoolYear: 'Năm học 2026 - 2027',
     orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
     subUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
     orgLevel: 'CẤP XÃ',
