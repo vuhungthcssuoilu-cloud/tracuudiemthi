@@ -75,10 +75,9 @@ export const HomePage: React.FC = () => {
         <div className="w-full flex flex-col items-center">
           {results && results.length > 0 ? (
             /* Hiển thị kết quả điểm chuyên nghiệp giống hệt certificate */
-            <div className="w-full max-w-2xl bg-[#fdfdfd] rounded-md shadow-2xl flex flex-col mb-4 border-4 sm:border-8 border-[#004e9a] relative mx-auto overflow-hidden animate-fade-in">
-              {/* Khung viền nghệ thuật bên trong */}
-              <div className="flex-grow p-4 sm:p-5 md:p-6 border-[1px] border-[#004e9a]/40 m-1 sm:m-1.5 relative bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] font-serif">
-                
+            <div className="w-full max-w-2xl bg-[#fdfdfd] rounded-md shadow-2xl flex flex-col mb-4 border-4 sm:border-8 border-[#004e9a] relative mx-auto overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] animate-fade-in">
+              {/* Khung viền nghệ thuật bên trong - Chỉ bao bọc nội dung kết quả để đóng kín hoàn toàn và tách biệt khỏi thanh tác vụ */}
+              <div className="border-[1.5px] border-[#004e9a] m-2 sm:m-3 p-4 sm:p-5 md:p-6 pb-5 font-serif rounded-sm bg-white/30 backdrop-blur-[0.5px]">
                 {/* Tiêu đề chính */}
                 <div className="text-center mb-4 sm:mb-6 pt-1">
                   <div className="flex justify-center mb-2">
@@ -98,7 +97,7 @@ export const HomePage: React.FC = () => {
                 {/* Nội dung thông tin thí sinh */}
                 <div className="space-y-2 sm:space-y-3 mb-6 text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed select-text">
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="min-w-[120px] text-slate-500 font-medium">Họ và tên thí sinh:</span>
+                    <span className="min-w-[120px] text-slate-500 font-medium font-sans">Họ và tên thí sinh:</span>
                     <span className="font-extrabold uppercase text-[#004e9a] border-b border-dotted border-slate-300 flex-grow text-[14px] sm:text-[15px] md:text-[16px]">
                       {results[0].ho_ten}
                     </span>
@@ -106,13 +105,13 @@ export const HomePage: React.FC = () => {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
                     <div className="flex items-baseline gap-2">
-                      <span className="min-w-[120px] sm:min-w-[120px] text-slate-500 font-medium">Ngày sinh:</span>
+                      <span className="min-w-[120px] sm:min-w-[120px] text-slate-500 font-medium font-sans">Ngày sinh:</span>
                       <span className="font-bold text-slate-800 border-b border-dotted border-slate-300 flex-grow">
                         {results[0].ngay_sinh || '---'}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2 col-span-1">
-                      <span className="min-w-[80px] text-slate-500 font-medium">Giới tính:</span>
+                      <span className="min-w-[80px] text-slate-500 font-medium font-sans">Giới tính:</span>
                       <span className="font-bold text-slate-800 border-b border-dotted border-slate-300 flex-grow">
                         {results[0].gioi_tinh || '---'}
                       </span>
@@ -135,7 +134,7 @@ export const HomePage: React.FC = () => {
                   </div>
 
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="min-w-[120px] text-slate-500 font-medium">Đơn vị / Trường:</span>
+                    <span className="min-w-[120px] text-slate-500 font-medium font-sans">Đơn vị / Trường:</span>
                     <span className="font-bold text-slate-700 border-b border-dotted border-slate-300 flex-grow text-ellipsis overflow-hidden" title={results[0].truong}>
                       {results[0].truong}
                     </span>
@@ -174,8 +173,8 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Thanh tác vụ bottom giống gốc */}
-              <div className="bg-slate-50/95 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 no-print border-t border-slate-200/80 font-sans">
+              {/* Thanh tác vụ bottom giống gốc - Nằm độc lập bên ngoài khung viền nhỏ */}
+              <div className="bg-slate-50/95 px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 no-print border-t border-slate-200/80 font-sans">
                 <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-bold select-none text-center sm:text-left leading-tight">
                   <MapPin size={12} className="text-[#004e9a] shrink-0" />
                   <span>{config.exam.orgUnit}</span>
@@ -183,16 +182,16 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-center gap-2.5 w-full sm:w-auto">
                   <button 
                     onClick={handlePrint}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 text-[#004e9a] border border-[#004e9a] px-4 py-2 rounded-md font-extrabold uppercase text-[11px] tracking-wider hover:bg-blue-50/60 active:scale-[0.98] transition-all duration-150"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 text-[#004e9a] border-2 border-[#004e9a]/80 px-5 py-2.5 bg-white rounded-full font-extrabold uppercase text-[11px] tracking-wider hover:bg-blue-50/80 active:scale-[0.98] transition-all duration-150"
                   >
                     <Printer size={13} className="stroke-[2.5]" />
-                    In kết quả
+                    IN KẾT QUẢ
                   </button>
                   <button 
                     onClick={handleReset}
-                    className="flex-1 sm:flex-none px-5 py-2 bg-[#004e9a] hover:bg-[#003d7a] active:scale-[0.98] text-white rounded-md font-extrabold uppercase text-[11px] tracking-wider transition-all duration-150 shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/15"
+                    className="flex-1 sm:flex-none px-6 py-2.5 bg-[#004e9a] hover:bg-[#003d7a] active:scale-[0.98] text-white rounded-full font-extrabold uppercase text-[11px] tracking-wider transition-all duration-150 shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/15"
                   >
-                    Xác nhận & Đóng
+                    XÁC NHẬN & ĐÓNG
                   </button>
                 </div>
               </div>
