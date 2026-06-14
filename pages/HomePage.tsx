@@ -189,7 +189,7 @@ export const HomePage: React.FC = () => {
                   </button>
                   <button 
                     onClick={handleReset}
-                    className="flex-1 sm:flex-none px-6 py-2.5 bg-[#004e9a] hover:bg-[#003d7a] active:scale-[0.98] text-white rounded-full font-extrabold uppercase text-[11px] tracking-wider transition-all duration-150 shadow-md shadow-blue-900/10 hover:shadow-lg hover:shadow-blue-900/15"
+                    className="flex-1 sm:flex-none px-6 py-2.5 bg-[#d32f2f] hover:bg-[#b71c1c] active:scale-[0.98] text-white rounded-full font-extrabold uppercase text-[11px] tracking-wider transition-all duration-150 shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/15"
                   >
                     XÁC NHẬN & ĐÓNG
                   </button>
