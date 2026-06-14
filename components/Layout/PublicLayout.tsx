@@ -57,61 +57,33 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
       <main className="flex-grow flex flex-col items-center justify-start px-3 py-4 sm:py-6 md:py-10">
         <div className="w-full max-w-md md:max-w-xl flex flex-col items-center justify-start">
           {children}
-          
-          {isHomePage && (
-            <div className="mt-4 sm:mt-6 text-center select-none no-print animate-fade-in w-full">
-              <div className="flex flex-col items-center justify-center gap-1 px-4">
-                <p className="text-gray-500 text-[12px] sm:text-[13px] md:text-[14px] font-medium leading-tight">
-                  {footerLine1}
-                </p>
-                {footerLine2 && (
-                   <p className="text-gray-400 text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-tight">
-                      {footerLine2}
-                   </p>
-                )}
-                {footerLine3 && (
-                   <p className="text-gray-400 text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-tight">
-                      {footerLine3}
-                   </p>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </main>
 
       {/* Footer */}
-      {isHomePage ? (
-        <footer className="pt-1 pb-4 text-center shrink-0 no-print bg-transparent select-none">
-          <div className="container mx-auto px-4 relative flex flex-col items-center justify-center">
-            <div className="absolute right-4 bottom-0 opacity-10 hover:opacity-50 transition-opacity">
-              <Link to="/admin/login" className="text-gray-500 text-[9px] uppercase font-bold tracking-widest px-2">Login</Link>
-            </div>
+      <footer className="bg-[#004e9a] py-4 sm:py-6 border-t border-[#003c77] shrink-0 no-print mt-auto text-center">
+        <div className="container mx-auto px-4 relative flex flex-col items-center justify-center">
+          <p className="text-white text-[13px] sm:text-[14px] font-bold uppercase mb-1.5 opacity-90 leading-tight">
+            {footerLine1}
+          </p>
+          {footerLine2 && (
+             <p className="text-white/80 text-[12px] sm:text-[13px] font-normal mb-1 leading-tight">
+                {footerLine2}
+             </p>
+          )}
+          {footerLine3 && (
+             <p className="text-white/70 text-[11px] sm:text-[12px] font-normal mb-3 sm:mb-0 leading-tight">
+                {footerLine3}
+             </p>
+          )}
+          
+          <div className="sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2 opacity-30 hover:opacity-100 transition-opacity mt-2 sm:mt-0">
+            <Link to="/admin/login" className="text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 border border-white/20 rounded hover:bg-white/10 transition-colors">
+              Đăng nhập
+            </Link>
           </div>
-        </footer>
-      ) : (
-        <footer className="bg-[#004e9a] py-4 text-center border-t border-[#003c77] shrink-0 no-print">
-          <div className="container mx-auto px-4 relative">
-            <p className="text-white text-[14px] font-bold uppercase mb-1">
-              {footerLine1}
-            </p>
-            {footerLine2 && (
-               <p className="text-white text-[13px] font-normal mb-1">
-                  {footerLine2}
-               </p>
-            )}
-            {footerLine3 && (
-               <p className="text-white text-[13px] font-normal">
-                  {footerLine3}
-               </p>
-            )}
-            
-            <div className="absolute right-4 bottom-1/2 translate-y-1/2 opacity-20 hover:opacity-60 transition-opacity">
-              <Link to="/admin/login" className="text-white text-[9px] uppercase font-bold tracking-widest px-2">Login</Link>
-            </div>
-          </div>
-        </footer>
-      )}
+        </div>
+      </footer>
     </div>
   );
 };
