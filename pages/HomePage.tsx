@@ -1,29 +1,28 @@
-
-import React, { useState, useEffect } from 'react';
-import { PublicLayout } from '../components/Layout/PublicLayout';
-import { LookupForm } from '../components/LookupForm';
-import { SearchParams, SearchResult, SystemConfig } from '../types';
-import { searchScores, getSystemConfig } from '../services/dataService';
-import { AlertTriangle, Printer, Award, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { PublicLayout } from "../components/Layout/PublicLayout";
+import { LookupForm } from "../components/LookupForm";
+import { SearchParams, SearchResult, SystemConfig } from "../types";
+import { searchScores, getSystemConfig } from "../services/dataService";
+import { AlertTriangle, Printer, Award, MapPin } from "lucide-react";
 
 export const HomePage: React.FC = () => {
   const [results, setResults] = useState<SearchResult[] | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Khởi tạo null để biết khi nào đang load dữ liệu thật
   const [config, setConfig] = useState<SystemConfig | null>(null);
-  
+
   const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     // Ẩn loader của index.html nếu React đã chạy
-    const loader = document.querySelector('.initial-loader');
+    const loader = document.querySelector(".initial-loader");
     if (loader) {
-        (loader as HTMLElement).style.opacity = '0';
-        setTimeout(() => loader.remove(), 500);
+      (loader as HTMLElement).style.opacity = "0";
+      setTimeout(() => loader.remove(), 500);
     }
-    
+
     // Load config
     getSystemConfig().then(setConfig);
   }, []);
@@ -32,20 +31,28 @@ export const HomePage: React.FC = () => {
     setIsLoading(true);
     setHasSearched(false);
     setSearchError(null);
-    
+
     try {
       const data = await searchScores(params);
       if (data && data.length > 0) {
         setResults(data);
         setHasSearched(true);
       } else {
-        setSearchError('Thông tin tra cứu không chính xác hoặc không tồn tại.');
+        setSearchError("Thông tin tra cứu không chính xác hoặc không tồn tại.");
         setResults([]);
         setHasSearched(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi tra cứu:", error);
-      setSearchError('Hệ thống đang bận, vui lòng thử lại sau.');
+      if (
+        error &&
+        error.message &&
+        error.message.includes("không khớp")
+      ) {
+        setSearchError(error.message);
+      } else {
+        setSearchError("Hệ thống đang bận, vui lòng thử lại sau.");
+      }
       setResults([]);
       setHasSearched(true);
     } finally {
@@ -66,11 +73,13 @@ export const HomePage: React.FC = () => {
   return (
     <PublicLayout>
       {!config ? (
-         /* Loading Spinner bên trong Layout */
-         <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-             <div className="w-12 h-12 border-4 border-gray-200 border-t-[#337ab7] rounded-full animate-spin"></div>
-             <p className="mt-4 text-gray-500 font-sans font-medium">Đang kết nối hệ thống...</p>
-         </div>
+        /* Loading Spinner bên trong Layout */
+        <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-[#337ab7] rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-500 font-sans font-medium">
+            Đang kết nối hệ thống...
+          </p>
+        </div>
       ) : (
         <div className="w-full flex flex-col items-center">
           {results && results.length > 0 ? (
@@ -81,7 +90,10 @@ export const HomePage: React.FC = () => {
                 {/* Tiêu đề chính */}
                 <div className="text-center mb-4 sm:mb-6 pt-1">
                   <div className="flex justify-center mb-2">
-                    <Award size={36} className="text-[#004e9a] opacity-[0.08] absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[4] pointer-events-none" />
+                    <Award
+                      size={36}
+                      className="text-[#004e9a] opacity-[0.08] absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[4] pointer-events-none"
+                    />
                   </div>
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-wide mb-1 select-none">
                     KẾT QUẢ
@@ -97,45 +109,60 @@ export const HomePage: React.FC = () => {
                 {/* Nội dung thông tin thí sinh */}
                 <div className="space-y-2 sm:space-y-3 mb-6 text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed select-text">
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="min-w-[120px] text-slate-500 font-medium font-sans">Họ và tên thí sinh:</span>
+                    <span className="min-w-[120px] text-slate-500 font-medium font-sans">
+                      Họ và tên thí sinh:
+                    </span>
                     <span className="font-extrabold uppercase text-[#004e9a] border-b border-dotted border-slate-300 flex-grow text-[14px] sm:text-[15px] md:text-[16px]">
                       {results[0].ho_ten}
                     </span>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
                     <div className="flex items-baseline gap-2">
-                      <span className="min-w-[120px] sm:min-w-[120px] text-slate-500 font-medium font-sans">Ngày sinh:</span>
+                      <span className="min-w-[120px] sm:min-w-[120px] text-slate-500 font-medium font-sans">
+                        Ngày sinh:
+                      </span>
                       <span className="font-bold text-slate-800 border-b border-dotted border-slate-300 flex-grow">
-                        {results[0].ngay_sinh || '---'}
+                        {results[0].ngay_sinh || "---"}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2 col-span-1">
-                      <span className="min-w-[80px] text-slate-500 font-medium font-sans">Giới tính:</span>
+                      <span className="min-w-[80px] text-slate-500 font-medium font-sans">
+                        Giới tính:
+                      </span>
                       <span className="font-bold text-slate-800 border-b border-dotted border-slate-300 flex-grow">
-                        {results[0].gioi_tinh || '---'}
+                        {results[0].gioi_tinh || "---"}
                       </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6">
                     <div className="flex items-baseline gap-2">
-                      <span className="min-w-[120px] sm:min-w-[120px] text-slate-500 font-medium font-sans">Số báo danh:</span>
+                      <span className="min-w-[120px] sm:min-w-[120px] text-slate-500 font-medium font-sans">
+                        Số báo danh:
+                      </span>
                       <span className="font-bold text-[#004e9a] border-b border-dotted border-slate-300 flex-grow font-mono text-[14px]">
                         {results[0].so_bao_danh}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2 col-span-1">
-                      <span className="min-w-[80px] text-slate-500 font-medium font-sans">Số CCCD:</span>
+                      <span className="min-w-[80px] text-slate-500 font-medium font-sans">
+                        Số CCCD:
+                      </span>
                       <span className="font-bold text-slate-800 border-b border-dotted border-slate-300 flex-grow font-mono text-[14px]">
-                        {results[0].cccd || '---'}
+                        {results[0].cccd || "---"}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="min-w-[120px] text-slate-500 font-medium font-sans">Đơn vị / Trường:</span>
-                    <span className="font-bold text-slate-700 border-b border-dotted border-slate-300 flex-grow text-ellipsis overflow-hidden" title={results[0].truong}>
+                    <span className="min-w-[120px] text-slate-500 font-medium font-sans">
+                      Đơn vị / Trường:
+                    </span>
+                    <span
+                      className="font-bold text-slate-700 border-b border-dotted border-slate-300 flex-grow text-ellipsis overflow-hidden"
+                      title={results[0].truong}
+                    >
                       {results[0].truong}
                     </span>
                   </div>
@@ -150,16 +177,29 @@ export const HomePage: React.FC = () => {
                     <table className="w-full text-left border-collapse min-w-0 font-sans">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-700 select-none">
-                          <th className="border-r border-slate-700 px-2 py-2 sm:py-2.5 text-center font-extrabold uppercase text-[11px] sm:text-[12px] text-slate-700 w-12 sm:w-16">STT</th>
-                          <th className="border-r border-slate-700 px-3 py-2 sm:py-2.5 sm:px-4 font-extrabold uppercase text-[11px] sm:text-[12px] text-slate-700">Môn thi / Nội dung</th>
-                          <th className="px-3 py-2 sm:py-2.5 text-center font-extrabold uppercase text-[11px] sm:text-[12px] text-slate-700 w-24 sm:w-32">Điểm số</th>
+                          <th className="border-r border-slate-700 px-2 py-2 sm:py-2.5 text-center font-extrabold uppercase text-[11px] sm:text-[12px] text-slate-700 w-12 sm:w-16">
+                            STT
+                          </th>
+                          <th className="border-r border-slate-700 px-3 py-2 sm:py-2.5 sm:px-4 font-extrabold uppercase text-[11px] sm:text-[12px] text-slate-700">
+                            Môn thi / Nội dung
+                          </th>
+                          <th className="px-3 py-2 sm:py-2.5 text-center font-extrabold uppercase text-[11px] sm:text-[12px] text-slate-700 w-24 sm:w-32">
+                            Điểm số
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {results.map((item, index) => (
-                          <tr key={item.id || index} className="border-b border-slate-700 last:border-b-0 hover:bg-slate-50/50 transition-colors">
-                            <td className="border-r border-slate-700 px-2 py-2 sm:py-2.5 text-center font-bold text-[12.5px] sm:text-[13.5px] text-slate-600">{index + 1}</td>
-                            <td className="border-r border-slate-700 px-3 py-2 sm:py-2.5 sm:px-4 font-bold uppercase text-[12.5px] sm:text-[13.5px] text-slate-800 leading-relaxed">{item.mon_thi}</td>
+                          <tr
+                            key={item.id || index}
+                            className="border-b border-slate-700 last:border-b-0 hover:bg-slate-50/50 transition-colors"
+                          >
+                            <td className="border-r border-slate-700 px-2 py-2 sm:py-2.5 text-center font-bold text-[12.5px] sm:text-[13.5px] text-slate-600">
+                              {index + 1}
+                            </td>
+                            <td className="border-r border-slate-700 px-3 py-2 sm:py-2.5 sm:px-4 font-bold uppercase text-[12.5px] sm:text-[13.5px] text-slate-800 leading-relaxed">
+                              {item.mon_thi}
+                            </td>
                             <td className="px-3 py-2 sm:py-2.5 text-center">
                               <span className="text-base sm:text-lg font-black text-[#d32f2f] block select-all">
                                 {item.diem}
@@ -180,14 +220,14 @@ export const HomePage: React.FC = () => {
                   <span>{config.exam.orgUnit}</span>
                 </div>
                 <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                  <button 
+                  <button
                     onClick={handlePrint}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 text-[#004e9a] border-2 border-[#004e9a]/80 px-5 py-2.5 bg-white rounded-full font-extrabold uppercase text-[11px] tracking-wider hover:bg-blue-50/80 active:scale-[0.98] transition-all duration-150"
                   >
                     <Printer size={13} className="stroke-[2.5]" />
                     IN KẾT QUẢ
                   </button>
-                  <button 
+                  <button
                     onClick={handleReset}
                     className="flex-1 sm:flex-none px-6 py-2.5 bg-[#d32f2f] hover:bg-[#b71c1c] active:scale-[0.98] text-white rounded-full font-extrabold uppercase text-[11px] tracking-wider transition-all duration-150 shadow-md shadow-red-900/10 hover:shadow-lg hover:shadow-red-900/15"
                   >
@@ -197,15 +237,21 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           ) : config.exam.isOpen ? (
-            <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} />
+            <LookupForm
+              onSearch={handleSearch}
+              isLoading={isLoading}
+              error={searchError}
+            />
           ) : (
             <div className="bg-white border border-slate-100 rounded-lg p-16 text-center shadow-sm max-w-2xl mx-auto animate-fade-in w-full">
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <AlertTriangle size={32} className="text-slate-200" />
+                <AlertTriangle size={32} className="text-slate-200" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 uppercase mb-3 text-center">Cổng tra cứu hiện đang đóng</h3>
+              <h3 className="text-xl font-bold text-slate-800 uppercase mb-3 text-center">
+                Cổng tra cứu hiện đang đóng
+              </h3>
               <p className="text-slate-400 text-sm italic text-center">
-                  Hệ thống tra cứu điểm thi hiện chưa mở.
+                Hệ thống tra cứu điểm thi hiện chưa mở.
               </p>
             </div>
           )}
