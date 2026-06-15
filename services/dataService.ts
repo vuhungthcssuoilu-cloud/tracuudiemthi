@@ -7,7 +7,7 @@ const CONFIG_ID = "global_settings";
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: "TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ",
-    schoolYear: "Năm học 2026- 2027",
+    schoolYear: "Năm học 2026 - 2027",
     orgUnit: "ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN",
     subUnit: "ỦY BAN NHÂN DÂN XÃ XA DUNG",
     orgLevel: "CẤP XÃ",
@@ -177,6 +177,44 @@ export const searchScores = async (
   const dobInput = params.ngay_sinh?.trim();
 
   try {
+    // Kiểm tra tính nhất quán giữa CCCD và SBD nếu cả hai đều hiển thị và được nhập
+    if (
+      config.fields.so_bao_danh.visible &&
+      sbdInput &&
+      config.fields.cccd.visible &&
+      cccdInput
+    ) {
+      const { data: sbdStudents, error: sbdError } = await supabase
+        .from("hoc_sinh")
+        .select("cccd")
+        .eq("so_bao_danh", sbdInput);
+
+      const { data: cccdStudents, error: cccdError } = await supabase
+        .from("hoc_sinh")
+        .select("so_bao_danh")
+        .eq("cccd", cccdInput);
+
+      const sbdExists = !sbdError && sbdStudents && sbdStudents.length > 0;
+      const cccdExists = !cccdError && cccdStudents && cccdStudents.length > 0;
+
+      if (cccdExists && !sbdExists) {
+        throw new Error(
+          `Số báo danh nhập không khớp với số căn cước ${params.cccd?.trim()}. Vui lòng kiểm tra lại.`,
+        );
+      } else if (sbdExists && !cccdExists) {
+        throw new Error(
+          `Số CCCD không khớp với số báo danh ${params.so_bao_danh?.trim()}. Vui lòng kiểm tra lại.`,
+        );
+      } else if (sbdExists && cccdExists) {
+        const dbCccd = sbdStudents[0].cccd?.toString().trim();
+        if (dbCccd !== cccdInput) {
+          throw new Error(
+            `Số báo danh nhập không khớp với số căn cước ${params.cccd?.trim()}. Vui lòng kiểm tra lại.`,
+          );
+        }
+      }
+    }
+
     // Sử dụng Join logic (ket_qua(*)) để chỉ cần đúng 1 cuộc gọi API duy nhất đến Supabase (Giảm 50% độ trễ)
     let query = supabase
       .from("hoc_sinh")
@@ -222,8 +260,11 @@ export const searchScores = async (
       ngay_sinh: student.ngay_sinh,
       gioi_tinh: student.gioi_tinh,
     }));
-  } catch (err) {
+  } catch (err: any) {
     console.error("Lỗi tra cứu:", err);
+    if (err && err.message && err.message.includes("không khớp")) {
+      throw err;
+    }
     return [];
   }
 };
