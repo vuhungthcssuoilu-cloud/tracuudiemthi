@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { PublicLayout } from '../components/Layout/PublicLayout';
 import { LookupForm } from '../components/LookupForm';
 import { SearchParams, SearchResult, SystemConfig } from '../types';
-import { searchScores, getSystemConfig } from '../services/dataService';
+import { searchScores, getSystemConfig, getCachedConfig } from '../services/dataService';
 import { AlertTriangle, Printer, Award, MapPin } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -11,8 +11,8 @@ export const HomePage: React.FC = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Khởi tạo null để biết khi nào đang load dữ liệu thật
-  const [config, setConfig] = useState<SystemConfig | null>(null);
+  // Khởi tạo ngay với config cached để hiển thị luôn
+  const [config, setConfig] = useState<SystemConfig>(getCachedConfig());
   
   const [searchError, setSearchError] = useState<string | null>(null);
 
@@ -65,13 +65,6 @@ export const HomePage: React.FC = () => {
 
   return (
     <PublicLayout>
-      {!config ? (
-         /* Loading Spinner bên trong Layout */
-         <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-             <div className="w-12 h-12 border-4 border-gray-200 border-t-[#337ab7] rounded-full animate-spin"></div>
-             <p className="mt-4 text-gray-500 font-sans font-medium">Đang kết nối hệ thống...</p>
-         </div>
-      ) : (
         <div className="w-full flex flex-col items-center">
           {results && results.length > 0 ? (
             /* Hiển thị kết quả điểm chuyên nghiệp giống hệt certificate */
@@ -210,7 +203,6 @@ export const HomePage: React.FC = () => {
             </div>
           )}
         </div>
-      )}
     </PublicLayout>
   );
 };
