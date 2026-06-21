@@ -76,6 +76,8 @@ try {
 
 let configPromise: Promise<SystemConfig> | null = null;
 
+export const getCachedConfig = (): SystemConfig => cachedConfig || DEFAULT_CONFIG;
+
 export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfig> => {
   if (cachedConfig && !forceRefresh) {
     // Kích hoạt cập nhật ngầm cấu hình để đồng bộ tức thì mà không block UI
