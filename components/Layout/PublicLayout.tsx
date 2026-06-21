@@ -1,12 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getSystemConfig, DEFAULT_CONFIG } from '../../services/dataService';
+import { getSystemConfig, getCachedConfig } from '../../services/dataService';
 import { SystemConfig } from '../../types';
 
 export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Khởi tạo ngay với DEFAULT_CONFIG để hiển thị Header/Footer lập tức
-  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
+  // Khởi tạo ngay với config để hiển thị Header/Footer lập tức
+  const [config, setConfig] = useState<SystemConfig>(getCachedConfig());
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 

@@ -7,7 +7,7 @@ const CONFIG_ID = "global_settings";
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
     name: "TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ",
-    schoolYear: "Năm học 2026 - 2027",
+    schoolYear: "Năm học 2025 - 2026",
     orgUnit: "ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN",
     subUnit: "ỦY BAN NHÂN DÂN XÃ XA DUNG",
     orgLevel: "CẤP XÃ",
@@ -89,6 +89,8 @@ try {
 
 let configPromise: Promise<SystemConfig> | null = null;
 
+export const getCachedConfig = (): SystemConfig => cachedConfig || DEFAULT_CONFIG;
+
 export const getSystemConfig = async (
   forceRefresh = false,
 ): Promise<SystemConfig> => {
@@ -99,6 +101,7 @@ export const getSystemConfig = async (
   }
 
   if (configPromise) return configPromise;
+
 
   configPromise = (async () => {
     try {

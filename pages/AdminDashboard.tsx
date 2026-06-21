@@ -379,87 +379,92 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans pb-20 overflow-y-auto">
-      <header className="bg-white shadow border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="bg-gov-blue p-1.5 rounded text-white">
+    <div className="min-h-screen bg-slate-50 font-sans pb-20 overflow-y-auto">
+      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="bg-gov-blue p-2 rounded-lg text-white shadow-sm">
               <Award size={24} />
             </div>
-            <h1 className="text-xl font-bold text-gray-800 uppercase">
-              Hệ Thống Quản Trị Điểm Thi
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+              Hệ Thống Quản Trị
             </h1>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-gray-600 hover:text-red-600 font-medium transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-md font-medium transition-all"
           >
-            <LogOut size={20} />
+            <LogOut size={18} />
             Đăng xuất
           </button>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="mb-8">
-          <div className="bg-gradient-to-r from-gov-blue to-blue-800 rounded-lg shadow-lg p-6 text-white flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold uppercase mb-1">
-                Cấu Hình Hệ Thống
-              </h2>
-              <p className="text-blue-100">
-                Quản lý kỳ thi, nhận diện, bảo mật.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/admin/settings")}
-              className="bg-white text-gov-blue px-6 py-3 rounded font-bold uppercase hover:bg-gray-100 transition-colors flex items-center gap-2"
-            >
-              <Settings size={20} />
-              Thiết Lập Ngay
-            </button>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Settings Banner */}
+        <div className="bg-gradient-to-r from-gov-blue to-indigo-800 rounded-xl shadow-md p-6 sm:p-8 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
+            <Settings size={180} className="transform translate-x-12 -translate-y-12 animate-pulse-slow" />
           </div>
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+              <Settings size={24} className="text-blue-200"/>
+              Cấu Hình Hệ Thống
+            </h2>
+            <p className="text-blue-100 max-w-xl">
+              Tùy chỉnh thông tin kỳ thi, cài đặt nhận diện và các tùy chọn.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/admin/settings")}
+            className="relative z-10 bg-white text-indigo-900 px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
+          >
+            <Settings size={18} />
+            Thiết Lập Ngay
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow border border-gray-200 flex items-center gap-4">
-            <div className="p-4 bg-blue-100 text-blue-600 rounded-full">
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-5 hover:shadow-md transition-shadow">
+            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
               <Users size={32} />
             </div>
             <div>
-              <p className="text-gray-500 text-sm uppercase font-semibold">
+              <p className="text-slate-500 text-sm font-medium uppercase tracking-wider mb-1">
                 Tổng Số Học Sinh
               </p>
-              <p className="text-3xl font-bold text-gray-800">
+              <p className="text-4xl font-bold text-slate-800 tracking-tight">
                 {stats.studentCount}
               </p>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow border border-gray-200 flex items-center gap-4">
-            <div className="p-4 bg-green-100 text-green-600 rounded-full">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-5 hover:shadow-md transition-shadow">
+            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
               <FileSpreadsheet size={32} />
             </div>
             <div>
-              <p className="text-gray-500 text-sm uppercase font-semibold">
+              <p className="text-slate-500 text-sm font-medium uppercase tracking-wider mb-1">
                 Kết Quả Đã Nhập
               </p>
-              <p className="text-3xl font-bold text-gray-800">
+              <p className="text-4xl font-bold text-slate-800 tracking-tight">
                 {stats.resultCount}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden mb-10">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-gray-800 uppercase flex items-center gap-2">
-              <Upload size={20} />
+        {/* Upload Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <Upload size={20} className="text-gov-blue" />
               Nhập Dữ Liệu Từ Excel
             </h2>
 
             <button
               onClick={handleDownloadTemplate}
-              className="flex items-center gap-2 text-sm bg-white border border-gray-300 text-gov-blue px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
+              className="flex items-center gap-2 text-sm bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-md hover:bg-slate-50 hover:text-gov-blue transition-all font-medium shadow-sm"
               title="Tải file mẫu định dạng .xlsx đầy đủ các cột Ngày sinh, Giới tính"
             >
               <Download size={16} />
@@ -467,154 +472,155 @@ export const AdminDashboard: React.FC = () => {
             </button>
           </div>
 
-          <div className="p-8">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:bg-gray-50 transition-colors relative">
+          <div className="p-6 sm:p-8">
+            <div className="border-2 border-dashed border-indigo-200 bg-indigo-50/30 rounded-xl p-10 text-center hover:bg-indigo-50/80 hover:border-indigo-300 transition-all relative group cursor-pointer">
               <input
                 type="file"
                 accept=".xlsx, .xls"
                 onChange={handleFileUpload}
                 disabled={isUploading}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               <div className="flex flex-col items-center justify-center pointer-events-none">
-                <FileSpreadsheet size={48} className="text-gray-400 mb-4" />
-                <p className="text-lg font-medium text-gray-700 mb-2">
+                <div className={`p-4 rounded-full mb-4 transition-transform group-hover:scale-110 ${isUploading ? 'bg-indigo-100 animate-pulse' : 'bg-indigo-100 text-indigo-600'}`}>
+                  <FileSpreadsheet size={40} className={isUploading ? "text-indigo-400" : ""} />
+                </div>
+                <p className="text-lg font-semibold text-slate-700 mb-1">
                   {isUploading
                     ? "Đang xử lý..."
                     : "Kéo thả file Excel hoặc nhấn để chọn"}
                 </p>
-                <p className="text-sm text-gray-500">
-                  Hỗ trợ định dạng .xlsx, .xls (Tự động nhận diện cột Ngày sinh,
-                  Giới tính)
+                <p className="text-sm text-slate-500">
+                  Hỗ trợ định dạng .xlsx, .xls
                 </p>
               </div>
             </div>
 
             {uploadStatus && (
               <div
-                className={`mt-6 p-4 rounded border ${uploadStatus.error ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`}
+                className={`mt-6 p-4 rounded-lg border flex items-start gap-3 ${uploadStatus.error ? "bg-red-50 border-red-200 text-red-800" : "bg-emerald-50 border-emerald-200 text-emerald-800"}`}
               >
-                {uploadStatus.error ? (
-                  <div>
-                    <h4 className="font-bold text-red-700 flex items-center gap-2">
-                      <AlertCircle size={20} />
-                      {uploadStatus.error}
+                <div className="mt-0.5">
+                    {uploadStatus.error ? <AlertCircle size={20} className="text-red-600" /> : <CheckCircle size={20} className="text-emerald-600"/>}
+                </div>
+                <div>
+                    {uploadStatus.error ? (
+                    <div>
+                        <h4 className="font-bold mb-1">
+                        {uploadStatus.error}
+                        </h4>
+                        {uploadStatus.details && (
+                        <ul className="list-disc list-inside text-sm mt-2 space-y-1 opacity-90 max-h-40 overflow-y-auto">
+                            {uploadStatus.details.map((msg, idx) => (
+                            <li key={idx}>{msg}</li>
+                            ))}
+                        </ul>
+                        )}
+                    </div>
+                    ) : (
+                    <h4 className="font-bold">
+                        Nhập dữ liệu thành công! Đã thêm {uploadStatus.success} bản ghi.
                     </h4>
-                    {uploadStatus.details && (
-                      <ul className="mt-2 list-disc list-inside text-sm text-red-600 max-h-40 overflow-y-auto">
-                        {uploadStatus.details.map((msg, idx) => (
-                          <li key={idx}>{msg}</li>
-                        ))}
-                      </ul>
                     )}
-                  </div>
-                ) : (
-                  <h4 className="font-bold text-green-700 flex items-center gap-2">
-                    <CheckCircle size={20} />
-                    Nhập dữ liệu thành công! Đã thêm {uploadStatus.success} bản
-                    ghi.
-                  </h4>
-                )}
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-gray-800 uppercase flex items-center gap-2">
+        {/* Data Tools */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
               <FileSpreadsheet size={24} className="text-gov-blue" />
               Danh Sách Kết Quả Thi
             </h2>
-            <form onSubmit={handleSearch} className="relative w-full md:w-96">
-              <input
-                type="text"
-                placeholder="Tìm theo Họ tên, SBD hoặc số CCCD..."
-                value={localSearchInput}
-                onChange={(e) => setLocalSearchInput(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-blue-500 outline-none text-sm text-gray-800"
-              />
-              <Search
-                size={18}
-                className="absolute left-3 top-2.5 text-gray-400"
-              />
-              {localSearchInput && (
+            
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                <form onSubmit={handleSearch} className="relative w-full sm:w-80">
+                <input
+                    type="text"
+                    placeholder="Tìm theo Họ tên, SBD, CCCD..."
+                    value={localSearchInput}
+                    onChange={(e) => setLocalSearchInput(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm text-slate-800 transition-all"
+                />
+                <Search
+                    size={18}
+                    className="absolute left-3 top-3 text-slate-400"
+                />
+                {localSearchInput && (
+                    <button
+                    type="button"
+                    onClick={() => setLocalSearchInput("")}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                    >
+                    <X size={16} />
+                    </button>
+                )}
+                </form>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
                 <button
-                  type="button"
-                  onClick={() => setLocalSearchInput("")}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                    onClick={() => setIsCreating(true)}
+                    className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm flex-shrink-0"
                 >
-                  <X size={16} />
+                    <Plus size={16} />
+                    Thêm Mới
                 </button>
-              )}
-            </form>
+                <button
+                    onClick={handleExportData}
+                    className="flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-all shadow-sm flex-shrink-0"
+                    title="Xuất danh sách ra file Excel"
+                >
+                    <Download size={16} />
+                    Xuất Excel
+                </button>
+                <button
+                    onClick={handleClearAll}
+                    className="flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-all shadow-sm flex-shrink-0"
+                    title="Xóa toàn bộ dữ liệu"
+                >
+                    <Trash2 size={16} />
+                    Xóa Tất Cả
+                </button>
+                </div>
+            </div>
           </div>
 
-          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm text-gray-500 font-medium italic">
-              <AlertCircle size={16} />
-              Công cụ quản lý dữ liệu
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsCreating(true)}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-green-700 transition-colors shadow-sm"
-              >
-                <Plus size={16} />
-                Thêm Mới
-              </button>
-              <div className="h-6 w-px bg-gray-300 mx-2"></div>
-              <button
-                onClick={handleExportData}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-blue-700 transition-colors shadow-sm"
-                title="Tải về toàn bộ danh sách hiện có dưới dạng file Excel"
-              >
-                <Download size={16} />
-                Xuất Excel
-              </button>
-              <button
-                onClick={handleClearAll}
-                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded text-sm font-bold uppercase hover:bg-red-700 transition-colors shadow-sm"
-                title="XÓA TOÀN BỘ dữ liệu khỏi hệ thống"
-              >
-                <Trash2 size={16} />
-                Xóa toàn bộ
-              </button>
-            </div>
-          </div>
+          <AdminResultTable
+            data={tableData}
+            total={totalRecords}
+            page={page}
+            pageSize={10}
+            isLoading={isTableLoading}
+            onPageChange={setPage}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </div>
-
-        <AdminResultTable
-          data={tableData}
-          total={totalRecords}
-          page={page}
-          pageSize={10}
-          isLoading={isTableLoading}
-          onPageChange={setPage}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
       </main>
 
       {editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto">
-            <div className="bg-gov-blue text-white px-6 py-4 flex justify-between items-center sticky top-0">
-              <h3 className="font-bold uppercase tracking-wide">
-                Chỉnh sửa kết quả thi
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] flex flex-col">
+            <div className="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center shrink-0">
+              <h3 className="font-bold text-lg tracking-wide flex items-center gap-2">
+                <Edit size={20} />
+                Chỉnh Sửa Kết Quả Thi
               </h3>
               <button
                 onClick={() => setEditingItem(null)}
-                className="hover:bg-white/10 p-1 rounded"
+                className="hover:bg-white/20 p-1.5 rounded-lg transition-colors"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleUpdate} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+            <form onSubmit={handleUpdate} className="p-6 space-y-5 overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Họ và tên
                   </label>
                   <input
@@ -626,12 +632,12 @@ export const AdminDashboard: React.FC = () => {
                         ho_ten: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Số báo danh
                   </label>
                   <input
@@ -643,13 +649,13 @@ export const AdminDashboard: React.FC = () => {
                         so_bao_danh: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase font-mono"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                    Căn cước công dân (CCCD)
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    CCCD
                   </label>
                   <input
                     type="text"
@@ -658,11 +664,11 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) =>
                       setEditingItem({ ...editingItem, cccd: e.target.value })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Ngày Sinh (dd/mm/yyyy)
                   </label>
                   <input
@@ -674,12 +680,12 @@ export const AdminDashboard: React.FC = () => {
                         ngay_sinh: e.target.value,
                       })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                     placeholder="01/01/2005"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Giới Tính
                   </label>
                   <input
@@ -691,12 +697,12 @@ export const AdminDashboard: React.FC = () => {
                         gioi_tinh: e.target.value,
                       })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                     placeholder="Nam/Nữ"
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Trường học
                   </label>
                   <input
@@ -708,11 +714,11 @@ export const AdminDashboard: React.FC = () => {
                         truong: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Môn thi
                   </label>
                   <input
@@ -724,12 +730,12 @@ export const AdminDashboard: React.FC = () => {
                         mon_thi: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Điểm thi
                   </label>
                   <input
@@ -742,27 +748,27 @@ export const AdminDashboard: React.FC = () => {
                         diem: parseFloat(e.target.value),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 font-bold text-gov-blue text-lg"
+                    className="w-full border border-indigo-300 rounded-lg px-4 py-2.5 font-bold text-indigo-700 bg-indigo-50/50 text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                     required
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-4 border-t border-slate-100 mt-6">
                 <button
                   type="button"
                   onClick={() => setEditingItem(null)}
-                  className="flex-1 bg-gray-100 text-gray-600 py-3 rounded font-bold uppercase hover:bg-gray-200 transition-colors"
+                  className="flex-1 bg-white border border-slate-300 text-slate-700 py-3 rounded-lg font-semibold hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm"
                 >
-                  Hủy bỏ
+                  Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="flex-1 bg-gov-blue text-white py-3 rounded font-bold uppercase hover:bg-blue-800 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all shadow-sm flex items-center justify-center gap-2"
                 >
                   <Save size={18} />
-                  {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
+                  {isUpdating ? "Đang lưu..." : "Lưu Thay Đổi"}
                 </button>
               </div>
             </form>
@@ -771,30 +777,32 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {isCreating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white w-full max-w-xl rounded-lg shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto">
-            <div className="bg-green-600 text-white px-6 py-4 flex justify-between items-center sticky top-0">
-              <h3 className="font-bold uppercase tracking-wide">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] flex flex-col">
+            <div className="bg-emerald-600 text-white px-6 py-4 flex justify-between items-center shrink-0">
+              <h3 className="font-bold text-lg tracking-wide flex items-center gap-2">
+                <Plus size={20} />
                 Thêm Mới Kết Quả
               </h3>
               <button
                 onClick={() => setIsCreating(false)}
-                className="hover:bg-white/10 p-1 rounded"
+                className="hover:bg-white/20 p-1.5 rounded-lg transition-colors"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
-              <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100 mb-4">
+            <form onSubmit={handleCreate} className="p-6 space-y-5 overflow-y-auto">
+              <div className="p-3 bg-emerald-50 text-emerald-800 text-sm rounded-lg border border-emerald-100 flex gap-2 items-start">
+                <AlertCircle size={18} className="mt-0.5 shrink-0" />
                 <p>
-                  <b>Lưu ý:</b> Nếu Số Báo Danh đã tồn tại, hệ thống sẽ thêm môn
-                  thi mới cho thí sinh đó.
+                  Nếu Số Báo Danh đã tồn tại, hệ thống sẽ thêm môn
+                  thi mới cho thí sinh đó, nếu chưa có sẽ tạo thí sinh mới.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Họ và tên <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -806,13 +814,13 @@ export const AdminDashboard: React.FC = () => {
                         ho_ten: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
                     required
                     placeholder="NGUYỄN VĂN A"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Số báo danh <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -824,14 +832,14 @@ export const AdminDashboard: React.FC = () => {
                         so_bao_danh: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase font-mono"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
                     required
                     placeholder="SBD001"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                    Căn cước công dân (CCCD)
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Căn cước công dân
                   </label>
                   <input
                     type="text"
@@ -840,12 +848,12 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) =>
                       setNewItem({ ...newItem, cccd: e.target.value })
                     }
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="Căn cước công dân (CCCD)"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
+                    placeholder="12 chữ số"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Ngày sinh (dd/mm/yyyy)
                   </label>
                   <input
@@ -854,12 +862,12 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) =>
                       setNewItem({ ...newItem, ngay_sinh: e.target.value })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
                     placeholder="01/01/2005"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Giới tính
                   </label>
                   <input
@@ -868,12 +876,12 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) =>
                       setNewItem({ ...newItem, gioi_tinh: e.target.value })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
                     placeholder="Nam"
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Trường học
                   </label>
                   <input
@@ -885,12 +893,12 @@ export const AdminDashboard: React.FC = () => {
                         truong: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
                     placeholder="THPT..."
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Môn thi <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -902,9 +910,9 @@ export const AdminDashboard: React.FC = () => {
                         mon_thi: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 uppercase"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 uppercase focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
                     required
-                    placeholder="TOÁN"
+                    placeholder="Ví dụ: TOÁN"
                     list="subject-list"
                   />
                   <datalist id="subject-list">
@@ -914,7 +922,7 @@ export const AdminDashboard: React.FC = () => {
                   </datalist>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                     Điểm thi <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -927,27 +935,27 @@ export const AdminDashboard: React.FC = () => {
                         diem: parseFloat(e.target.value),
                       })
                     }
-                    className="w-full border rounded px-3 py-2 font-bold text-gov-blue text-lg"
+                    className="w-full border border-emerald-300 rounded-lg px-4 py-2.5 font-bold text-emerald-700 bg-emerald-50/50 text-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all shadow-sm"
                     required
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-4 border-t border-slate-100 mt-6">
                 <button
                   type="button"
                   onClick={() => setIsCreating(false)}
-                  className="flex-1 bg-gray-100 text-gray-600 py-3 rounded font-bold uppercase hover:bg-gray-200 transition-colors"
+                  className="flex-1 bg-white border border-slate-300 text-slate-700 py-3 rounded-lg font-semibold hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm"
                 >
-                  Hủy bỏ
+                  Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="flex-1 bg-green-600 text-white py-3 rounded font-bold uppercase hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-all shadow-sm flex items-center justify-center gap-2"
                 >
                   <Plus size={18} />
-                  {isUpdating ? "Đang thêm..." : "Thêm mới"}
+                  {isUpdating ? "Đang thêm..." : "Thêm Mới"}
                 </button>
               </div>
             </form>
