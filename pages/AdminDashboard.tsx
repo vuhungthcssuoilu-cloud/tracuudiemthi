@@ -625,7 +625,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={editingItem.ho_ten}
+                    value={editingItem.ho_ten || ""}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
@@ -642,7 +642,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={editingItem.so_bao_danh}
+                    value={editingItem.so_bao_danh || ""}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
@@ -659,7 +659,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={editingItem.cccd}
+                    value={editingItem.cccd || ""}
                     maxLength={12}
                     onChange={(e) =>
                       setEditingItem({ ...editingItem, cccd: e.target.value })
@@ -673,7 +673,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={editingItem.ngay_sinh}
+                    value={editingItem.ngay_sinh || ""}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
@@ -690,7 +690,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={editingItem.gioi_tinh}
+                    value={editingItem.gioi_tinh || ""}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
@@ -707,7 +707,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={editingItem.truong}
+                    value={editingItem.truong || ""}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
@@ -723,7 +723,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={editingItem.mon_thi}
+                    value={editingItem.mon_thi || ""}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
@@ -741,7 +741,7 @@ export const AdminDashboard: React.FC = () => {
                   <input
                     type="number"
                     step="0.01"
-                    value={editingItem.diem}
+                    value={editingItem.diem ?? ""}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
@@ -916,7 +916,7 @@ export const AdminDashboard: React.FC = () => {
                     list="subject-list"
                   />
                   <datalist id="subject-list">
-                    {config?.subjects.map((s) => (
+                    {(config?.subjects || []).map((s) => (
                       <option key={s} value={s} />
                     ))}
                   </datalist>
