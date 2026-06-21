@@ -1,67 +1,54 @@
-import { supabase, isSupabaseConfigured } from "../supabaseClient";
-import { SearchParams, SearchResult, SystemConfig } from "../types";
+
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
+import { SearchParams, SearchResult, SystemConfig } from '../types';
 
 // ID cố định cho bản ghi cấu hình trong bảng 'cau_hinh'
-const CONFIG_ID = "global_settings";
+const CONFIG_ID = 'global_settings';
 
 export const DEFAULT_CONFIG: SystemConfig = {
   exam: {
-    name: "TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ",
-    schoolYear: "Năm học 2025 - 2026",
-    orgUnit: "ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN",
-    subUnit: "ỦY BAN NHÂN DÂN XÃ XA DUNG",
-    orgLevel: "CẤP XÃ",
+    name: 'TRA CỨU ĐIỂM THI CHỌN HỌC SINH GIỎI CẤP XÃ',
+    schoolYear: 'Năm học 2025 - 2026',
+    orgUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG, TỈNH ĐIỆN BIÊN',
+    subUnit: 'ỦY BAN NHÂN DÂN XÃ XA DUNG',
+    orgLevel: 'CẤP XÃ',
     isOpen: true,
-    logoUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png",
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/National_Emblem_of_Vietnam.svg/2048px-National_Emblem_of_Vietnam.svg.png',
     faviconUrl: null,
-    headerTextColor: "#FFFF00",
+    headerTextColor: '#FFFF00'
   },
   footer: {
-    line1: "Dữ liệu chính thức từ phòng Văn Hóa UBND xã Xa Dung",
-    line2: "Mọi thắc mắc về điểm thi xin liên hệ đơn vị tổ chức kỳ thi",
-    line3: "Application developed by: Vu Hung - Email: vuhung@db.edu.vn",
+    line1: 'Dữ liệu chính thức từ phòng Văn Hóa UBND xã Xa Dung',
+    line2: 'Mọi thắc mắc về điểm thi xin liên hệ đơn vị tổ chức kỳ thi',
+    line3: 'Application developed by: Vu Hung - Email: vuhung@db.edu.vn'
   },
   fields: {
-    ho_ten: { visible: false, required: false, label: "Họ và tên thí sinh" },
-    so_bao_danh: { visible: true, required: true, label: "Số báo danh" },
-    ngay_sinh: {
-      visible: false,
-      required: false,
-      label: "Ngày sinh (dd/mm/yyyy)",
-    },
-    cccd: { visible: true, required: true, label: "Căn cước công dân (CCCD)" },
-    truong: { visible: false, required: false, label: "Trường học" },
+    ho_ten: { visible: false, required: false, label: 'Họ và tên thí sinh' },
+    so_bao_danh: { visible: true, required: true, label: 'Số báo danh' },
+    ngay_sinh: { visible: false, required: false, label: 'Ngày sinh (dd/mm/yyyy)' },
+    cccd: { visible: true, required: true, label: 'Căn cước công dân (CCCD)' },
+    truong: { visible: false, required: false, label: 'Trường học' }
   },
-  subjects: [],
+  subjects: [], 
   results: {
     showScore: true,
-    showRank: false,
+    showRank: false
   },
   security: {
     enableCaptcha: true,
     requireConfirmation: false,
-    confirmationText: "",
-    maxLookupsPerMinute: 10,
+    confirmationText: '',
+    maxLookupsPerMinute: 10
   },
   template: {
     fileUrl: null,
     fileName: "Mau_Nhap_Diem_Thi.xlsx",
     lastUpdated: null,
-    requiredHeaders: [
-      "HO_TEN",
-      "SO_BAO_DANH",
-      "NGAY_SINH",
-      "GIOI_TINH",
-      "CCCD",
-      "TRUONG",
-      "MON_THI",
-      "DIEM",
-    ],
-  },
+    requiredHeaders: ['HO_TEN', 'SO_BAO_DANH', 'NGAY_SINH', 'GIOI_TINH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM']
+  }
 };
 
-const CONFIG_CACHE_KEY = "system_config_cache";
+const CONFIG_CACHE_KEY = 'system_config_cache';
 
 let cachedConfig: SystemConfig | null = null;
 try {
@@ -72,72 +59,67 @@ try {
       const label = parsed.fields.cccd.label;
       if (
         !label ||
-        label === "Số CCCD (12 số)" ||
-        label === "Số CCCD (12 chữ số)" ||
-        label === "Số CCCD" ||
-        label.includes("12 số") ||
-        label.toLowerCase().includes("cccd (12")
+        label === 'Số CCCD (12 số)' ||
+        label === 'Số CCCD (12 chữ số)' ||
+        label === 'Số CCCD' ||
+        label.includes('12 số') ||
+        label.toLowerCase().includes('cccd (12')
       ) {
-        parsed.fields.cccd.label = "Căn cước công dân (CCCD)";
+        parsed.fields.cccd.label = 'Căn cước công dân (CCCD)';
       }
     }
     cachedConfig = parsed;
   }
 } catch (e) {
-  console.error("Error loading config from cache", e);
+  console.error('Error loading config from cache', e);
 }
 
 let configPromise: Promise<SystemConfig> | null = null;
 
-export const getCachedConfig = (): SystemConfig => cachedConfig || DEFAULT_CONFIG;
-
-export const getSystemConfig = async (
-  forceRefresh = false,
-): Promise<SystemConfig> => {
+export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfig> => {
   if (cachedConfig && !forceRefresh) {
     // Kích hoạt cập nhật ngầm cấu hình để đồng bộ tức thì mà không block UI
     getSystemConfig(true).catch(() => {});
     return cachedConfig;
   }
-
+  
   if (configPromise) return configPromise;
-
 
   configPromise = (async () => {
     try {
       const { data, error } = await supabase
-        .from("cau_hinh")
-        .select("data")
-        .eq("id", CONFIG_ID)
+        .from('cau_hinh')
+        .select('data')
+        .eq('id', CONFIG_ID)
         .maybeSingle();
 
       if (error) throw error;
       const dbConfig = data?.data || {};
-      const newConfig = {
-        ...DEFAULT_CONFIG,
-        ...dbConfig,
-        footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
-        exam: { ...DEFAULT_CONFIG.exam, ...(dbConfig.exam || {}) },
-        fields: { ...DEFAULT_CONFIG.fields, ...(dbConfig.fields || {}) },
-        security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
-        template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) },
+      const newConfig = { 
+          ...DEFAULT_CONFIG, 
+          ...dbConfig,
+          footer: { ...DEFAULT_CONFIG.footer, ...(dbConfig.footer || {}) },
+          exam: { ...DEFAULT_CONFIG.exam, ...(dbConfig.exam || {}) },
+          fields: { ...DEFAULT_CONFIG.fields, ...(dbConfig.fields || {}) },
+          security: { ...DEFAULT_CONFIG.security, ...(dbConfig.security || {}) },
+          template: { ...DEFAULT_CONFIG.template, ...(dbConfig.template || {}) }
       };
-
+      
       // Chuẩn hóa tên trường CCCD nếu đang sử dụng nhãn cũ trong cơ sở dữ liệu
       if (newConfig.fields.cccd) {
         const cccdLabel = newConfig.fields.cccd.label;
         if (
           !cccdLabel ||
-          cccdLabel === "Số CCCD (12 số)" ||
-          cccdLabel === "Số CCCD (12 chữ số)" ||
-          cccdLabel === "Số CCCD" ||
-          cccdLabel.includes("12 số") ||
-          cccdLabel.toLowerCase().includes("cccd (12")
+          cccdLabel === 'Số CCCD (12 số)' || 
+          cccdLabel === 'Số CCCD (12 chữ số)' || 
+          cccdLabel === 'Số CCCD' ||
+          cccdLabel.includes('12 số') ||
+          cccdLabel.toLowerCase().includes('cccd (12')
         ) {
-          newConfig.fields.cccd.label = "Căn cước công dân (CCCD)";
+          newConfig.fields.cccd.label = 'Căn cước công dân (CCCD)';
         }
       }
-
+      
       cachedConfig = newConfig;
       localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(newConfig));
       return cachedConfig;
@@ -151,15 +133,15 @@ export const getSystemConfig = async (
   return configPromise;
 };
 
-export const saveSystemConfig = async (
-  config: SystemConfig,
-): Promise<boolean> => {
+export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> => {
   try {
-    const { error } = await supabase.from("cau_hinh").upsert({
-      id: CONFIG_ID,
-      data: config,
-      updated_at: new Date().toISOString(),
-    });
+    const { error } = await supabase
+      .from('cau_hinh')
+      .upsert({ 
+        id: CONFIG_ID, 
+        data: config, 
+        updated_at: new Date().toISOString() 
+      });
     if (!error) {
       cachedConfig = config;
       localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(config));
@@ -170,9 +152,7 @@ export const saveSystemConfig = async (
   }
 };
 
-export const searchScores = async (
-  params: SearchParams,
-): Promise<SearchResult[]> => {
+export const searchScores = async (params: SearchParams): Promise<SearchResult[]> => {
   const config = await getSystemConfig();
   const nameInput = params.ho_ten?.trim().toUpperCase();
   const sbdInput = params.so_bao_danh?.trim().toUpperCase();
@@ -180,70 +160,28 @@ export const searchScores = async (
   const dobInput = params.ngay_sinh?.trim();
 
   try {
-    // Kiểm tra tính nhất quán giữa CCCD và SBD nếu cả hai đều hiển thị và được nhập
-    if (
-      config.fields.so_bao_danh.visible &&
-      sbdInput &&
-      config.fields.cccd.visible &&
-      cccdInput
-    ) {
-      const { data: sbdStudents, error: sbdError } = await supabase
-        .from("hoc_sinh")
-        .select("cccd")
-        .eq("so_bao_danh", sbdInput);
-
-      const { data: cccdStudents, error: cccdError } = await supabase
-        .from("hoc_sinh")
-        .select("so_bao_danh")
-        .eq("cccd", cccdInput);
-
-      const sbdExists = !sbdError && sbdStudents && sbdStudents.length > 0;
-      const cccdExists = !cccdError && cccdStudents && cccdStudents.length > 0;
-
-      if (cccdExists && !sbdExists) {
-        throw new Error(
-          `Số báo danh nhập không khớp với số căn cước ${params.cccd?.trim()}. Vui lòng kiểm tra lại.`,
-        );
-      } else if (sbdExists && !cccdExists) {
-        throw new Error(
-          `Số CCCD không khớp với số báo danh ${params.so_bao_danh?.trim()}. Vui lòng kiểm tra lại.`,
-        );
-      } else if (sbdExists && cccdExists) {
-        const dbCccd = sbdStudents[0].cccd?.toString().trim();
-        if (dbCccd !== cccdInput) {
-          throw new Error(
-            `Số báo danh nhập không khớp với số căn cước ${params.cccd?.trim()}. Vui lòng kiểm tra lại.`,
-          );
-        }
-      }
-    }
-
     // Sử dụng Join logic (ket_qua(*)) để chỉ cần đúng 1 cuộc gọi API duy nhất đến Supabase (Giảm 50% độ trễ)
-    let query = supabase
-      .from("hoc_sinh")
-      .select(
-        "id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh, ket_qua(*)",
-      );
+    let query = supabase.from('hoc_sinh').select('id, ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh, ket_qua(*)');
     let hasCondition = false;
 
     if (config.fields.so_bao_danh.visible && sbdInput) {
-      query = query.eq("so_bao_danh", sbdInput);
+      query = query.eq('so_bao_danh', sbdInput);
       hasCondition = true;
     }
 
     if (config.fields.ho_ten.visible && nameInput) {
-      query = query.eq("ho_ten", nameInput);
+      query = query.eq('ho_ten', nameInput);
       hasCondition = true;
     }
-
+    
     if (config.fields.cccd.visible && cccdInput) {
-      query = query.eq("cccd", cccdInput);
+      query = query.eq('cccd', cccdInput);
       hasCondition = true;
     }
 
     if (config.fields.ngay_sinh?.visible && dobInput) {
-      query = query.eq("ngay_sinh", dobInput);
-      hasCondition = true;
+       query = query.eq('ngay_sinh', dobInput);
+       hasCondition = true;
     }
 
     if (!hasCondition) return [];
@@ -261,104 +199,57 @@ export const searchScores = async (
       cccd: student.cccd,
       truong: student.truong,
       ngay_sinh: student.ngay_sinh,
-      gioi_tinh: student.gioi_tinh,
+      gioi_tinh: student.gioi_tinh
     }));
-  } catch (err: any) {
+  } catch (err) {
     console.error("Lỗi tra cứu:", err);
-    if (err && err.message && err.message.includes("không khớp")) {
-      throw err;
-    }
     return [];
   }
 };
 
 const formatDateInput = (input: any): string => {
-  if (!input) return "";
-  if (typeof input === "number") {
-    const date = new Date(Math.round((input - 25569) * 86400 * 1000));
-    const d = date.getDate().toString().padStart(2, "0");
-    const m = (date.getMonth() + 1).toString().padStart(2, "0");
-    const y = date.getFullYear();
-    return `${d}/${m}/${y}`;
+  if (!input) return '';
+  if (typeof input === 'number') {
+     const date = new Date(Math.round((input - 25569) * 86400 * 1000));
+     const d = date.getDate().toString().padStart(2, '0');
+     const m = (date.getMonth() + 1).toString().padStart(2, '0');
+     const y = date.getFullYear();
+     return `${d}/${m}/${y}`;
   }
   let str = input.toString().trim();
   if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    const [y, m, d] = str.split("-");
-    return `${d}/${m}/${y}`;
+      const [y, m, d] = str.split('-');
+      return `${d}/${m}/${y}`;
   }
   return str;
 };
 
-export const uploadExcelData = async (
-  data: any[],
-): Promise<{ success: number; errors: string[] }> => {
+export const uploadExcelData = async (data: any[]): Promise<{ success: number; errors: string[] }> => {
   let successCount = 0;
   const errorLog: string[] = [];
-  const sbdNameMap = new Map<string, string>();
-
+  const sbdNameMap = new Map<string, string>(); 
+  
   const normalizeRow = (row: any) => {
     const normalized: any = {};
-    Object.keys(row).forEach((key) => {
-      const lowerKey = key.toString().toLowerCase().trim();
-      const cleanKey = lowerKey
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]/g, "");
-
-      if (["hoten", "hovaten", "name", "thisinh"].includes(cleanKey))
-        normalized.HO_TEN = row[key];
-      else if (["sbd", "sobaodanh", "sobd"].includes(cleanKey))
-        normalized.SO_BAO_DANH = row[key];
-      else if (["cccd", "cmnd", "socccd"].includes(cleanKey))
-        normalized.CCCD = row[key];
-      else if (["truong", "donvi", "truonghoc"].includes(cleanKey))
-        normalized.TRUONG = row[key];
-      else if (["monthi", "mon", "subject"].includes(cleanKey))
-        normalized.MON_THI = row[key];
-      else if (["diem", "diemso", "ketqua", "score"].includes(cleanKey))
-        normalized.DIEM = row[key];
-      else if (["ngaysinh", "ngayde", "dob", "birthdate"].includes(cleanKey))
-        normalized.NGAY_SINH = row[key];
-      else if (["gioitinh", "phai", "gender", "sex"].includes(cleanKey))
-        normalized.GIOI_TINH = row[key];
+    Object.keys(row).forEach(key => {
+        const lowerKey = key.toString().toLowerCase().trim();
+        const cleanKey = lowerKey.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+        
+        if (['hoten', 'hovaten', 'name', 'thisinh'].includes(cleanKey)) normalized.HO_TEN = row[key];
+        else if (['sbd', 'sobaodanh', 'sobd'].includes(cleanKey)) normalized.SO_BAO_DANH = row[key];
+        else if (['cccd', 'cmnd', 'socccd'].includes(cleanKey)) normalized.CCCD = row[key];
+        else if (['truong', 'donvi', 'truonghoc'].includes(cleanKey)) normalized.TRUONG = row[key];
+        else if (['monthi', 'mon', 'subject'].includes(cleanKey)) normalized.MON_THI = row[key];
+        else if (['diem', 'diemso', 'ketqua', 'score'].includes(cleanKey)) normalized.DIEM = row[key];
+        else if (['ngaysinh', 'ngayde', 'dob', 'birthdate'].includes(cleanKey)) normalized.NGAY_SINH = row[key];
+        else if (['gioitinh', 'phai', 'gender', 'sex'].includes(cleanKey)) normalized.GIOI_TINH = row[key];
     });
-    const keys = [
-      "HO_TEN",
-      "SO_BAO_DANH",
-      "CCCD",
-      "TRUONG",
-      "MON_THI",
-      "DIEM",
-      "NGAY_SINH",
-      "GIOI_TINH",
-    ];
-    keys.forEach((k) => {
-      if (!normalized[k] && row[k]) normalized[k] = row[k];
+    const keys = ['HO_TEN', 'SO_BAO_DANH', 'CCCD', 'TRUONG', 'MON_THI', 'DIEM', 'NGAY_SINH', 'GIOI_TINH'];
+    keys.forEach(k => {
+        if (!normalized[k] && row[k]) normalized[k] = row[k];
     });
     return normalized;
   };
-
-  const validationErrors: string[] = [];
-  for (let i = 0; i < data.length; i++) {
-    const rawRow = data[i];
-    const row = normalizeRow(rawRow);
-    if (!row.SO_BAO_DANH) continue;
-
-    const hoTen = row.HO_TEN?.toString().trim() || "Chưa có tên";
-    const sbd = row.SO_BAO_DANH.toString().trim();
-    const cccd = row.CCCD?.toString().trim() || "";
-    const truong = row.TRUONG?.toString().trim() || "Chưa có trường";
-
-    if (!cccd || cccd.length !== 12 || !/^\d{12}$/.test(cccd)) {
-      validationErrors.push(
-        `Lỗi CCCD (Thí sinh: ${hoTen}, SBD: ${sbd}, Trường: ${truong}): CCCD phải đúng 12 chữ số (Hiện có: ${cccd || "Trống"})`,
-      );
-    }
-  }
-
-  if (validationErrors.length > 0) {
-    return { success: 0, errors: validationErrors };
-  }
 
   for (const rawRow of data) {
     const row = normalizeRow(rawRow);
@@ -366,308 +257,225 @@ export const uploadExcelData = async (
 
     try {
       const sbd = row.SO_BAO_DANH.toString().trim().toUpperCase();
-      const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || "";
+      const hoTen = row.HO_TEN?.toString().trim().toUpperCase() || '';
       const cccd = row.CCCD?.toString().trim();
       const ngaySinh = formatDateInput(row.NGAY_SINH);
-      const gioiTinh = row.GIOI_TINH ? row.GIOI_TINH.toString().trim() : "";
+      const gioiTinh = row.GIOI_TINH ? row.GIOI_TINH.toString().trim() : '';
 
       if (hoTen) {
-        if (sbdNameMap.has(sbd)) {
-          const prevName = sbdNameMap.get(sbd);
-          if (prevName !== hoTen) continue;
-        } else {
-          sbdNameMap.set(sbd, hoTen);
-        }
+          if (sbdNameMap.has(sbd)) {
+              const prevName = sbdNameMap.get(sbd);
+              if (prevName !== hoTen) continue;
+          } else {
+              sbdNameMap.set(sbd, hoTen);
+          }
       }
 
       const { data: existingStudentBySBD } = await supabase
-        .from("hoc_sinh")
-        .select("id, ho_ten, cccd, so_bao_danh, ngay_sinh, gioi_tinh")
-        .eq("so_bao_danh", sbd)
+        .from('hoc_sinh')
+        .select('id, ho_ten, cccd, so_bao_danh, ngay_sinh, gioi_tinh')
+        .eq('so_bao_danh', sbd)
         .maybeSingle();
 
       let studentId: string | undefined;
 
       if (existingStudentBySBD) {
-        studentId = existingStudentBySBD.id;
-        const updateData: any = {};
-        if (!existingStudentBySBD.cccd && cccd) updateData.cccd = cccd;
-        if (row.TRUONG)
-          updateData.truong = row.TRUONG.toString().trim().toUpperCase();
-        if (!existingStudentBySBD.ngay_sinh && ngaySinh)
-          updateData.ngay_sinh = ngaySinh;
-        if (!existingStudentBySBD.gioi_tinh && gioiTinh)
-          updateData.gioi_tinh = gioiTinh;
+          studentId = existingStudentBySBD.id;
+          const updateData: any = {};
+          if (!existingStudentBySBD.cccd && cccd) updateData.cccd = cccd;
+          if (row.TRUONG) updateData.truong = row.TRUONG.toString().trim().toUpperCase();
+          if (!existingStudentBySBD.ngay_sinh && ngaySinh) updateData.ngay_sinh = ngaySinh;
+          if (!existingStudentBySBD.gioi_tinh && gioiTinh) updateData.gioi_tinh = gioiTinh;
 
-        if (Object.keys(updateData).length > 0) {
-          await supabase
-            .from("hoc_sinh")
-            .update(updateData)
-            .eq("id", studentId);
-        }
+          if (Object.keys(updateData).length > 0) {
+              await supabase.from('hoc_sinh').update(updateData).eq('id', studentId);
+          }
       } else {
         if (!hoTen) continue;
-        const { data: newStudent, error: createError } = await supabase
-          .from("hoc_sinh")
-          .insert({
+        const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
             ho_ten: hoTen,
             so_bao_danh: sbd,
             cccd: cccd,
             truong: row.TRUONG?.toString().trim().toUpperCase(),
             ngay_sinh: ngaySinh,
-            gioi_tinh: gioiTinh,
-          })
-          .select("id")
-          .single();
-
+            gioi_tinh: gioiTinh
+          }).select('id').single();
+          
         if (createError) throw createError;
         studentId = newStudent.id;
       }
 
       let score = row.DIEM;
-      if (typeof score === "string")
-        score = parseFloat(score.replace(",", "."));
-
+      if (typeof score === 'string') score = parseFloat(score.replace(',', '.'));
+      
       if (row.MON_THI && studentId) {
-        const subject = row.MON_THI.toString().trim().toUpperCase();
-        const { data: existingResult } = await supabase
-          .from("ket_qua")
-          .select("id")
-          .eq("hoc_sinh_id", studentId)
-          .eq("mon_thi", subject)
-          .maybeSingle();
-
-        if (existingResult) {
-          await supabase
-            .from("ket_qua")
-            .update({ diem: Number(score) || 0 })
-            .eq("id", existingResult.id);
-        } else {
-          await supabase.from("ket_qua").insert({
-            hoc_sinh_id: studentId,
-            mon_thi: subject,
-            diem: Number(score) || 0,
-          });
-        }
+          const subject = row.MON_THI.toString().trim().toUpperCase();
+          const { data: existingResult } = await supabase.from('ket_qua')
+              .select('id')
+              .eq('hoc_sinh_id', studentId)
+              .eq('mon_thi', subject)
+              .maybeSingle();
+              
+          if (existingResult) {
+              await supabase.from('ket_qua').update({ diem: Number(score) || 0 }).eq('id', existingResult.id);
+          } else {
+              await supabase.from('ket_qua').insert({
+                  hoc_sinh_id: studentId,
+                  mon_thi: subject,
+                  diem: Number(score) || 0
+                });
+          }
       }
       successCount++;
     } catch (err: any) {
-      errorLog.push(`SBD ${row.SO_BAO_DANH || "?"}: ${err.message}`);
+      errorLog.push(`SBD ${row.SO_BAO_DANH || '?'}: ${err.message}`);
     }
   }
 
   try {
-    const { data: allResults } = await supabase
-      .from("ket_qua")
-      .select("mon_thi");
-    if (allResults && allResults.length > 0) {
-      const distinctSubjects = Array.from(
-        new Set(allResults.map((r) => r.mon_thi?.trim().toUpperCase())),
-      ).filter(Boolean) as string[];
-      distinctSubjects.sort();
-      const currentConfig = await getSystemConfig();
-      currentConfig.subjects = distinctSubjects;
-      await saveSystemConfig(currentConfig);
-    }
+      const { data: allResults } = await supabase.from('ket_qua').select('mon_thi');
+      if (allResults && allResults.length > 0) {
+          const distinctSubjects = Array.from(new Set(allResults.map(r => r.mon_thi?.trim().toUpperCase()))).filter(Boolean) as string[];
+          distinctSubjects.sort();
+          const currentConfig = await getSystemConfig();
+          currentConfig.subjects = distinctSubjects;
+          await saveSystemConfig(currentConfig);
+      }
   } catch (syncError) {}
 
   return { success: successCount, errors: errorLog };
 };
 
-export const createStudentResult = async (
-  data: SearchResult,
-): Promise<{ success: boolean; message?: string }> => {
-  try {
-    const sbd = data.so_bao_danh.trim().toUpperCase();
-    const cccd = data.cccd?.trim();
-    const hoTen = data.ho_ten.trim().toUpperCase();
-    const ngaySinh = data.ngay_sinh?.trim();
-    const gioiTinh = data.gioi_tinh?.trim();
+export const createStudentResult = async (data: SearchResult): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const sbd = data.so_bao_danh.trim().toUpperCase();
+        const cccd = data.cccd?.trim();
+        const hoTen = data.ho_ten.trim().toUpperCase();
+        const ngaySinh = data.ngay_sinh?.trim();
+        const gioiTinh = data.gioi_tinh?.trim();
 
-    const { data: existingStudent } = await supabase
-      .from("hoc_sinh")
-      .select("id, ho_ten, cccd")
-      .eq("so_bao_danh", sbd)
-      .maybeSingle();
-    if (existingStudent && existingStudent.ho_ten !== hoTen) {
-      return {
-        success: false,
-        message: `SBD ${sbd} đã tồn tại với tên '${existingStudent.ho_ten}'.`,
-      };
+        const { data: existingStudent } = await supabase.from('hoc_sinh').select('id, ho_ten, cccd').eq('so_bao_danh', sbd).maybeSingle();
+        if (existingStudent && existingStudent.ho_ten !== hoTen) {
+            return { success: false, message: `SBD ${sbd} đã tồn tại với tên '${existingStudent.ho_ten}'.` };
+        }
+
+        let studentId = existingStudent?.id;
+        if (!studentId) {
+             const { data: newStudent, error: createError } = await supabase.from('hoc_sinh').insert({
+                ho_ten: hoTen,
+                so_bao_danh: sbd,
+                cccd: cccd,
+                truong: data.truong?.toUpperCase(),
+                ngay_sinh: ngaySinh,
+                gioi_tinh: gioiTinh
+            }).select('id').single();
+            if (createError) return { success: false, message: createError.message };
+            studentId = newStudent.id;
+        } else {
+             await supabase.from('hoc_sinh').update({ 
+                 cccd: cccd, 
+                 truong: data.truong?.toUpperCase(),
+                 ngay_sinh: ngaySinh,
+                 gioi_tinh: gioiTinh
+             }).eq('id', studentId);
+        }
+
+        const { data: existingResult } = await supabase.from('ket_qua')
+            .select('id')
+            .eq('hoc_sinh_id', studentId)
+            .eq('mon_thi', data.mon_thi.toUpperCase())
+            .maybeSingle();
+
+        if (existingResult) {
+            await supabase.from('ket_qua').update({ diem: data.diem }).eq('id', existingResult.id);
+        } else {
+            await supabase.from('ket_qua').insert({
+                hoc_sinh_id: studentId,
+                mon_thi: data.mon_thi.toUpperCase(),
+                diem: data.diem
+            });
+        }
+        return { success: true };
+    } catch (e: any) {
+        return { success: false, message: e.message };
     }
-
-    let studentId = existingStudent?.id;
-    if (!studentId) {
-      const { data: newStudent, error: createError } = await supabase
-        .from("hoc_sinh")
-        .insert({
-          ho_ten: hoTen,
-          so_bao_danh: sbd,
-          cccd: cccd,
-          truong: data.truong?.toUpperCase(),
-          ngay_sinh: ngaySinh,
-          gioi_tinh: gioiTinh,
-        })
-        .select("id")
-        .single();
-      if (createError) return { success: false, message: createError.message };
-      studentId = newStudent.id;
-    } else {
-      await supabase
-        .from("hoc_sinh")
-        .update({
-          cccd: cccd,
-          truong: data.truong?.toUpperCase(),
-          ngay_sinh: ngaySinh,
-          gioi_tinh: gioiTinh,
-        })
-        .eq("id", studentId);
-    }
-
-    const { data: existingResult } = await supabase
-      .from("ket_qua")
-      .select("id")
-      .eq("hoc_sinh_id", studentId)
-      .eq("mon_thi", data.mon_thi.toUpperCase())
-      .maybeSingle();
-
-    if (existingResult) {
-      await supabase
-        .from("ket_qua")
-        .update({ diem: data.diem })
-        .eq("id", existingResult.id);
-    } else {
-      await supabase.from("ket_qua").insert({
-        hoc_sinh_id: studentId,
-        mon_thi: data.mon_thi.toUpperCase(),
-        diem: data.diem,
-      });
-    }
-    return { success: true };
-  } catch (e: any) {
-    return { success: false, message: e.message };
-  }
-};
+}
 
 export const getDashboardStats = async () => {
   try {
-    const { count: s } = await supabase
-      .from("hoc_sinh")
-      .select("*", { count: "exact", head: true });
-    const { count: r } = await supabase
-      .from("ket_qua")
-      .select("*", { count: "exact", head: true });
+    const { count: s } = await supabase.from('hoc_sinh').select('*', { count: 'exact', head: true });
+    const { count: r } = await supabase.from('ket_qua').select('*', { count: 'exact', head: true });
     return { studentCount: s || 0, resultCount: r || 0 };
   } catch {
     return { studentCount: 0, resultCount: 0 };
   }
 };
 
-export const getAdminResults = async (
-  page: number = 1,
-  pageSize: number = 20,
-  search: string = "",
-): Promise<{ data: SearchResult[]; total: number }> => {
+export const getAdminResults = async (page: number = 1, pageSize: number = 20, search: string = ''): Promise<{ data: SearchResult[], total: number }> => {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   try {
-    let query = supabase
-      .from("ket_qua")
-      .select(
-        "*, hoc_sinh(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)",
-        { count: "exact" },
-      );
+    let query = supabase.from('ket_qua').select('*, hoc_sinh(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' });
     if (search) {
-      const cleanSearch = search.trim().replace(/,/g, " ");
-      query = supabase
-        .from("ket_qua")
-        .select(
-          "*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)",
-          { count: "exact" },
-        )
-        .or(
-          `ho_ten.ilike.%${cleanSearch}%,so_bao_danh.ilike.%${cleanSearch}%,cccd.ilike.%${cleanSearch}%`,
-          { foreignTable: "hoc_sinh" },
-        );
+        const cleanSearch = search.trim().replace(/,/g, ' ');
+        query = supabase.from('ket_qua').select('*, hoc_sinh!inner(ho_ten, so_bao_danh, cccd, truong, ngay_sinh, gioi_tinh)', { count: 'exact' })
+          .or(`ho_ten.ilike.%${cleanSearch}%,so_bao_danh.ilike.%${cleanSearch}%,cccd.ilike.%${cleanSearch}%`, { foreignTable: 'hoc_sinh' });
     }
     const { data, count, error } = await query.range(from, to);
     if (error) throw error;
     const formattedData = (data || []).map((item: any) => {
-      const hs = Array.isArray(item.hoc_sinh)
-        ? item.hoc_sinh[0]
-        : item.hoc_sinh;
-      return {
-        ...item,
-        ho_ten: hs?.ho_ten || "(Không tên)",
-        so_bao_danh: hs?.so_bao_danh || "---",
-        cccd: hs?.cccd || "",
-        truong: hs?.truong || "",
-        ngay_sinh: hs?.ngay_sinh || "",
-        gioi_tinh: hs?.gioi_tinh || "",
-      };
+        const hs = Array.isArray(item.hoc_sinh) ? item.hoc_sinh[0] : item.hoc_sinh;
+        return {
+            ...item,
+            ho_ten: hs?.ho_ten || '(Không tên)',
+            so_bao_danh: hs?.so_bao_danh || '---',
+            cccd: hs?.cccd || '',
+            truong: hs?.truong || '',
+            ngay_sinh: hs?.ngay_sinh || '',
+            gioi_tinh: hs?.gioi_tinh || ''
+        };
     });
     return { data: formattedData, total: count || 0 };
   } catch (err) {
-    return { data: [], total: 0 };
+      return { data: [], total: 0 }; 
   }
 };
 
 export const deleteResult = async (id: string): Promise<boolean> => {
   try {
-    const { error } = await supabase.from("ket_qua").delete().eq("id", id);
+    const { error } = await supabase.from('ket_qua').delete().eq('id', id);
     return !error;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 };
 
-export const updateResult = async (
-  id: string,
-  data: Partial<SearchResult>,
-): Promise<boolean> => {
+export const updateResult = async (id: string, data: Partial<SearchResult>): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from("ket_qua")
-      .update({ mon_thi: data.mon_thi, diem: data.diem })
-      .eq("id", id);
+    const { error } = await supabase.from('ket_qua').update({ mon_thi: data.mon_thi, diem: data.diem }).eq('id', id);
     if (!error && data.hoc_sinh_id) {
-      await supabase
-        .from("hoc_sinh")
-        .update({
-          ho_ten: data.ho_ten,
-          so_bao_danh: data.so_bao_danh,
-          cccd: data.cccd,
-          truong: data.truong,
-          ngay_sinh: data.ngay_sinh,
-          gioi_tinh: data.gioi_tinh,
-        })
-        .eq("id", data.hoc_sinh_id);
+         await supabase.from('hoc_sinh').update({
+             ho_ten: data.ho_ten,
+             so_bao_danh: data.so_bao_danh,
+             cccd: data.cccd,
+             truong: data.truong,
+             ngay_sinh: data.ngay_sinh,
+             gioi_tinh: data.gioi_tinh
+         }).eq('id', data.hoc_sinh_id);
     }
     return !error;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 };
 
 export const deleteAllData = async (): Promise<boolean> => {
   try {
-    await supabase
-      .from("ket_qua")
-      .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000");
-    const { error } = await supabase
-      .from("hoc_sinh")
-      .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabase.from('ket_qua').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error } = await supabase.from('hoc_sinh').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     if (!error) {
-      const config = await getSystemConfig();
-      config.subjects = [];
-      await saveSystemConfig(config);
+        const config = await getSystemConfig();
+        config.subjects = [];
+        await saveSystemConfig(config);
     }
     return !error;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 };
 
 export const getAllResultsForExport = async (): Promise<SearchResult[]> => {
@@ -675,6 +483,4 @@ export const getAllResultsForExport = async (): Promise<SearchResult[]> => {
   return res.data;
 };
 
-export const uploadTemplateFile = async (file: File, headers: string[]) => {
-  return "";
-};
+export const uploadTemplateFile = async (file: File, headers: string[]) => { return ""; }

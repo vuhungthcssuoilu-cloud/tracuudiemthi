@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Captcha } from './Captcha';
 import { SearchParams, SystemConfig } from '../types';
-import { getSystemConfig, getCachedConfig } from '../services/dataService';
+import { getSystemConfig } from '../services/dataService';
 
 interface LookupFormProps {
   onSearch: (params: SearchParams) => void;
@@ -12,7 +12,7 @@ interface LookupFormProps {
 }
 
 export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, error: externalError }) => {
-  const [config, setConfig] = useState<SystemConfig>(getCachedConfig());
+  const [config, setConfig] = useState<SystemConfig | null>(null);
   const [formData, setFormData] = useState<SearchParams>({
     ho_ten: '',
     so_bao_danh: '',
@@ -56,6 +56,8 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  if (!config) return null;
 
   const displayError = localError || externalError;
 
