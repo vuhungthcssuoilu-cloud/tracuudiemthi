@@ -76,12 +76,6 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                 {footerLine3}
              </p>
           )}
-          
-          <div className="sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2 opacity-30 hover:opacity-100 transition-opacity mt-2 sm:mt-0">
-            <Link to="/admin/login" className="text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 border border-white/20 rounded hover:bg-white/10 transition-colors">
-              Đăng nhập
-            </Link>
-          </div>
         </div>
       </footer>
     </div>
