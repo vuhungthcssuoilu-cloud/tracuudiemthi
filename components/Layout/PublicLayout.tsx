@@ -35,7 +35,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const footerLine3 = config?.footer?.line3 || 'Application developed by: Vu Hung - Email: vuhung@db.edu.vn';
 
   return (
-    <div className={`flex flex-col min-h-screen bg-[#f0f4f8] font-sans`}>
+    <div className={`flex flex-col min-h-screen font-sans`}>
       {/* Header Banner - Thiết kế chính xác theo hình gốc, tối ưu mobile */}
       <header className="bg-[#004e9a] py-2.5 sm:py-4.5 shrink-0">
         <div className="container mx-auto px-2 xs:px-4 max-w-6xl flex flex-col items-center justify-center select-none">
