@@ -17,13 +17,6 @@ export const HomePage: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Ẩn loader của index.html nếu React đã chạy
-    const loader = document.querySelector('.initial-loader');
-    if (loader) {
-        (loader as HTMLElement).style.opacity = '0';
-        setTimeout(() => loader.remove(), 500);
-    }
-    
     // Load config
     getSystemConfig().then(setConfig);
   }, []);
