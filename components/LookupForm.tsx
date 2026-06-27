@@ -9,10 +9,10 @@ interface LookupFormProps {
   onSearch: (params: SearchParams) => void;
   isLoading: boolean;
   error?: string | null;
+  config: SystemConfig;
 }
 
-export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, error: externalError }) => {
-  const [config, setConfig] = useState<SystemConfig>(getCachedConfig());
+export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, error: externalError, config }) => {
   const [formData, setFormData] = useState<SearchParams>({
     ho_ten: '',
     so_bao_danh: '',
@@ -20,11 +20,16 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
   });
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [localError, setLocalError] = useState<string | null>(null);
 
+  // Tự động đổi mã xác nhận và xóa ô nhập khi phát hiện thông tin sai lệch từ máy chủ hoặc nhập sai
   useEffect(() => {
-    getSystemConfig().then(setConfig);
-  }, []);
+    if (externalError) {
+      setCaptchaInput('');
+      setCaptchaKey(prev => prev + 1);
+    }
+  }, [externalError]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +51,8 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
 
     if (config.security.enableCaptcha && captchaInput.toUpperCase() !== captchaCode) {
       setLocalError('Mã xác nhận không hợp lệ');
+      setCaptchaInput('');
+      setCaptchaKey(prev => prev + 1);
       return;
     }
     
@@ -90,7 +97,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004b93] focus:ring-1 focus:ring-[#004b93] text-[14px] sm:text-[15px] placeholder-gray-400"
                   autoComplete="off"
                   placeholder={
-                    key === 'cccd' ? "Nhập số CCCD (12 chữ số)" : 
+                    key === 'cccd' ? "Nhập căn cước công dân (CCCD)" : 
                     key === 'so_bao_danh' ? "Nhập số báo danh" : 
                     field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
                   }
@@ -116,7 +123,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   autoComplete="off"
                 />
                 <div className="shrink-0 flex items-center bg-white rounded-md border border-gray-200 p-1">
-                  <Captcha onRefresh={setCaptchaCode} />
+                  <Captcha key={captchaKey} onRefresh={setCaptchaCode} />
                 </div>
               </div>
             </div>
