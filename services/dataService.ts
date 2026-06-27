@@ -35,7 +35,7 @@ export const DEFAULT_CONFIG: SystemConfig = {
     showRank: false
   },
   security: {
-    enableCaptcha: true,
+    enableCaptcha: false,
     requireConfirmation: false,
     confirmationText: '',
     maxLookupsPerMinute: 10
@@ -75,6 +75,26 @@ try {
 }
 
 let configPromise: Promise<SystemConfig> | null = null;
+
+type ConfigListener = (config: SystemConfig) => void;
+const configListeners = new Set<ConfigListener>();
+
+export const subscribeToConfig = (listener: ConfigListener) => {
+  configListeners.add(listener);
+  return () => {
+    configListeners.delete(listener);
+  };
+};
+
+const notifyListeners = (config: SystemConfig) => {
+  configListeners.forEach((listener) => {
+    try {
+      listener(config);
+    } catch (e) {
+      console.error('Error notifying config listener', e);
+    }
+  });
+};
 
 export const getCachedConfig = (): SystemConfig => cachedConfig || DEFAULT_CONFIG;
 
@@ -124,6 +144,7 @@ export const getSystemConfig = async (forceRefresh = false): Promise<SystemConfi
       
       cachedConfig = newConfig;
       localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(newConfig));
+      notifyListeners(newConfig);
       return cachedConfig;
     } catch (err) {
       return cachedConfig || DEFAULT_CONFIG;
@@ -147,6 +168,7 @@ export const saveSystemConfig = async (config: SystemConfig): Promise<boolean> =
     if (!error) {
       cachedConfig = config;
       localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify(config));
+      notifyListeners(config);
     }
     return !error;
   } catch {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SearchResult, SystemConfig } from '../types';
 import { CheckCircle2, XCircle, User, School, Award } from 'lucide-react';
-import { getSystemConfig } from '../services/dataService';
+import { getSystemConfig, getCachedConfig, subscribeToConfig } from '../services/dataService';
 
 interface ResultTableProps {
   results: SearchResult[] | null;
@@ -9,10 +9,11 @@ interface ResultTableProps {
 }
 
 export const ResultTable: React.FC<ResultTableProps> = ({ results, hasSearched }) => {
-  const [config, setConfig] = useState<SystemConfig | null>(null);
+  const [config, setConfig] = useState<SystemConfig>(getCachedConfig());
 
   useEffect(() => {
-    getSystemConfig().then(setConfig);
+    const unsubscribe = subscribeToConfig(setConfig);
+    return unsubscribe;
   }, []);
 
   if (!hasSearched) return null;

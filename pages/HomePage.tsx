@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { PublicLayout } from '../components/Layout/PublicLayout';
 import { LookupForm } from '../components/LookupForm';
 import { SearchParams, SearchResult, SystemConfig } from '../types';
-import { searchScores, getSystemConfig, getCachedConfig } from '../services/dataService';
+import { searchScores, getSystemConfig, getCachedConfig, subscribeToConfig } from '../services/dataService';
 import { AlertTriangle, Printer, Award, MapPin } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -13,25 +13,20 @@ export const HomePage: React.FC = () => {
   
   // Khởi tạo ngay với config cached để hiển thị luôn
   const [config, setConfig] = useState<SystemConfig>(getCachedConfig());
-  const [isConfigReady, setIsConfigReady] = useState(() => {
-    try {
-      return !!localStorage.getItem('system_config_cache');
-    } catch {
-      return false;
-    }
-  });
   
   const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load config
-    getSystemConfig().then((newConfig) => {
-      setConfig(newConfig);
-      setIsConfigReady(true);
-    });
+    // Đăng ký nhận cập nhật cấu hình tức thì
+    const unsubscribe = subscribeToConfig(setConfig);
+    
+    // Kích hoạt nạp cấu hình mới nhất từ Supabase
+    getSystemConfig();
+    
+    return unsubscribe;
   }, []);
 
-  const handleSearch = async (params: SearchParams) => {
+  const handleSearch = async (params: SearchParams): Promise<boolean> => {
     setIsLoading(true);
     setHasSearched(false);
     setSearchError(null);
@@ -41,16 +36,19 @@ export const HomePage: React.FC = () => {
       if (data && data.length > 0) {
         setResults(data);
         setHasSearched(true);
+        return true;
       } else {
         setSearchError('Thông tin tra cứu không chính xác hoặc không tồn tại.');
         setResults([]);
         setHasSearched(true);
+        return false;
       }
     } catch (error) {
       console.error("Lỗi tra cứu:", error);
       setSearchError('Hệ thống đang bận, vui lòng thử lại sau.');
       setResults([]);
       setHasSearched(true);
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -191,14 +189,6 @@ export const HomePage: React.FC = () => {
                   </button>
                 </div>
               </div>
-            </div>
-          ) : !isConfigReady ? (
-            /* Trạng thái tải cấu hình ban đầu nếu chưa có cache */
-            <div className="bg-white rounded-lg p-8 sm:p-12 w-full max-w-md md:max-w-xl flex flex-col items-center justify-center border border-slate-100/80 shadow-[0_15px_45px_rgba(0,78,154,0.12)] border-t-[5px] border-t-[#004e9a] min-h-[250px] animate-fade-in">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-slate-200 border-t-[#004e9a] mb-4"></div>
-              <p className="text-[14px] text-gray-500 font-bold tracking-wide font-sans text-center uppercase">
-                Đang tải cấu hình hệ thống...
-              </p>
             </div>
           ) : config.exam.isOpen ? (
             <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} config={config} />

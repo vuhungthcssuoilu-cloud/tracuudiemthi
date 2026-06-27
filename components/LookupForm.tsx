@@ -6,7 +6,7 @@ import { SearchParams, SystemConfig } from '../types';
 import { getSystemConfig, getCachedConfig } from '../services/dataService';
 
 interface LookupFormProps {
-  onSearch: (params: SearchParams) => void;
+  onSearch: (params: SearchParams) => Promise<boolean>;
   isLoading: boolean;
   error?: string | null;
   config: SystemConfig;
@@ -31,7 +31,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
     }
   }, [externalError]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
     if (!config) return;
@@ -56,7 +56,11 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
       return;
     }
     
-    onSearch(formData);
+    const success = await onSearch(formData);
+    if (!success) {
+      setCaptchaInput('');
+      setCaptchaKey(prev => prev + 1);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +101,7 @@ export const LookupForm: React.FC<LookupFormProps> = ({ onSearch, isLoading, err
                   className="w-full border border-gray-300 rounded-md px-3 py-2 sm:px-3.5 sm:py-2.5 text-gray-800 font-medium bg-white transition-all outline-none focus:border-[#004b93] focus:ring-1 focus:ring-[#004b93] text-[14px] sm:text-[15px] placeholder-gray-400"
                   autoComplete="off"
                   placeholder={
-                    key === 'cccd' ? "Nhập số CCCD (12 chữ số)" : 
+                    key === 'cccd' ? "Nhập căn cước công dân (CCCD)" : 
                     key === 'so_bao_danh' ? "Nhập số báo danh" : 
                     field.required ? `Nhập ${field.label.toLowerCase()}` : `Nhập ${field.label.toLowerCase()} (tùy chọn)`
                   }
