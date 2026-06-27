@@ -13,12 +13,22 @@ export const HomePage: React.FC = () => {
   
   // Khởi tạo ngay với config cached để hiển thị luôn
   const [config, setConfig] = useState<SystemConfig>(getCachedConfig());
+  const [isConfigReady, setIsConfigReady] = useState(() => {
+    try {
+      return !!localStorage.getItem('system_config_cache');
+    } catch {
+      return false;
+    }
+  });
   
   const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     // Load config
-    getSystemConfig().then(setConfig);
+    getSystemConfig().then((newConfig) => {
+      setConfig(newConfig);
+      setIsConfigReady(true);
+    });
   }, []);
 
   const handleSearch = async (params: SearchParams) => {
@@ -182,8 +192,16 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
             </div>
+          ) : !isConfigReady ? (
+            /* Trạng thái tải cấu hình ban đầu nếu chưa có cache */
+            <div className="bg-white rounded-lg p-8 sm:p-12 w-full max-w-md md:max-w-xl flex flex-col items-center justify-center border border-slate-100/80 shadow-[0_15px_45px_rgba(0,78,154,0.12)] border-t-[5px] border-t-[#004e9a] min-h-[250px] animate-fade-in">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-slate-200 border-t-[#004e9a] mb-4"></div>
+              <p className="text-[14px] text-gray-500 font-bold tracking-wide font-sans text-center uppercase">
+                Đang tải cấu hình hệ thống...
+              </p>
+            </div>
           ) : config.exam.isOpen ? (
-            <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} />
+            <LookupForm onSearch={handleSearch} isLoading={isLoading} error={searchError} config={config} />
           ) : (
             <div className="bg-white border border-slate-100 rounded-lg p-16 text-center shadow-sm max-w-2xl mx-auto animate-fade-in w-full">
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
